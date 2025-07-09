@@ -21,6 +21,22 @@
     <script src="config/supabase.js"></script>
     
     <style>
+        /* 히어로 섹션 스타일 */
+        .hero-section {
+            background: 
+                radial-gradient(circle at 10% 10%, rgba(255, 182, 193, 0.8) 0%, rgba(255, 192, 203, 0.5) 25%, transparent 50%),
+                radial-gradient(circle at 90% 90%, rgba(135, 206, 235, 0.8) 0%, rgba(135, 206, 235, 0.5) 25%, transparent 50%),
+                linear-gradient(135deg, #ffe0e6 0%, #fff5f7 50%, #e6f3ff 100%);
+        }
+        
+        /* 다크모드 히어로 섹션 */
+        [data-theme="dark"] .hero-section {
+            background: 
+                radial-gradient(circle at 10% 10%, rgba(139, 69, 79, 0.6) 0%, rgba(139, 69, 79, 0.3) 25%, transparent 50%),
+                radial-gradient(circle at 90% 90%, rgba(59, 130, 246, 0.6) 0%, rgba(59, 130, 246, 0.3) 25%, transparent 50%),
+                linear-gradient(135deg, #2d1f1f 0%, #1a1a2e 50%, #1f2937 100%);
+        }
+        
         /* 추가 스타일 */
         .upload-area {
             border: 2px dashed var(--gray-300);
