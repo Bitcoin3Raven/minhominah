@@ -114,7 +114,7 @@ minhominah/
 자세한 기능 설명은 `/docs/additional_features.md` 참조
 
 ## 🔄 현재 상태
-- **진행률**: 핵심 기능 완료, Vercel 배포 준비 완료, 디자인 개선 계획 수립
+- **진행률**: 핵심 기능 완료, Vercel 배포 준비 완료, 디자인 개선 완료
 - **기술 스택**: HTML/JavaScript + Supabase + Vercel 확정
 - **완료된 작업**:
   - Supabase 백엔드 완전 구축 (테이블, RLS, Storage)
@@ -127,6 +127,8 @@ minhominah/
   - PHP 버전 백업 완료
   - Vercel 배포 파일 생성 (vercel.json, package.json, .gitignore)
   - 디자인 개선 계획 문서 작성 (design_improvement_plan.md)
+  - 디자인 개선 Phase 1 완료 (대각선 그라데이션, 현대적 UI)
+  - Git 저장소 초기화 및 커밋 완료
 
 ## 🚀 실제 테스트 가능한 페이지들
 1. **메인 갤러리**: `/index.html`
