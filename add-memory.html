@@ -1,0 +1,659 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>추억 추가 - 민호민아 성장 앨범</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Supabase 클라이언트 -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    
+    <!-- AOS (Animate On Scroll) -->
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+    
+    <!-- 프로젝트 스타일 및 스크립트 -->
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/style-improved.css">
+    <script src="config/supabase.js"></script>
+    
+    <style>
+        /* 추가 스타일 */
+        .upload-area {
+            border: 2px dashed var(--gray-300);
+            border-radius: var(--radius-xl);
+            padding: 3rem;
+            text-align: center;
+            transition: all var(--transition-base);
+            background: var(--gray-50);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .upload-area:hover {
+            border-color: var(--secondary-400);
+            background: var(--secondary-50);
+        }
+        
+        .upload-area.dragging {
+            border-color: var(--secondary-500);
+            background: var(--secondary-100);
+        }
+        
+        .image-preview-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+        
+        .image-preview-item {
+            position: relative;
+            aspect-ratio: 1;
+            border-radius: var(--radius-lg);
+            overflow: hidden;
+            background: var(--gray-100);
+        }
+        
+        .image-preview-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .remove-image {
+            position: absolute;
+            top: 0.5rem;
+            right: 0.5rem;
+            width: 2rem;
+            height: 2rem;
+            background: rgba(239, 68, 68, 0.9);
+            color: white;
+            border-radius: var(--radius-full);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all var(--transition-base);
+        }
+        
+        .remove-image:hover {
+            background: rgba(220, 38, 38, 1);
+            transform: scale(1.1);
+        }
+        
+        .form-input {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border: 1px solid var(--gray-300);
+            border-radius: var(--radius-lg);
+            font-size: 1rem;
+            transition: all var(--transition-base);
+            background: white;
+        }
+        
+        .form-input:focus {
+            outline: none;
+            border-color: var(--secondary-500);
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+        
+        .form-textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+        
+        .checkbox-container {
+            display: flex;
+            gap: 2rem;
+        }
+        
+        .checkbox-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            cursor: pointer;
+            padding: 0.75rem 1.5rem;
+            border: 2px solid var(--gray-300);
+            border-radius: var(--radius-full);
+            transition: all var(--transition-base);
+        }
+        
+        .checkbox-item:hover {
+            border-color: var(--secondary-300);
+            background: var(--secondary-50);
+        }
+        
+        .checkbox-item.selected {
+            border-color: var(--secondary-500);
+            background: var(--secondary-500);
+            color: white;
+        }
+        
+        .checkbox-item input[type="checkbox"] {
+            display: none;
+        }
+        
+        .progress-bar {
+            width: 100%;
+            height: 4px;
+            background: var(--gray-200);
+            border-radius: var(--radius-full);
+            overflow: hidden;
+            margin-top: 1rem;
+        }
+        
+        .progress-bar-fill {
+            height: 100%;
+            background: var(--secondary-500);
+            transition: width 0.3s ease;
+        }
+    </style>
+</head>
+<body>
+    <!-- 히어로 섹션 -->
+    <section class="hero-section relative overflow-hidden" style="min-height: 40vh;">
+        <div class="bg-pattern"></div>
+        <div class="floating-shapes">
+            <div class="shape shape-1"></div>
+            <div class="shape shape-2"></div>
+            <div class="shape shape-3"></div>
+            <div class="shape shape-4"></div>
+            <div class="shape shape-5"></div>
+        </div>
+        
+        <div class="relative z-10 container mx-auto px-4 py-16 text-center">
+            <div class="flex items-center justify-between mb-8">
+                <a href="index.html" class="btn btn-secondary flex items-center gap-2">
+                    <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="15 18 9 12 15 6"></polyline>
+                    </svg>
+                    앨범으로 돌아가기
+                </a>
+            </div>
+            <h1 class="text-4xl md:text-5xl font-bold text-gray-800 mb-4 animate-fade-in">
+                새로운 <span class="text-gradient">추억 만들기</span>
+            </h1>
+            <p class="text-lg text-gray-600 animate-slide-up">
+                소중한 순간을 기록하고 공유해보세요
+            </p>
+        </div>
+    </section>
+    
+    <div class="container mx-auto px-4 py-8">
+        <!-- 인증 체크 섹션 -->
+        <div id="authCheck" class="glass-card rounded-2xl p-8 mb-8" data-aos="fade-up">
+            <h2 class="text-2xl font-bold mb-4">로그인이 필요합니다</h2>
+            <p class="text-gray-600 mb-6">추억을 추가하려면 먼저 로그인해주세요.</p>
+            <div class="grid md:grid-cols-2 gap-4 max-w-md">
+                <input type="email" id="loginEmail" placeholder="이메일" class="form-input">
+                <input type="password" id="loginPassword" placeholder="비밀번호" class="form-input">
+            </div>
+            <button class="btn btn-primary mt-4" onclick="login()">
+                <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" class="mr-2">
+                    <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"></path>
+                    <polyline points="10 17 15 12 10 7"></polyline>
+                    <line x1="15" y1="12" x2="3" y2="12"></line>
+                </svg>
+                로그인
+            </button>
+        </div>
+        
+        <!-- 추억 추가 폼 -->
+        <div id="addMemoryForm" style="display: none;">
+            <!-- 알림 메시지 -->
+            <div class="glass-card rounded-2xl p-6 mb-8 bg-green-50 border-2 border-green-200" id="successMessage" style="display: none;" data-aos="fade-down">
+                <div class="flex items-center gap-3">
+                    <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" class="text-green-600">
+                        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                        <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                    </svg>
+                    <p class="text-green-800 font-medium">추억이 성공적으로 추가되었습니다!</p>
+                </div>
+            </div>
+            
+            <div class="glass-card rounded-2xl p-6 mb-8 bg-red-50 border-2 border-red-200" id="errorMessage" style="display: none;" data-aos="fade-down">
+                <div class="flex items-center gap-3">
+                    <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" class="text-red-600">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <line x1="12" y1="8" x2="12" y2="12"></line>
+                        <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                    </svg>
+                    <p class="text-red-800 font-medium" id="errorText"></p>
+                </div>
+            </div>
+            
+            <form id="memoryForm" onsubmit="submitMemory(event)">
+                <!-- 기본 정보 섹션 -->
+                <div class="glass-card rounded-2xl p-8 mb-8" data-aos="fade-up">
+                    <h2 class="text-2xl font-bold mb-6">기본 정보</h2>
+                    <div class="grid md:grid-cols-2 gap-6">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">제목 *</label>
+                            <input type="text" id="title" required placeholder="예: 민호 첫 생일" class="form-input">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">날짜 *</label>
+                            <input type="date" id="memoryDate" required class="form-input">
+                        </div>
+                    </div>
+                    
+                    <div class="mt-6">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">누구의 추억인가요? *</label>
+                        <div class="checkbox-container">
+                            <label class="checkbox-item" id="minhoLabel">
+                                <input type="checkbox" id="forMinho">
+                                <span class="emoji">👦</span>
+                                <span>민호</span>
+                            </label>
+                            <label class="checkbox-item" id="minaLabel">
+                                <input type="checkbox" id="forMina">
+                                <span class="emoji">👧</span>
+                                <span>민아</span>
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <div class="grid md:grid-cols-2 gap-6 mt-6">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">장소</label>
+                            <input type="text" id="location" placeholder="예: 우리집, 놀이공원" class="form-input">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">설명</label>
+                            <textarea id="description" placeholder="이 날의 특별한 순간을 기록해보세요" class="form-input form-textarea"></textarea>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 사진 업로드 섹션 -->
+                <div class="glass-card rounded-2xl p-8 mb-8" data-aos="fade-up" data-aos-delay="100">
+                    <h2 class="text-2xl font-bold mb-6">사진 추가</h2>
+                    <div class="upload-area" id="uploadArea">
+                        <input type="file" id="imageInput" multiple accept="image/*,video/*" style="display: none;">
+                        <svg width="48" height="48" fill="none" stroke="currentColor" stroke-width="2" class="mx-auto mb-4 text-gray-400">
+                            <path d="M21 15v-4a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v14c0 1.1.9 2 2 2h14a2 2 0 0 0 2-2v-4"></path>
+                            <polyline points="16 17 21 12 16 7"></polyline>
+                            <line x1="21" y1="12" x2="9" y2="12"></line>
+                        </svg>
+                        <p class="text-lg font-medium text-gray-700 mb-2">사진을 드래그하거나 클릭하여 업로드</p>
+                        <p class="text-sm text-gray-500">JPG, PNG, GIF, MP4 (최대 50MB)</p>
+                        
+                        <div class="progress-bar" id="uploadProgress" style="display: none;">
+                            <div class="progress-bar-fill" id="progressFill"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="image-preview-grid" id="imagePreview"></div>
+                </div>
+                
+                <!-- 제출 버튼 -->
+                <div class="flex justify-center gap-4">
+                    <button type="button" onclick="window.location.href='index.html'" class="btn btn-secondary">
+                        취소
+                    </button>
+                    <button type="submit" class="btn btn-primary flex items-center gap-2">
+                        <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>
+                            <polyline points="17 21 17 13 7 13 7 21"></polyline>
+                            <polyline points="7 3 7 8 15 8"></polyline>
+                        </svg>
+                        추억 저장하기
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <!-- 테마 토글 버튼 -->
+    <button class="theme-toggle" id="themeToggle" aria-label="다크모드 전환">
+        <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="sun-icon">
+            <circle cx="12" cy="12" r="5"></circle>
+            <line x1="12" y1="1" x2="12" y2="3"></line>
+            <line x1="12" y1="21" x2="12" y2="23"></line>
+            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+            <line x1="1" y1="12" x2="3" y2="12"></line>
+            <line x1="21" y1="12" x2="23" y2="12"></line>
+            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+            <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+        </svg>
+        <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="moon-icon" style="display: none;">
+            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+        </svg>
+    </button>
+    
+    <script>
+        // 다크모드 토글 기능
+        function initTheme() {
+            const themeToggle = document.getElementById('themeToggle');
+            const htmlElement = document.documentElement;
+            const sunIcon = themeToggle.querySelector('.sun-icon');
+            const moonIcon = themeToggle.querySelector('.moon-icon');
+            
+            // 저장된 테마 불러오기
+            const savedTheme = localStorage.getItem('theme') || 'light';
+            htmlElement.setAttribute('data-theme', savedTheme);
+            updateThemeIcon(savedTheme);
+            
+            // 테마 토글 이벤트
+            themeToggle.addEventListener('click', () => {
+                const currentTheme = htmlElement.getAttribute('data-theme');
+                const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+                
+                htmlElement.setAttribute('data-theme', newTheme);
+                localStorage.setItem('theme', newTheme);
+                updateThemeIcon(newTheme);
+            });
+            
+            function updateThemeIcon(theme) {
+                if (theme === 'dark') {
+                    sunIcon.style.display = 'none';
+                    moonIcon.style.display = 'block';
+                } else {
+                    sunIcon.style.display = 'block';
+                    moonIcon.style.display = 'none';
+                }
+            }
+        }
+        
+        let currentUser = null;
+        let selectedFiles = [];
+        let peopleData = {};
+        
+        // 페이지 로드시 초기화
+        window.addEventListener('DOMContentLoaded', async function() {
+            // 다크모드 초기화
+            initTheme();
+            
+            // AOS 초기화
+            AOS.init({
+                duration: 800,
+                easing: 'ease-in-out',
+                once: true,
+                offset: 100
+            });
+            
+            // 인증 상태 확인
+            const { data: { user } } = await supabaseClient.auth.getUser();
+            if (user) {
+                currentUser = user;
+                document.getElementById('authCheck').style.display = 'none';
+                document.getElementById('addMemoryForm').style.display = 'block';
+                loadPeople();
+            }
+            
+            // 체크박스 스타일 업데이트
+            document.getElementById('forMinho').addEventListener('change', function() {
+                document.getElementById('minhoLabel').classList.toggle('selected', this.checked);
+            });
+            
+            document.getElementById('forMina').addEventListener('change', function() {
+                document.getElementById('minaLabel').classList.toggle('selected', this.checked);
+            });
+            
+            // 업로드 영역 설정
+            setupUploadArea();
+        });
+        
+        // 로그인
+        async function login() {
+            const email = document.getElementById('loginEmail').value;
+            const password = document.getElementById('loginPassword').value;
+            
+            try {
+                const { data, error } = await supabaseClient.auth.signInWithPassword({
+                    email: email,
+                    password: password
+                });
+                
+                if (error) throw error;
+                
+                currentUser = data.user;
+                document.getElementById('authCheck').style.display = 'none';
+                document.getElementById('addMemoryForm').style.display = 'block';
+                loadPeople();
+            } catch (error) {
+                alert('로그인 실패: ' + error.message);
+            }
+        }
+        
+        // 사람 정보 로드
+        async function loadPeople() {
+            try {
+                const { data, error } = await supabaseClient
+                    .from('people')
+                    .select('*');
+                
+                if (error) throw error;
+                
+                data.forEach(person => {
+                    peopleData[person.name.toLowerCase()] = person.id;
+                });
+            } catch (error) {
+                console.error('Error loading people:', error);
+            }
+        }
+        
+        // 업로드 영역 설정
+        function setupUploadArea() {
+            const uploadArea = document.getElementById('uploadArea');
+            const imageInput = document.getElementById('imageInput');
+            
+            // 클릭시 파일 선택
+            uploadArea.addEventListener('click', () => imageInput.click());
+            
+            // 드래그 앤 드롭
+            uploadArea.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                uploadArea.classList.add('dragging');
+            });
+            
+            uploadArea.addEventListener('dragleave', () => {
+                uploadArea.classList.remove('dragging');
+            });
+            
+            uploadArea.addEventListener('drop', (e) => {
+                e.preventDefault();
+                uploadArea.classList.remove('dragging');
+                handleFiles(e.dataTransfer.files);
+            });
+            
+            // 파일 선택시
+            imageInput.addEventListener('change', (e) => {
+                handleFiles(e.target.files);
+            });
+        }
+        
+        // 파일 처리
+        function handleFiles(files) {
+            const imagePreview = document.getElementById('imagePreview');
+            
+            Array.from(files).forEach(file => {
+                if (file.size > 50 * 1024 * 1024) {
+                    alert('파일 크기는 50MB 이하여야 합니다.');
+                    return;
+                }
+                
+                selectedFiles.push(file);
+                
+                // 미리보기 생성
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    const previewItem = document.createElement('div');
+                    previewItem.className = 'image-preview-item';
+                    previewItem.innerHTML = `
+                        <img src="${e.target.result}" alt="${file.name}">
+                        <button class="remove-image" onclick="removeFile(${selectedFiles.length - 1})">
+                            <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="3">
+                                <line x1="4" y1="4" x2="12" y2="12"></line>
+                                <line x1="12" y1="4" x2="4" y2="12"></line>
+                            </svg>
+                        </button>
+                    `;
+                    imagePreview.appendChild(previewItem);
+                };
+                reader.readAsDataURL(file);
+            });
+        }
+        
+        // 파일 제거
+        function removeFile(index) {
+            selectedFiles.splice(index, 1);
+            updateImagePreview();
+        }
+        
+        // 이미지 미리보기 업데이트
+        function updateImagePreview() {
+            const imagePreview = document.getElementById('imagePreview');
+            imagePreview.innerHTML = '';
+            
+            selectedFiles.forEach((file, index) => {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    const previewItem = document.createElement('div');
+                    previewItem.className = 'image-preview-item';
+                    previewItem.innerHTML = `
+                        <img src="${e.target.result}" alt="${file.name}">
+                        <button class="remove-image" onclick="removeFile(${index})">
+                            <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="3">
+                                <line x1="4" y1="4" x2="12" y2="12"></line>
+                                <line x1="12" y1="4" x2="4" y2="12"></line>
+                            </svg>
+                        </button>
+                    `;
+                    imagePreview.appendChild(previewItem);
+                };
+                reader.readAsDataURL(file);
+            });
+        }
+        
+        // 추억 저장
+        async function submitMemory(event) {
+            event.preventDefault();
+            
+            const title = document.getElementById('title').value;
+            const memoryDate = document.getElementById('memoryDate').value;
+            const forMinho = document.getElementById('forMinho').checked;
+            const forMina = document.getElementById('forMina').checked;
+            const location = document.getElementById('location').value;
+            const description = document.getElementById('description').value;
+            
+            if (!forMinho && !forMina) {
+                showError('최소 한 명은 선택해야 합니다.');
+                return;
+            }
+            
+            try {
+                // 1. 추억 데이터 저장
+                const { data: memoryData, error: memoryError } = await supabaseClient
+                    .from('memories')
+                    .insert({
+                        title: title,
+                        memory_date: memoryDate,
+                        location: location || null,
+                        description: description || null,
+                        created_by: currentUser.id
+                    })
+                    .select()
+                    .single();
+                
+                if (memoryError) throw memoryError;
+                
+                // 2. 사람 연결
+                const peopleConnections = [];
+                if (forMinho && peopleData['민호']) {
+                    peopleConnections.push({
+                        memory_id: memoryData.id,
+                        person_id: peopleData['민호']
+                    });
+                }
+                if (forMina && peopleData['민아']) {
+                    peopleConnections.push({
+                        memory_id: memoryData.id,
+                        person_id: peopleData['민아']
+                    });
+                }
+                
+                if (peopleConnections.length > 0) {
+                    const { error: peopleError } = await supabaseClient
+                        .from('memory_people')
+                        .insert(peopleConnections);
+                    
+                    if (peopleError) throw peopleError;
+                }
+                
+                // 3. 이미지 업로드
+                if (selectedFiles.length > 0) {
+                    await uploadImages(memoryData.id);
+                }
+                
+                showSuccess();
+                
+                // 3초 후 메인 페이지로 이동
+                setTimeout(() => {
+                    window.location.href = 'index.html';
+                }, 3000);
+                
+            } catch (error) {
+                showError('추억 저장 실패: ' + error.message);
+            }
+        }
+        
+        // 이미지 업로드
+        async function uploadImages(memoryId) {
+            const uploadProgress = document.getElementById('uploadProgress');
+            const progressFill = document.getElementById('progressFill');
+            uploadProgress.style.display = 'block';
+            
+            for (let i = 0; i < selectedFiles.length; i++) {
+                const file = selectedFiles[i];
+                const fileName = `memories/${memoryId}/${Date.now()}-${file.name}`;
+                
+                // 진행률 업데이트
+                progressFill.style.width = `${((i + 1) / selectedFiles.length) * 100}%`;
+                
+                // Storage에 업로드
+                const { data: uploadData, error: uploadError } = await supabaseClient.storage
+                    .from('media')
+                    .upload(fileName, file);
+                
+                if (uploadError) throw uploadError;
+                
+                // DB에 파일 정보 저장
+                const { error: dbError } = await supabaseClient
+                    .from('media_files')
+                    .insert({
+                        memory_id: memoryId,
+                        file_path: fileName,
+                        file_type: file.type.startsWith('image/') ? 'image' : 'video',
+                        file_size: file.size
+                    });
+                
+                if (dbError) throw dbError;
+            }
+            
+            uploadProgress.style.display = 'none';
+        }
+        
+        // 성공 메시지 표시
+        function showSuccess() {
+            document.getElementById('successMessage').style.display = 'block';
+            document.getElementById('errorMessage').style.display = 'none';
+            document.getElementById('memoryForm').reset();
+            selectedFiles = [];
+            updateImagePreview();
+        }
+        
+        // 에러 메시지 표시
+        function showError(message) {
+            document.getElementById('errorText').textContent = message;
+            document.getElementById('errorMessage').style.display = 'block';
+            document.getElementById('successMessage').style.display = 'none';
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,1196 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>민호민아 성장 앨범</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Supabase 클라이언트 -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    
+    <!-- AOS (Animate On Scroll) -->
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+    
+    <!-- 프로젝트 스타일 및 스크립트 -->
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/style-improved.css">
+    <script src="config/supabase.js"></script>
+    
+    <style>
+        /* 추가 스타일 */
+        .hero-section {
+            background: linear-gradient(90deg, #ffb6c1 0%, #ffc0cb 15%, #ffe0e6 30%, #fff5f7 50%, #e6f3ff 70%, #b8d4f1 85%, #87ceeb 100%);
+            color: #333;
+            padding: 60px 0;
+            text-align: center;
+        }
+        
+        .hero-section h1 {
+            font-size: 3rem;
+            margin-bottom: 10px;
+            color: #333;
+        }
+        
+        .hero-section p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+            color: #666;
+        }
+        
+        /* 다크모드 히어로 섹션 */
+        [data-theme="dark"] .hero-section {
+            background: linear-gradient(90deg, #2d1f1f 0%, #1f1f2e 50%, #1f2937 100%);
+        }
+        
+        [data-theme="dark"] .hero-section h1,
+        [data-theme="dark"] .hero-section p {
+            color: #e2e8f0;
+        }
+        
+        .filter-section {
+            background: white;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .filter-buttons {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        
+        .person-filter {
+            padding: 8px 16px;
+            border: 2px solid #667eea;
+            background: white;
+            color: #667eea;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .person-filter.active {
+            background: #667eea;
+            color: white;
+        }
+        
+        .stats-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin: 20px 0;
+        }
+        
+        .stat-card {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .stat-number {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #667eea;
+        }
+        
+        .memory-card {
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            transition: transform 0.3s;
+        }
+        
+        .memory-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .memory-image {
+            width: 100%;
+            height: 200px;
+            background: #f0f0f0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #999;
+        }
+        
+        .memory-content {
+            padding: 15px;
+        }
+        
+        .memory-date {
+            color: #666;
+            font-size: 0.9rem;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 40px;
+        }
+        
+        /* 좋아요 버튼 스타일 */
+        .like-btn {
+            position: relative;
+            transition: all 0.3s ease;
+        }
+        
+        .like-btn.active {
+            color: #ef4444;
+        }
+        
+        .like-btn:hover {
+            transform: scale(1.1);
+        }
+        
+        .like-count {
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            background: #ef4444;
+            color: white;
+            font-size: 11px;
+            padding: 2px 6px;
+            border-radius: 10px;
+            min-width: 18px;
+            text-align: center;
+            display: none;
+        }
+        
+        .like-btn.active .like-count {
+            display: block;
+        }
+        
+        @keyframes heartBeat {
+            0% { transform: scale(1); }
+            25% { transform: scale(1.3); }
+            50% { transform: scale(1); }
+            75% { transform: scale(1.3); }
+            100% { transform: scale(1); }
+        }
+        
+        .like-btn.active {
+            animation: heartBeat 0.8s ease-in-out;
+        }
+        
+        /* 슬라이드쇼 스타일 */
+        .slideshow-modal {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.95);
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .slideshow-container {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .slideshow-close {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            border: none;
+            color: white;
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            z-index: 10;
+        }
+        
+        .slideshow-close:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: scale(1.1);
+        }
+        
+        .slideshow-content {
+            max-width: 90vw;
+            max-height: 80vh;
+            display: flex;
+            align-items: center;
+            gap: 40px;
+        }
+        
+        .slideshow-content img {
+            max-width: 70%;
+            max-height: 80vh;
+            object-fit: contain;
+            border-radius: 12px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+        }
+        
+        .slideshow-info {
+            color: white;
+            max-width: 300px;
+        }
+        
+        .slideshow-info h2 {
+            font-size: 2rem;
+            margin-bottom: 10px;
+        }
+        
+        .slideshow-info p {
+            color: rgba(255, 255, 255, 0.8);
+            margin-bottom: 5px;
+        }
+        
+        .slideshow-controls {
+            position: absolute;
+            bottom: 40px;
+            display: flex;
+            gap: 20px;
+            align-items: center;
+        }
+        
+        .slideshow-nav,
+        .slideshow-play {
+            background: rgba(255, 255, 255, 0.1);
+            border: none;
+            color: white;
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .slideshow-nav:hover,
+        .slideshow-play:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: scale(1.1);
+        }
+        
+        .slideshow-progress {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: rgba(255, 255, 255, 0.1);
+        }
+        
+        .slideshow-progress-bar {
+            height: 100%;
+            background: white;
+            width: 0;
+            transition: width 0.3s;
+        }
+    </style>
+</head>
+<body>
+    <!-- 개선된 히어로 섹션 -->
+    <section class="hero-section relative overflow-hidden">
+        <!-- 배경 패턴 -->
+        <div class="bg-pattern"></div>
+        
+        <!-- 애니메이션 요소들 -->
+        <div class="floating-shapes">
+            <div class="shape shape-1"></div>
+            <div class="shape shape-2"></div>
+            <div class="shape shape-3"></div>
+            <div class="shape shape-4"></div>
+            <div class="shape shape-5"></div>
+        </div>
+        
+        <!-- 콘텐츠 -->
+        <div class="relative z-10 container mx-auto px-4 py-20 text-center">
+            <h1 class="text-5xl md:text-7xl font-bold text-gray-800 mb-4 animate-fade-in">
+                민호와 민아의
+                <span class="text-gradient">소중한 순간들</span>
+            </h1>
+            <p class="text-xl text-gray-600 max-w-2xl mx-auto animate-slide-up">
+                우리 아이들의 성장 이야기를 담은 특별한 공간입니다
+            </p>
+        </div>
+    </section>
+    
+    <div class="container">
+        <!-- 개선된 통계 섹션 -->
+        <div class="stats-grid" data-aos="fade-up">
+            <div class="stat-card glass-card">
+                <div class="stat-icon">
+                    <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                        <circle cx="8.5" cy="8.5" r="1.5"></circle>
+                        <polyline points="21 15 16 10 5 21"></polyline>
+                    </svg>
+                </div>
+                <div class="stat-content">
+                    <div class="stat-number counter" id="totalMemories" data-target="0">0</div>
+                    <div class="stat-label">소중한 순간</div>
+                </div>
+            </div>
+            <div class="stat-card glass-card">
+                <div class="stat-icon">
+                    <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                        <circle cx="12" cy="7" r="4"></circle>
+                    </svg>
+                </div>
+                <div class="stat-content">
+                    <div class="stat-number counter" id="minhoMemories" data-target="0">0</div>
+                    <div class="stat-label">민호의 추억</div>
+                </div>
+            </div>
+            <div class="stat-card glass-card">
+                <div class="stat-icon">
+                    <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                        <circle cx="12" cy="7" r="4"></circle>
+                    </svg>
+                </div>
+                <div class="stat-content">
+                    <div class="stat-number counter" id="minaMemories" data-target="0">0</div>
+                    <div class="stat-label">민아의 추억</div>
+                </div>
+            </div>
+            <div class="stat-card glass-card">
+                <div class="stat-icon">
+                    <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                        <circle cx="8.5" cy="8.5" r="1.5"></circle>
+                        <polyline points="21 15 16 10 5 21"></polyline>
+                    </svg>
+                </div>
+                <div class="stat-content">
+                    <div class="stat-number counter" id="totalPhotos" data-target="0">0</div>
+                    <div class="stat-label">사진/동영상</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 개선된 필터 섹션 -->
+        <div class="filter-section backdrop-blur-lg bg-white/80 rounded-2xl shadow-xl p-6" data-aos="fade-up" data-aos-delay="200">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-lg font-semibold text-gray-800">추억 필터</h3>
+                <div class="flex gap-2">
+                    <button onclick="startSlideshow()" class="btn btn-secondary flex items-center gap-2">
+                        <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+                            <polygon points="5 3 19 12 5 21 5 3"></polygon>
+                        </svg>
+                        슬라이드쇼
+                    </button>
+                    <button onclick="location.href='add-memory.html'" class="btn btn-primary flex items-center gap-2">
+                        <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+                            <line x1="12" y1="5" x2="12" y2="19"></line>
+                            <line x1="5" y1="12" x2="19" y2="12"></line>
+                        </svg>
+                        추억 추가
+                    </button>
+                    <button class="text-sm text-gray-500 hover:text-gray-700 transition-colors">초기화</button>
+                </div>
+            </div>
+            
+            <!-- 검색 바 추가 -->
+            <div class="mb-4">
+                <div class="relative">
+                    <input type="text" id="searchInput" placeholder="제목, 설명, 장소로 검색..." 
+                           class="form-input pl-10 pr-4 py-2 w-full" 
+                           style="background: white; border: 1px solid var(--gray-300); border-radius: var(--radius-full);">
+                    <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" 
+                         class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400">
+                        <circle cx="11" cy="11" r="8"></circle>
+                        <path d="m21 21-4.35-4.35"></path>
+                    </svg>
+                </div>
+            </div>
+            
+            <!-- 날짜 범위 필터 추가 -->
+            <div class="mb-4 flex gap-4 items-center flex-wrap">
+                <div class="flex items-center gap-2">
+                    <label for="startDate" class="text-sm text-gray-600">시작일:</label>
+                    <input type="date" id="startDate" class="form-input" 
+                           style="padding: 0.5rem; border: 1px solid var(--gray-300); border-radius: var(--radius);">
+                </div>
+                <div class="flex items-center gap-2">
+                    <label for="endDate" class="text-sm text-gray-600">종료일:</label>
+                    <input type="date" id="endDate" class="form-input" 
+                           style="padding: 0.5rem; border: 1px solid var(--gray-300); border-radius: var(--radius);">
+                </div>
+                <button onclick="clearDateFilter()" class="text-sm text-gray-500 hover:text-gray-700 transition-colors">
+                    날짜 필터 초기화
+                </button>
+            </div>
+            
+            <div class="filter-tags flex flex-wrap gap-3">
+                <button class="filter-tag active" data-person="all">
+                    <span class="emoji">👶</span>
+                    <span>전체보기</span>
+                    <span class="count">0</span>
+                </button>
+                <button class="filter-tag" data-person="minho">
+                    <span class="emoji">👦</span>
+                    <span>민호</span>
+                    <span class="count">0</span>
+                </button>
+                <button class="filter-tag" data-person="mina">
+                    <span class="emoji">👧</span>
+                    <span>민아</span>
+                    <span class="count">0</span>
+                </button>
+            </div>
+        </div>
+        
+        <!-- 개선된 갤러리 컨테이너 -->
+        <div class="gallery-container" data-aos="fade-up" data-aos-delay="400">
+            <!-- 갤러리 탭 -->
+            <div class="gallery-tabs mb-8">
+                <button class="tab active" data-layout="grid">
+                    <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="1" y="1" width="6" height="6"></rect>
+                        <rect x="9" y="1" width="6" height="6"></rect>
+                        <rect x="1" y="9" width="6" height="6"></rect>
+                        <rect x="9" y="9" width="6" height="6"></rect>
+                    </svg>
+                    그리드
+                </button>
+                <button class="tab" data-layout="masonry">
+                    <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="1" y="1" width="6" height="10"></rect>
+                        <rect x="9" y="1" width="6" height="6"></rect>
+                        <rect x="9" y="9" width="6" height="6"></rect>
+                    </svg>
+                    마소너리
+                </button>
+                <button class="tab" data-layout="timeline">
+                    <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="8" y1="1" x2="8" y2="15"></line>
+                        <circle cx="8" cy="4" r="2"></circle>
+                        <circle cx="8" cy="12" r="2"></circle>
+                    </svg>
+                    타임라인
+                </button>
+            </div>
+            
+            <!-- 메모리 갤러리 -->
+            <div id="memoriesContainer" class="gallery-grid">
+                <div class="loading">
+                    <div class="skeleton-card">
+                        <div class="skeleton skeleton-image"></div>
+                        <div class="skeleton-content">
+                            <div class="skeleton skeleton-title"></div>
+                            <div class="skeleton skeleton-text"></div>
+                            <div class="skeleton skeleton-text short"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 테마 토글 버튼 -->
+    <button class="theme-toggle" id="themeToggle" aria-label="다크모드 전환">
+        <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="sun-icon">
+            <circle cx="12" cy="12" r="5"></circle>
+            <line x1="12" y1="1" x2="12" y2="3"></line>
+            <line x1="12" y1="21" x2="12" y2="23"></line>
+            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+            <line x1="1" y1="12" x2="3" y2="12"></line>
+            <line x1="21" y1="12" x2="23" y2="12"></line>
+            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+            <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+        </svg>
+        <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="moon-icon" style="display: none;">
+            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+        </svg>
+    </button>
+    
+    <!-- 슬라이드쇼 모달 -->
+    <div id="slideshowModal" class="slideshow-modal" style="display: none;">
+        <div class="slideshow-container">
+            <button class="slideshow-close" onclick="closeSlideshow()">
+                <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+            </button>
+            
+            <div class="slideshow-content">
+                <img id="slideshowImage" src="" alt="">
+                <div class="slideshow-info">
+                    <h2 id="slideshowTitle"></h2>
+                    <p id="slideshowDate"></p>
+                    <p id="slideshowDescription"></p>
+                </div>
+            </div>
+            
+            <div class="slideshow-controls">
+                <button class="slideshow-nav" onclick="previousSlide()">
+                    <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="15 18 9 12 15 6"></polyline>
+                    </svg>
+                </button>
+                <button class="slideshow-play" onclick="togglePlayPause()">
+                    <svg id="playIcon" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polygon points="5 3 19 12 5 21 5 3"></polygon>
+                    </svg>
+                    <svg id="pauseIcon" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" style="display: none;">
+                        <rect x="6" y="4" width="4" height="16"></rect>
+                        <rect x="14" y="4" width="4" height="16"></rect>
+                    </svg>
+                </button>
+                <button class="slideshow-nav" onclick="nextSlide()">
+                    <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="9 18 15 12 9 6"></polyline>
+                    </svg>
+                </button>
+            </div>
+            
+            <div class="slideshow-progress">
+                <div class="slideshow-progress-bar" id="progressBar"></div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // 다크모드 토글 기능
+        function initTheme() {
+            const themeToggle = document.getElementById('themeToggle');
+            const htmlElement = document.documentElement;
+            const sunIcon = themeToggle.querySelector('.sun-icon');
+            const moonIcon = themeToggle.querySelector('.moon-icon');
+            
+            // 저장된 테마 불러오기
+            const savedTheme = localStorage.getItem('theme') || 'light';
+            htmlElement.setAttribute('data-theme', savedTheme);
+            updateThemeIcon(savedTheme);
+            
+            // 테마 토글 이벤트
+            themeToggle.addEventListener('click', () => {
+                const currentTheme = htmlElement.getAttribute('data-theme');
+                const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+                
+                htmlElement.setAttribute('data-theme', newTheme);
+                localStorage.setItem('theme', newTheme);
+                updateThemeIcon(newTheme);
+            });
+            
+            function updateThemeIcon(theme) {
+                if (theme === 'dark') {
+                    sunIcon.style.display = 'none';
+                    moonIcon.style.display = 'block';
+                } else {
+                    sunIcon.style.display = 'block';
+                    moonIcon.style.display = 'none';
+                }
+            }
+        }
+        
+        // 페이지 로드시 테마 초기화
+        document.addEventListener('DOMContentLoaded', initTheme);
+        
+        // 전역 변수
+        let allMemories = [];
+        let currentFilter = 'all';
+        let searchTerm = '';
+        let peopleData = {};
+        let likes = JSON.parse(localStorage.getItem('memoryLikes') || '{}');
+        let dateFilter = { start: null, end: null };
+        
+        // 슬라이드쇼 변수
+        let slideshowMemories = [];
+        let currentSlideIndex = 0;
+        let isPlaying = false;
+        let slideshowInterval = null;
+        
+        // 좋아요 상태 확인
+        function isLiked(memoryId) {
+            return likes[memoryId] === true;
+        }
+        
+        // 좋아요 개수 가져오기
+        function getLikeCount(memoryId) {
+            // 로컬스토리지 기반 구현이므로 개수는 0 또는 1
+            return isLiked(memoryId) ? 1 : 0;
+        }
+        
+        // 좋아요 토글
+        function toggleLike(memoryId, event) {
+            event.stopPropagation(); // 이벤트 버블링 방지
+            
+            likes[memoryId] = !likes[memoryId];
+            localStorage.setItem('memoryLikes', JSON.stringify(likes));
+            
+            // 버튼 업데이트
+            const btn = event.currentTarget;
+            const svg = btn.querySelector('svg');
+            const countSpan = btn.querySelector('.like-count');
+            
+            if (likes[memoryId]) {
+                btn.classList.add('active');
+                svg.setAttribute('fill', 'currentColor');
+                // 하트 애니메이션
+                btn.style.transform = 'scale(1.2)';
+                setTimeout(() => {
+                    btn.style.transform = 'scale(1)';
+                }, 200);
+            } else {
+                btn.classList.remove('active');
+                svg.setAttribute('fill', 'none');
+            }
+            
+            countSpan.textContent = getLikeCount(memoryId);
+        }
+        
+        // 추억 상세 보기
+        function viewMemory(memoryId) {
+            // 추후 구현: 모달 또는 상세 페이지로 이동
+            console.log('View memory:', memoryId);
+            alert('추억 상세 보기 기능은 곧 추가될 예정입니다!');
+        }
+        
+        // 날짜 필터 초기화
+        function clearDateFilter() {
+            dateFilter.start = null;
+            dateFilter.end = null;
+            document.getElementById('startDate').value = '';
+            document.getElementById('endDate').value = '';
+            displayMemories();
+        }
+        
+        // 슬라이드쇼 시작
+        function startSlideshow() {
+            // 현재 표시된 메모리 중 이미지가 있는 것만 필터링
+            slideshowMemories = getCurrentFilteredMemories().filter(memory => 
+                memory.media_files && memory.media_files.length > 0
+            );
+            
+            if (slideshowMemories.length === 0) {
+                alert('슬라이드쇼로 보여줄 이미지가 없습니다.');
+                return;
+            }
+            
+            currentSlideIndex = 0;
+            document.getElementById('slideshowModal').style.display = 'flex';
+            showSlide(currentSlideIndex);
+            
+            // 전체화면 모드 시도
+            const modal = document.getElementById('slideshowModal');
+            if (modal.requestFullscreen) {
+                modal.requestFullscreen();
+            } else if (modal.webkitRequestFullscreen) {
+                modal.webkitRequestFullscreen();
+            }
+        }
+        
+        // 현재 필터링된 메모리 가져오기
+        function getCurrentFilteredMemories() {
+            let filteredMemories = allMemories;
+            
+            // 인물 필터
+            if (currentFilter !== 'all') {
+                filteredMemories = filteredMemories.filter(memory => {
+                    return memory.memory_people.some(mp => {
+                        const person = peopleData[mp.person_id];
+                        return person && person.name.toLowerCase() === 
+                            (currentFilter === 'minho' ? '민호' : '민아');
+                    });
+                });
+            }
+            
+            // 검색 필터
+            if (searchTerm) {
+                filteredMemories = filteredMemories.filter(memory => {
+                    const searchableText = `${memory.title} ${memory.description || ''} ${memory.location || ''}`.toLowerCase();
+                    return searchableText.includes(searchTerm);
+                });
+            }
+            
+            // 날짜 필터
+            if (dateFilter.start || dateFilter.end) {
+                filteredMemories = filteredMemories.filter(memory => {
+                    const memoryDate = new Date(memory.memory_date);
+                    if (dateFilter.start && memoryDate < new Date(dateFilter.start)) return false;
+                    if (dateFilter.end && memoryDate > new Date(dateFilter.end)) return false;
+                    return true;
+                });
+            }
+            
+            return filteredMemories;
+        }
+        
+        // 슬라이드 표시
+        function showSlide(index) {
+            const memory = slideshowMemories[index];
+            const image = document.getElementById('slideshowImage');
+            const title = document.getElementById('slideshowTitle');
+            const date = document.getElementById('slideshowDate');
+            const description = document.getElementById('slideshowDescription');
+            const progressBar = document.getElementById('progressBar');
+            
+            image.src = getMediaUrl(memory.media_files[0]);
+            title.textContent = memory.title;
+            date.textContent = new Date(memory.memory_date).toLocaleDateString('ko-KR', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+            });
+            description.textContent = memory.description || '';
+            
+            // 진행률 업데이트
+            progressBar.style.width = `${((index + 1) / slideshowMemories.length) * 100}%`;
+        }
+        
+        // 이전 슬라이드
+        function previousSlide() {
+            currentSlideIndex = (currentSlideIndex - 1 + slideshowMemories.length) % slideshowMemories.length;
+            showSlide(currentSlideIndex);
+        }
+        
+        // 다음 슬라이드
+        function nextSlide() {
+            currentSlideIndex = (currentSlideIndex + 1) % slideshowMemories.length;
+            showSlide(currentSlideIndex);
+        }
+        
+        // 재생/일시정지 토글
+        function togglePlayPause() {
+            isPlaying = !isPlaying;
+            const playIcon = document.getElementById('playIcon');
+            const pauseIcon = document.getElementById('pauseIcon');
+            
+            if (isPlaying) {
+                playIcon.style.display = 'none';
+                pauseIcon.style.display = 'block';
+                slideshowInterval = setInterval(nextSlide, 4000); // 4초마다 전환
+            } else {
+                playIcon.style.display = 'block';
+                pauseIcon.style.display = 'none';
+                clearInterval(slideshowInterval);
+            }
+        }
+        
+        // 슬라이드쇼 닫기
+        function closeSlideshow() {
+            document.getElementById('slideshowModal').style.display = 'none';
+            isPlaying = false;
+            clearInterval(slideshowInterval);
+            
+            // 전체화면 종료
+            if (document.exitFullscreen) {
+                document.exitFullscreen();
+            } else if (document.webkitExitFullscreen) {
+                document.webkitExitFullscreen();
+            }
+        }
+        
+        // ESC 키로 슬라이드쇼 닫기
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape' && document.getElementById('slideshowModal').style.display === 'flex') {
+                closeSlideshow();
+            }
+            if (e.key === 'ArrowLeft' && document.getElementById('slideshowModal').style.display === 'flex') {
+                previousSlide();
+            }
+            if (e.key === 'ArrowRight' && document.getElementById('slideshowModal').style.display === 'flex') {
+                nextSlide();
+            }
+            if (e.key === ' ' && document.getElementById('slideshowModal').style.display === 'flex') {
+                e.preventDefault();
+                togglePlayPause();
+            }
+        });
+        
+        // 페이지 로드시 초기화
+        window.addEventListener('DOMContentLoaded', async function() {
+            if (!supabaseClient) {
+                console.error('Supabase 클라이언트 초기화 실패');
+                return;
+            }
+            
+            // 데이터 로드
+            await loadPeople();
+            await loadMemories();
+            updateStats();
+            
+            // 필터 버튼 이벤트 리스너
+            document.querySelectorAll('.filter-tag').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    document.querySelectorAll('.filter-tag').forEach(b => b.classList.remove('active'));
+                    this.classList.add('active');
+                    currentFilter = this.dataset.person;
+                    displayMemories();
+                });
+            });
+            
+            // 검색 입력 이벤트
+            const searchInput = document.getElementById('searchInput');
+            let searchTimeout;
+            searchInput.addEventListener('input', function(e) {
+                clearTimeout(searchTimeout);
+                searchTimeout = setTimeout(() => {
+                    searchTerm = e.target.value.toLowerCase();
+                    displayMemories();
+                }, 300); // 300ms 디바운스
+            });
+            
+            // 날짜 필터 이벤트
+            const startDateInput = document.getElementById('startDate');
+            const endDateInput = document.getElementById('endDate');
+            
+            startDateInput.addEventListener('change', function() {
+                dateFilter.start = this.value;
+                displayMemories();
+            });
+            
+            endDateInput.addEventListener('change', function() {
+                dateFilter.end = this.value;
+                displayMemories();
+            });
+        });
+        
+        // 사람 정보 로드
+        async function loadPeople() {
+            try {
+                const { data, error } = await supabaseClient
+                    .from('people')
+                    .select('*');
+                
+                if (error) throw error;
+                
+                // ID를 키로 하는 객체로 변환
+                data.forEach(person => {
+                    peopleData[person.id] = person;
+                });
+                
+                console.log('People loaded:', peopleData);
+            } catch (error) {
+                console.error('Error loading people:', error);
+            }
+        }
+        
+        // 메모리 로드
+        async function loadMemories() {
+            try {
+                const { data, error } = await supabaseClient
+                    .from('memories')
+                    .select(`
+                        *,
+                        memory_people(person_id),
+                        media_files(*)
+                    `)
+                    .order('memory_date', { ascending: false });
+                
+                if (error) throw error;
+                
+                allMemories = data || [];
+                console.log('Memories loaded:', allMemories);
+                displayMemories();
+                
+            } catch (error) {
+                console.error('Error loading memories:', error);
+                document.getElementById('memoriesContainer').innerHTML = 
+                    '<p class="error">추억을 불러오는데 실패했습니다.</p>';
+            }
+        }
+        
+        // 메모리 표시
+        function displayMemories() {
+            const container = document.getElementById('memoriesContainer');
+            
+            // 필터링
+            let filteredMemories = allMemories;
+            
+            // 1. 인물 필터
+            if (currentFilter !== 'all') {
+                filteredMemories = filteredMemories.filter(memory => {
+                    return memory.memory_people.some(mp => {
+                        const person = peopleData[mp.person_id];
+                        return person && person.name.toLowerCase() === 
+                            (currentFilter === 'minho' ? '민호' : '민아');
+                    });
+                });
+            }
+            
+            // 2. 검색 필터
+            if (searchTerm) {
+                filteredMemories = filteredMemories.filter(memory => {
+                    const searchableText = `${memory.title} ${memory.description || ''} ${memory.location || ''}`.toLowerCase();
+                    return searchableText.includes(searchTerm);
+                });
+            }
+            
+            // 3. 날짜 필터
+            if (dateFilter.start || dateFilter.end) {
+                filteredMemories = filteredMemories.filter(memory => {
+                    const memoryDate = new Date(memory.memory_date);
+                    if (dateFilter.start && memoryDate < new Date(dateFilter.start)) return false;
+                    if (dateFilter.end && memoryDate > new Date(dateFilter.end)) return false;
+                    return true;
+                });
+            }
+            
+            if (filteredMemories.length === 0) {
+                container.innerHTML = '<p class="text-center">추억이 없습니다.</p>';
+                return;
+            }
+            
+            // 그리드 레이아웃으로 표시
+            container.innerHTML = '<div class="gallery-grid">' + 
+                filteredMemories.map(memory => createMemoryCard(memory)).join('') + 
+                '</div>';
+        }
+        
+        // 메모리 카드 생성 (개선된 디자인)
+        function createMemoryCard(memory) {
+            const date = new Date(memory.memory_date).toLocaleDateString('ko-KR', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+            });
+            const people = memory.memory_people.map(mp => {
+                const person = peopleData[mp.person_id];
+                return person ? person.name : '';
+            }).filter(name => name).join(', ');
+            
+            const hasMedia = memory.media_files && memory.media_files.length > 0;
+            
+            return `
+                <div class="memory-item" data-aos="fade-up">
+                    <div class="memory-card modern-card">
+                        <div class="image-wrapper">
+                            ${hasMedia ? 
+                                `<img src="${getMediaUrl(memory.media_files[0])}" alt="${memory.title}" loading="lazy">` : 
+                                '<div class="no-image-placeholder flex items-center justify-center h-full bg-gray-100">📷</div>'
+                            }
+                            <div class="overlay">
+                                <button class="action-btn like-btn ${isLiked(memory.id) ? 'active' : ''}" 
+                                        onclick="toggleLike('${memory.id}', event)" 
+                                        title="좋아요">
+                                    <svg width="20" height="20" fill="${isLiked(memory.id) ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="2">
+                                        <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+                                    </svg>
+                                    <span class="like-count">${getLikeCount(memory.id)}</span>
+                                </button>
+                                <button class="action-btn" onclick="viewMemory('${memory.id}')" title="자세히 보기">
+                                    <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M1 10s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                                        <circle cx="12" cy="10" r="3"></circle>
+                                    </svg>
+                                </button>
+                                <button class="action-btn share-btn" title="공유">
+                                    <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+                                        <circle cx="18" cy="5" r="3"></circle>
+                                        <circle cx="6" cy="12" r="3"></circle>
+                                        <circle cx="18" cy="19" r="3"></circle>
+                                        <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line>
+                                        <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line>
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="card-content">
+                            <div class="date-badge">${date}</div>
+                            <h3 class="memory-title">${memory.title}</h3>
+                            <p class="memory-desc">${memory.description || ''}</p>
+                            <div class="tags">
+                                ${people.split(', ').map(name => `<span class="tag">${name}</span>`).join('')}
+                                ${memory.location ? `<span class="tag">📍 ${memory.location}</span>` : ''}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+        
+        // 미디어 URL 가져오기
+        function getMediaUrl(mediaFile) {
+            if (!mediaFile) return '';
+            
+            // 썸네일이 있으면 썸네일 사용, 없으면 원본 사용
+            const path = mediaFile.thumbnail_path || mediaFile.file_path;
+            const { data } = supabaseClient.storage
+                .from('media')
+                .getPublicUrl(path);
+            
+            return data.publicUrl;
+        }
+        
+        // 통계 업데이트
+        function updateStats() {
+            // 전체 추억 수
+            const totalMemoriesEl = document.getElementById('totalMemories');
+            totalMemoriesEl.setAttribute('data-target', allMemories.length);
+            totalMemoriesEl.textContent = allMemories.length;
+            
+            // 민호 추억 수
+            const minhoCount = allMemories.filter(memory => 
+                memory.memory_people.some(mp => {
+                    const person = peopleData[mp.person_id];
+                    return person && person.name === '민호';
+                })
+            ).length;
+            const minhoMemoriesEl = document.getElementById('minhoMemories');
+            minhoMemoriesEl.setAttribute('data-target', minhoCount);
+            minhoMemoriesEl.textContent = minhoCount;
+            
+            // 민아 추억 수
+            const minaCount = allMemories.filter(memory => 
+                memory.memory_people.some(mp => {
+                    const person = peopleData[mp.person_id];
+                    return person && person.name === '민아';
+                })
+            ).length;
+            const minaMemoriesEl = document.getElementById('minaMemories');
+            minaMemoriesEl.setAttribute('data-target', minaCount);
+            minaMemoriesEl.textContent = minaCount;
+            
+            // 전체 미디어 수
+            const totalMedia = allMemories.reduce((sum, memory) => 
+                sum + (memory.media_files ? memory.media_files.length : 0), 0
+            );
+            const totalPhotosEl = document.getElementById('totalPhotos');
+            totalPhotosEl.setAttribute('data-target', totalMedia);
+            totalPhotosEl.textContent = totalMedia;
+            
+            // 필터 카운트 업데이트
+            updateFilterCounts(allMemories.length, minhoCount, minaCount);
+        }
+        
+        // 필터 카운트 업데이트
+        function updateFilterCounts(total, minho, mina) {
+            document.querySelector('[data-person="all"] .count').textContent = total;
+            document.querySelector('[data-person="minho"] .count').textContent = minho;
+            document.querySelector('[data-person="mina"] .count').textContent = mina;
+        }
+        
+        // AOS 초기화
+        AOS.init({
+            duration: 800,
+            easing: 'ease-in-out',
+            once: true,
+            offset: 100
+        });
+        
+        // 갤러리 레이아웃 전환
+        document.querySelectorAll('.tab').forEach(tab => {
+            tab.addEventListener('click', function() {
+                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                this.classList.add('active');
+                
+                const layout = this.dataset.layout;
+                const container = document.getElementById('memoriesContainer');
+                
+                // 레이아웃 클래스 변경
+                container.className = layout === 'masonry' ? 'masonry-layout' : 'gallery-grid';
+                
+                // 애니메이션 재실행
+                AOS.refresh();
+            });
+        });
+        
+        // 카운터 애니메이션
+        function animateCounter(element) {
+            const target = parseInt(element.getAttribute('data-target'));
+            const duration = 2000;
+            const step = target / (duration / 16);
+            let current = 0;
+            
+            const timer = setInterval(() => {
+                current += step;
+                if (current >= target) {
+                    current = target;
+                    clearInterval(timer);
+                }
+                element.textContent = Math.round(current).toLocaleString();
+            }, 16);
+        }
+        
+        // Intersection Observer로 카운터 애니메이션 트리거
+        const counterObserver = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    animateCounter(entry.target);
+                    counterObserver.unobserve(entry.target);
+                }
+            });
+        });
+        
+        // 카운터 요소들 관찰
+        document.querySelectorAll('.counter').forEach(counter => {
+            counterObserver.observe(counter);
+        });
+        
+        // 다크모드 토글 기능
+        const themeToggle = document.querySelector('.theme-toggle');
+        const currentTheme = localStorage.getItem('theme') || 'light';
+        
+        // 초기 테마 설정
+        document.documentElement.setAttribute('data-theme', currentTheme);
+        updateThemeIcon(currentTheme);
+        
+        themeToggle.addEventListener('click', () => {
+            const theme = document.documentElement.getAttribute('data-theme') === 'light' ? 'dark' : 'light';
+            document.documentElement.setAttribute('data-theme', theme);
+            localStorage.setItem('theme', theme);
+            updateThemeIcon(theme);
+        });
+        
+        function updateThemeIcon(theme) {
+            const themeToggle = document.querySelector('.theme-toggle');
+            if (theme === 'dark') {
+                themeToggle.innerHTML = `
+                    <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                `;
+            } else {
+                themeToggle.innerHTML = `
+                    <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+                `;
+            }
+        }
+    </script>
+    
+    <!-- 테마 토글 버튼 (향후 구현) -->
+    <button class="theme-toggle" title="다크모드 전환">
+        <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="5"></circle>
+            <line x1="12" y1="1" x2="12" y2="3"></line>
+            <line x1="12" y1="21" x2="12" y2="23"></line>
+            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+            <line x1="1" y1="12" x2="3" y2="12"></line>
+            <line x1="21" y1="12" x2="23" y2="12"></line>
+            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+            <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+        </svg>
+    </button>
+</body>
+</html>

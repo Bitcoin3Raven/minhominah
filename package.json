@@ -1,0 +1,22 @@
+{
+  "name": "minhominah",
+  "version": "1.0.0",
+  "description": "민호와 민아의 성장 앨범 - 소중한 추억을 담는 디지털 공간",
+  "main": "index.html",
+  "scripts": {
+    "dev": "live-server",
+    "build": "echo 'No build needed for static site'",
+    "preview": "vercel dev"
+  },
+  "keywords": [
+    "photo-album",
+    "family",
+    "memories",
+    "supabase"
+  ],
+  "author": "thaiholic",
+  "license": "MIT",
+  "devDependencies": {
+    "live-server": "^1.2.2"
+  }
+}
