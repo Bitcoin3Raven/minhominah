@@ -9,6 +9,14 @@
 
 ## 현재 상태 요약
 
+### 🔄 현재 배포 상황 (2025-01-10)
+- **GitHub 리포지토리**: https://github.com/Bitcoin3Raven/minhominah.git
+- **Vercel 프로젝트**:
+  - minhominah (메인 프로젝트) - 자동 배포 활성화됨
+  - ~~minhominah.album~~ (삭제 예정 - 중복 프로젝트)
+- **최근 배포**: 정상 배포됨
+- **Git 상태**: main 브랜치, 깨끗한 상태 (nothing to commit)
+
 ### ✅ 완료된 작업 (2025-01-20)
 1. **보안 강화 문서화**
    - Supabase Security Advisor 3개 경고 해결방안 제시
@@ -26,23 +34,24 @@
    - SQL_EXECUTION_GUIDE.md 업데이트
 
 ### 🔄 즉시 필요한 작업
-1. **Supabase Dashboard에서 보안 설정**
+1. **도메인 연결 설정**
+   - Vercel에서 "Add Domain" 클릭하여 minhominah.com 추가
+   - dotname에서 DNS 설정 (A 레코드: 76.76.21.21)
+   - SSL 인증서 자동 발급 대기
+
+2. **Vercel 중복 프로젝트 정리**
+   - minhominah.album 프로젝트 삭제
+   - minhominah 프로젝트만 유지
+
+3. **Supabase Dashboard에서 보안 설정**
    - SQL Editor에서 database-security-patch.sql 실행
    - Authentication 설정에서 OTP 시간 및 비밀번호 보호 설정
-
-2. **GitHub 리포지토리 생성 및 푸시**
-   - PowerShell: `.\deploy-to-vercel.ps1` 실행
-   - 또는 수동으로 Git 초기화 및 푸시
-
-3. **Vercel 배포**
-   - vercel.com에서 GitHub 리포지토리 연결
-   - Deploy 클릭하여 배포 완료
 
 ### 📌 프로젝트 접속 정보
 - **로컬**: C:\Users\thaih\Documents\minhominah
 - **Supabase**: https://illwscrdeyncckltjrmr.supabase.co
-- **배포 예정 URL**: https://minhominah.vercel.app
-- **최종 도메인**: https://minhominah.com (DNS 설정 필요)
+- **현재 배포 URL**: https://minhominah.vercel.app
+- **최종 도메인**: https://minhominah.com (dotname 보유, DNS 설정 필요)
 
 #### 1. index.html 번역 완성
 - **상태**: ✅ 완료
@@ -132,7 +141,26 @@
 
 ## 작업 로그
 
-### 2025-01-10
+### 2025-01-10 (오늘)
+- 프로젝트 현황 파악:
+  - GitHub 리포지토리 연결 확인 (Bitcoin3Raven/minhominah)
+  - Vercel 자동 배포 상태 확인 (minhominah, minhominah.album 두 프로젝트)
+  - Git 상태 확인 (main 브랜치, working tree clean)
+  - 기존 프로젝트 구조 및 파일 확인
+- project_plan.md 파일 업데이트:
+  - 현재 배포 상황 섹션 추가
+  - GitHub 및 Vercel 프로젝트 정보 명시
+- Vercel 프로젝트 정리:
+  - 중복 배포 문제 확인 (minhominah, minhominah.album)
+  - minhominah.album 프로젝트 삭제 결정
+  - Vercel 프로젝트 삭제 방법 안내
+- 도메인 연결 준비:
+  - minhominah.com 도메인 (dotname 보유) 확인
+  - Vercel 커스텀 도메인 설정 가이드 작성
+  - docs/DOMAIN_SETUP_GUIDE.md 문서 생성
+  - DNS 설정 방법 안내 (A 레코드, CNAME 설정)
+
+### 2025-01-10 (이전 작업)
 - 프로젝트 계획 문서 생성
 - 번역 관련 이슈 파악 및 정리
 - 작업 계획 수립
