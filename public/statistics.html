@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="ko" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>통계 대시보드 - 민호민아 성장앨범</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        // Tailwind 다크모드 설정
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {}
+            }
+        }
+    </script>
+    
+    <!-- 다크모드 초기화 스크립트 -->
+    <script>
+        // 페이지 로드 전 다크모드 설정
+        if (localStorage.getItem('theme') === 'dark' || (!localStorage.getItem('theme') && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.add('dark');
+        } else {
+            document.documentElement.classList.remove('dark');
+        }
+    </script>
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    
+    <!-- Supabase 클라이언트 -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/style-improved.css">
+    
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns"></script>
+    
+    <!-- AOS Animation -->
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+    
+    <!-- 언어 시스템 -->
+    <script src="js/lang/ko.js"></script>
+    <script src="js/lang/th.js"></script>
+    <script src="js/lang/en.js"></script>
+    <script src="js/language.js"></script>
+    
+    <!-- Custom Styles -->
+    
+    <style>
+        /* 차트 컨테이너 스타일 */
+        .chart-container {
+            position: relative;
+            height: 300px;
+            width: 100%;
+        }
+        
+        .stat-card {
+            background: white;
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        }
+        
+        /* 다크모드 차트 카드 */
+        .dark .stat-card {
+            background: #1f2937;
+        }
+        
+        /* 통계 숫자 애니메이션 */
+        @keyframes countUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .stat-number {
+            animation: countUp 0.6s ease-out;
+        }
+        
+        /* 로딩 스켈레톤 */
+        .skeleton {
+            background: linear-gradient(90deg, #f3f4f6 25%, #e5e7eb 50%, #f3f4f6 75%);
+            background-size: 200% 100%;
+            animation: loading 1.5s infinite;
+        }
+        
+        @keyframes loading {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+    </style>
+    
+
+</head>
+<body class="bg-gray-50 dark:bg-gray-900 transition-colors duration-200">
+    <!-- 헤더 영역 -->
+    <header class="fixed top-0 left-0 right-0 z-50 backdrop-blur-lg bg-white/90 dark:bg-gray-700/90 shadow-md">
+        <div class="container mx-auto px-4 py-4 flex justify-between items-center">
+            <h1 class="text-xl font-bold text-gray-800 dark:text-white">
+                <a href="index.html" class="hover:opacity-80 transition-opacity flex items-center">
+                    <img src="assets/images/logo.png" alt="민호민아 성장앨범" class="h-10 w-auto">
+                </a>
+            </h1>
+            
+            <nav class="flex items-center space-x-2 sm:space-x-6">
+                <a href="index.html" class="text-gray-600 dark:text-white hover:text-gray-900 dark:hover:text-white transition-colors" title="홈">
+                    <i class="fas fa-home mr-1 sm:mr-2"></i><span class="hidden sm:inline" data-lang="nav_home">홈</span>
+                </a>
+                <a href="growth.html" class="text-gray-600 dark:text-white hover:text-gray-900 dark:hover:text-white transition-colors" title="성장 기록">
+                    <i class="fas fa-chart-line mr-1 sm:mr-2"></i><span class="hidden sm:inline" data-lang="nav_growth">성장 기록</span>
+                </a>
+                <a href="statistics.html" class="text-gray-600 dark:text-white hover:text-gray-900 dark:hover:text-white transition-colors" title="통계">
+                    <i class="fas fa-chart-bar mr-1 sm:mr-2"></i><span class="hidden sm:inline" data-lang="nav_statistics">통계</span>
+                </a>
+                <a href="family-settings.html" class="text-gray-600 dark:text-white hover:text-gray-900 dark:hover:text-white transition-colors" title="가족 설정">
+                    <i class="fas fa-users mr-1 sm:mr-2"></i><span class="hidden sm:inline" data-lang="nav_family">가족 설정</span>
+                </a>
+                <a href="backup.html" class="text-gray-600 dark:text-white hover:text-gray-900 dark:hover:text-white transition-colors" title="백업">
+                    <i class="fas fa-database mr-1 sm:mr-2"></i><span class="hidden sm:inline" data-lang="nav_backup">백업</span>
+                </a>
+                <a href="add-memory.html" class="px-3 sm:px-4 py-2 bg-gradient-to-r from-pink-500 to-blue-500 text-white rounded-lg font-semibold hover:shadow-lg transition text-sm sm:text-base" title="추억 추가">
+                    <i class="fas fa-plus-circle mr-1 sm:mr-2"></i><span class="hidden sm:inline" data-lang="nav_add_memory">추억 추가</span>
+                </a>
+                
+                <!-- 언어 선택기 (language.js에서 동적으로 생성됨) -->
+                <div id="languageSelector"></div>
+                <!-- 다크모드 토글 버튼 -->
+                <button id="themeToggle" class="w-10 h-10 rounded-full bg-gray-200 dark:bg-gray-600 hover:bg-gray-300 dark:hover:bg-gray-500 transition-all duration-300 flex items-center justify-center hover:scale-110 shadow-lg dark:shadow-xl border border-gray-300 dark:border-gray-500">
+                    <svg id="sunIcon" class="w-6 h-6 text-yellow-500" fill="currentColor" viewBox="0 0 20 20" style="display: block;">
+                        <path fill-rule="evenodd" d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z"></path>
+                    </svg>
+                    <svg id="moonIcon" class="w-6 h-6 text-purple-400" fill="currentColor" viewBox="0 0 20 20" style="display: none;">
+                        <path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"></path>
+                    </svg>
+                </button>
+            </nav>
+        </div>
+    </header>
+
+    <!-- 메인 컨텐츠 -->
+    <main class="container mx-auto px-4 py-8 pt-32">
+        <!-- 페이지 타이틀 -->
+        <div class="mb-8" data-aos="fade-down">
+            <h1 class="text-4xl font-bold text-gray-800 dark:text-white mb-2">
+                <i class="fas fa-chart-bar mr-3 text-purple-500"></i><span data-lang="statistics_title">통계 대시보드</span>
+            </h1>
+            <p class="text-gray-600 dark:text-gray-400" data-lang="statistics_subtitle">민호와 민아의 성장 여정을 숫자로 만나보세요</p>
+        </div>
+
+        <!-- 요약 통계 카드 -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+            <!-- 총 추억 수 -->
+            <div class="stat-card" data-aos="fade-up" data-aos-delay="100">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-gray-500 dark:text-gray-400 text-sm" data-lang="stats_total_memories">총 추억</p>
+                        <p class="text-3xl font-bold text-gray-800 dark:text-white stat-number" id="totalMemories">0</p>
+                    </div>
+                    <div class="w-12 h-12 bg-blue-100 dark:bg-blue-900 rounded-lg flex items-center justify-center">
+                        <i class="fas fa-camera text-blue-600 dark:text-blue-400"></i>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 이번 달 추억 -->
+            <div class="stat-card" data-aos="fade-up" data-aos-delay="200">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-gray-500 dark:text-gray-400 text-sm" data-lang="stats_monthly_memories">이번 달</p>
+                        <p class="text-3xl font-bold text-gray-800 dark:text-white stat-number" id="monthlyMemories">0</p>
+                    </div>
+                    <div class="w-12 h-12 bg-green-100 dark:bg-green-900 rounded-lg flex items-center justify-center">
+                        <i class="fas fa-calendar-check text-green-600 dark:text-green-400"></i>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 총 사진 수 -->
+            <div class="stat-card" data-aos="fade-up" data-aos-delay="300">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-gray-500 dark:text-gray-400 text-sm" data-lang="stats_total_photos">총 사진</p>
+                        <p class="text-3xl font-bold text-gray-800 dark:text-white stat-number" id="totalPhotos">0</p>
+                    </div>
+                    <div class="w-12 h-12 bg-purple-100 dark:bg-purple-900 rounded-lg flex items-center justify-center">
+                        <i class="fas fa-image text-purple-600 dark:text-purple-400"></i>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 총 동영상 수 -->
+            <div class="stat-card" data-aos="fade-up" data-aos-delay="400">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-gray-500 dark:text-gray-400 text-sm" data-lang="stats_total_videos">총 동영상</p>
+                        <p class="text-3xl font-bold text-gray-800 dark:text-white stat-number" id="totalVideos">0</p>
+                    </div>
+                    <div class="w-12 h-12 bg-red-100 dark:bg-red-900 rounded-lg flex items-center justify-center">
+                        <i class="fas fa-video text-red-600 dark:text-red-400"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 차트 섹션 -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <!-- 월별 추억 트렌드 -->
+            <div class="stat-card" data-aos="fade-up">
+                <h3 class="text-xl font-bold text-gray-800 dark:text-white mb-4">
+                    <i class="fas fa-chart-line mr-2 text-blue-500"></i><span data-lang="chart_monthly_trend">월별 추억 트렌드</span>
+                </h3>
+                <div class="chart-container">
+                    <canvas id="monthlyTrendChart"></canvas>
+                </div>
+            </div>
+
+            <!-- 인물별 추억 분포 -->
+            <div class="stat-card" data-aos="fade-up" data-aos-delay="100">
+                <h3 class="text-xl font-bold text-gray-800 dark:text-white mb-4">
+                    <i class="fas fa-user-friends mr-2 text-green-500"></i><span data-lang="chart_person_distribution">인물별 추억 분포</span>
+                </h3>
+                <div class="chart-container">
+                    <canvas id="personDistributionChart"></canvas>
+                </div>
+            </div>
+
+            <!-- 연도별 성장 기록 -->
+            <div class="stat-card" data-aos="fade-up">
+                <h3 class="text-xl font-bold text-gray-800 dark:text-white mb-4">
+                    <i class="fas fa-calendar-alt mr-2 text-purple-500"></i><span data-lang="chart_yearly_memories">연도별 추억 수</span>
+                </h3>
+                <div class="chart-container">
+                    <canvas id="yearlyChart"></canvas>
+                </div>
+            </div>
+
+            <!-- 태그별 통계 -->
+            <div class="stat-card" data-aos="fade-up" data-aos-delay="100">
+                <h3 class="text-xl font-bold text-gray-800 dark:text-white mb-4">
+                    <i class="fas fa-tags mr-2 text-orange-500"></i><span data-lang="top_10_tags">인기 태그 TOP 10</span>
+                </h3>
+                <div class="chart-container">
+                    <canvas id="tagChart"></canvas>
+                </div>
+            </div>
+
+            <!-- 시간대별 활동 -->
+            <div class="stat-card" data-aos="fade-up">
+                <h3 class="text-xl font-bold text-gray-800 dark:text-white mb-4">
+                    <i class="fas fa-clock mr-2 text-indigo-500"></i><span data-lang="chart_weekday_memories">요일별 추억 등록</span>
+                </h3>
+                <div class="chart-container">
+                    <canvas id="weekdayChart"></canvas>
+                </div>
+            </div>
+
+            <!-- 미디어 타입 분포 -->
+            <div class="stat-card" data-aos="fade-up" data-aos-delay="100">
+                <h3 class="text-xl font-bold text-gray-800 dark:text-white mb-4">
+                    <i class="fas fa-photo-video mr-2 text-pink-500"></i><span data-lang="chart_media_type">미디어 타입 분포</span>
+                </h3>
+                <div class="chart-container">
+                    <canvas id="mediaTypeChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- 추가 통계 정보 -->
+        <div class="mt-8 stat-card" data-aos="fade-up">
+            <h3 class="text-xl font-bold text-gray-800 dark:text-white mb-6">
+                <i class="fas fa-info-circle mr-2 text-blue-500"></i><span data-lang="additional_stats">추가 통계 정보</span>
+            </h3>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <!-- 가장 활발한 달 -->
+                <div class="text-center">
+                    <p class="text-gray-500 dark:text-gray-400 mb-2" data-lang="most_active_month">가장 활발한 달</p>
+                    <p class="text-2xl font-bold text-gray-800 dark:text-white" id="mostActiveMonth">-</p>
+                </div>
+                
+                <!-- 평균 월별 추억 수 -->
+                <div class="text-center">
+                    <p class="text-gray-500 dark:text-gray-400 mb-2" data-lang="avg_monthly_memories">평균 월별 추억</p>
+                    <p class="text-2xl font-bold text-gray-800 dark:text-white" id="avgMonthlyMemories">0</p>
+                </div>
+                
+                <!-- 가장 많이 사용된 태그 -->
+                <div class="text-center">
+                    <p class="text-gray-500 dark:text-gray-400 mb-2" data-lang="most_popular_tag">가장 인기 있는 태그</p>
+                    <p class="text-2xl font-bold text-gray-800 dark:text-white" id="mostPopularTag">-</p>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- 푸터 -->
+    <footer class="bg-gray-100 dark:bg-gray-800 py-8 mt-16">
+        <div class="container mx-auto px-4 text-center text-gray-600 dark:text-gray-400">
+            <p>&copy; 2025 <span data-lang="site_title">민호민아 성장앨범</span>. <span data-lang="footer_rights">All rights reserved.</span></p>
+            <p class="mt-2">
+                <span data-lang="footer_made_with">Made with</span> 
+                <i class="fas fa-heart text-red-500 animate-pulse"></i> 
+                <span data-lang="footer_for">for</span> 
+                <span data-lang="footer_minho_mina">민호 & 민아</span>
+            </p>
+        </div>
+    </footer>
+
+    <!-- Supabase & Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="js/supabase.js"></script>
+    <script src="js/statistics.js"></script>
+    <script src="js/notification-system.js" defer></script>
+    
+    <!-- Dark Mode Toggle -->
+    <script>
+        const themeToggle = document.getElementById('themeToggle');
+        const sunIcon = document.getElementById('sunIcon');
+        const moonIcon = document.getElementById('moonIcon');
+        
+        themeToggle.addEventListener('click', () => {
+            const isDark = document.documentElement.classList.contains('dark');
+            
+            if (isDark) {
+                document.documentElement.classList.remove('dark');
+                localStorage.setItem('theme', 'light');
+                sunIcon.style.display = 'block';
+                moonIcon.style.display = 'none';
+            } else {
+                document.documentElement.classList.add('dark');
+                localStorage.setItem('theme', 'dark');
+                sunIcon.style.display = 'none';
+                moonIcon.style.display = 'block';
+            }
+        });
+        
+        // 초기 아이콘 설정
+        if (document.documentElement.classList.contains('dark')) {
+            sunIcon.style.display = 'none';
+            moonIcon.style.display = 'block';
+        } else {
+            sunIcon.style.display = 'block';
+            moonIcon.style.display = 'none';
+        }
+        
+        // AOS 초기화
+        AOS.init({
+            duration: 800,
+            once: true
+        });
+        
+        // 언어 시스템 초기화
+        document.addEventListener('DOMContentLoaded', () => {
+            initializeLanguage();
+        });
+
+    </script>
+</body>
+</html>

@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title data-lang="join_family_title">가족 초대 - 민호민아</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/style-improved.css">
+    
+    <!-- AOS Animation -->
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+    
+    <!-- Supabase 클라이언트 -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    
+    <!-- 언어 시스템 -->
+    <script src="js/lang/ko.js"></script>
+    <script src="js/lang/th.js"></script>
+    <script src="js/lang/en.js"></script>
+    <script src="js/language.js"></script>
+</head>
+<body class="bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100">
+
+
+    <!-- 메인 컨텐츠 -->
+    <main class="min-h-screen flex items-center justify-center p-4">
+        <div class="max-w-md w-full">
+            <!-- 초대 카드 -->
+            <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-8" data-aos="zoom-in">
+                <!-- 로고 -->
+                <div class="text-center mb-8">
+                    <div class="flex justify-center items-center space-x-2 mb-4">
+                        <span class="text-5xl">👶</span>
+                        <h1 class="text-3xl font-black">
+                            <span class="bg-gradient-to-r from-pink-500 to-blue-500 bg-clip-text text-transparent">민호민아</span>
+                        </h1>
+                    </div>
+                    <h2 class="text-2xl font-bold mb-2" data-lang="join_title">가족 초대</h2>
+                    <p class="text-gray-600 dark:text-gray-400" data-lang="join_subtitle">소중한 추억을 함께 만들어가요</p>
+                </div>
+
+                <!-- 초대 정보 -->
+                <div id="inviteInfo" class="hidden space-y-6">
+                    <div class="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-4">
+                        <p class="text-sm text-blue-800 dark:text-blue-300">
+                            <i class="fas fa-info-circle mr-2"></i>
+                            <span id="inviterName">누군가</span><span data-lang="invited_you">님이</span> 
+                            '<span id="familyName" class="font-semibold">가족</span>' <span data-lang="invited_to_group">그룹에 
+                            초대했습니다</span>
+                        </p>
+                    </div>
+
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium mb-2" data-lang="role">역할</label>
+                            <div class="bg-gray-100 dark:bg-gray-700 rounded-lg px-4 py-2">
+                                <span id="inviteRole" class="font-semibold"></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 로그인/회원가입 폼 -->
+                    <div id="authSection" class="space-y-4">
+                        <h3 class="text-lg font-semibold" data-lang="create_or_login">계정 만들기 또는 로그인</h3>
+                        <form id="joinForm" class="space-y-4">
+                            <div>
+                                <label class="block text-sm font-medium mb-2" data-lang="email">이메일</label>
+                                <input type="email" id="joinEmail" class="w-full px-4 py-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600" required>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium mb-2" data-lang="password">비밀번호</label>
+                                <input type="password" id="joinPassword" class="w-full px-4 py-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600" required>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium mb-2" data-lang="name">이름</label>
+                                <input type="text" id="joinName" class="w-full px-4 py-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600" placeholder="홍길동" data-lang-placeholder="name_placeholder">
+                            </div>
+                            <button type="submit" class="w-full bg-gradient-to-r from-pink-500 to-blue-500 text-white py-3 rounded-lg font-semibold hover:shadow-lg transition" data-lang="accept_invitation">
+                                초대 수락하기
+                            </button>
+                        </form>
+                        <p class="text-sm text-center text-gray-600 dark:text-gray-400" data-lang="already_have_account">
+                            이미 계정이 있으신가요? 이메일과 비밀번호로 로그인하세요
+                        </p>
+                    </div>
+                </div>
+
+                <!-- 로딩 상태 -->
+                <div id="loading" class="text-center py-8">
+                    <i class="fas fa-spinner fa-spin text-4xl text-gray-400 mb-4"></i>
+                    <p class="text-gray-600 dark:text-gray-400" data-lang="checking_invitation">초대 정보를 확인하고 있습니다...</p>
+                </div>
+
+                <!-- 오류 메시지 -->
+                <div id="errorMessage" class="hidden">
+                    <div class="text-center py-8">
+                        <i class="fas fa-exclamation-circle text-6xl text-red-500 mb-4"></i>
+                        <h3 class="text-xl font-bold mb-2" data-lang="invitation_not_found">초대를 찾을 수 없습니다</h3>
+                        <p class="text-gray-600 dark:text-gray-400 mb-6" data-lang="invitation_expired">
+                            초대 링크가 만료되었거나 잘못된 링크입니다
+                        </p>
+                        <a href="index.html" class="inline-block bg-gray-500 text-white px-6 py-2 rounded-lg hover:bg-gray-600 transition" data-lang="back_to_main">
+                            메인으로 돌아가기
+                        </a>
+                    </div>
+                </div>
+
+                <!-- 성공 메시지 -->
+                <div id="successMessage" class="hidden">
+                    <div class="text-center py-8">
+                        <i class="fas fa-check-circle text-6xl text-green-500 mb-4"></i>
+                        <h3 class="text-xl font-bold mb-2" data-lang="welcome">환영합니다!</h3>
+                        <p class="text-gray-600 dark:text-gray-400 mb-6" data-lang="join_success">
+                            가족 그룹에 성공적으로 참여했습니다
+                        </p>
+                        <a href="index.html" class="inline-block bg-gradient-to-r from-pink-500 to-blue-500 text-white px-6 py-3 rounded-lg font-semibold hover:shadow-lg transition" data-lang="view_memories">
+                            추억 보러 가기
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- 알림 토스트 -->
+    <div id="toast" class="fixed bottom-4 right-4 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg transform translate-y-full transition-transform duration-300 z-50">
+        <span id="toastMessage">메시지</span>
+    </div>
+
+    <!-- JavaScript -->
+    <script src="js/supabase.js"></script>
+    <script>
+        // 초대 처리 로직
+        class JoinFamily {
+            constructor() {
+                this.token = null;
+                this.invitation = null;
+                this.init();
+            }
+
+            async init() {
+                // URL에서 토큰 추출
+                const urlParams = new URLSearchParams(window.location.search);
+                this.token = urlParams.get('token');
+
+                if (!this.token) {
+                    this.showError();
+                    return;
+                }
+
+                await this.loadInvitation();
+            }
+
+            async loadInvitation() {
+                try {
+                    // 초대 정보 조회
+                    const { data: invitation, error } = await supabase
+                        .from('family_invitations')
+                        .select(`
+                            *,
+                            family_groups(*),
+                            profiles!invited_by(full_name, username)
+                        `)
+                        .eq('token', this.token)
+                        .eq('status', 'pending')
+                        .single();
+
+                    if (error || !invitation) {
+                        this.showError();
+                        return;
+                    }
+
+                    // 만료 확인
+                    if (new Date(invitation.expires_at) < new Date()) {
+                        this.showError();
+                        return;
+                    }
+
+                    this.invitation = invitation;
+                    this.displayInvitation();
+
+                } catch (error) {
+                    console.error('초대 로드 오류:', error);
+                    this.showError();
+                }
+            }
+
+            displayInvitation() {
+                document.getElementById('loading').classList.add('hidden');
+                document.getElementById('inviteInfo').classList.remove('hidden');
+
+                // 초대 정보 표시
+                const inviterName = this.invitation.profiles?.full_name || 
+                                   this.invitation.profiles?.username || 
+                                   '가족';
+                document.getElementById('inviterName').textContent = inviterName;
+                document.getElementById('familyName').textContent = this.invitation.family_groups.name;
+                document.getElementById('inviteRole').textContent = this.getRoleLabel(this.invitation.role);
+                document.getElementById('joinEmail').value = this.invitation.email;
+
+                // 폼 이벤트 리스너
+                document.getElementById('joinForm').addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    this.acceptInvitation();
+                });
+            }
+
+            async acceptInvitation() {
+                const email = document.getElementById('joinEmail').value;
+                const password = document.getElementById('joinPassword').value;
+                const fullName = document.getElementById('joinName').value;
+
+                try {
+                    // 기존 사용자인지 확인 (로그인 시도)
+                    let { data: authData, error: authError } = await supabase.auth.signInWithPassword({
+                        email,
+                        password
+                    });
+
+                    // 새 사용자인 경우 회원가입
+                    if (authError) {
+                        const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
+                            email,
+                            password
+                        });
+
+                        if (signUpError) throw signUpError;
+                        authData = signUpData;
+                    }
+
+                    if (!authData.user) {
+                        throw new Error('인증에 실패했습니다');
+                    }
+
+                    // 프로필 업데이트
+                    if (fullName) {
+                        await supabase
+                            .from('profiles')
+                            .upsert({
+                                id: authData.user.id,
+                                full_name: fullName,
+                                role: this.invitation.role
+                            });
+                    }
+
+                    // 가족 구성원으로 추가
+                    const { error: memberError } = await supabase
+                        .from('family_members')
+                        .insert({
+                            family_id: this.invitation.family_id,
+                            user_id: authData.user.id,
+                            role: this.invitation.role
+                        });
+
+                    if (memberError) throw memberError;
+
+                    // 초대 상태 업데이트
+                    await supabase
+                        .from('family_invitations')
+                        .update({ status: 'accepted' })
+                        .eq('id', this.invitation.id);
+
+                    // 성공 메시지 표시
+                    this.showSuccess();
+
+                } catch (error) {
+                    console.error('초대 수락 오류:', error);
+                    this.showToast(error.message || '초대 수락에 실패했습니다', 'error');
+                }
+            }
+
+            showError() {
+                document.getElementById('loading').classList.add('hidden');
+                document.getElementById('errorMessage').classList.remove('hidden');
+            }
+
+            showSuccess() {
+                document.getElementById('inviteInfo').classList.add('hidden');
+                document.getElementById('successMessage').classList.remove('hidden');
+            }
+
+            getRoleLabel(role) {
+                const labels = {
+                    'parent': `👑 ${translations[currentLang]?.parent_role || '부모'}`,
+                    'family': `💝 ${translations[currentLang]?.family_role || '가족'}`,
+                    'viewer': `👀 ${translations[currentLang]?.viewer_role || '관람객'}`
+                };
+                return labels[role] || role;
+            }
+
+            showToast(message, type = 'success') {
+                const toast = document.getElementById('toast');
+                const toastMessage = document.getElementById('toastMessage');
+                
+                toastMessage.textContent = message;
+                toast.className = `fixed bottom-4 right-4 px-6 py-3 rounded-lg shadow-lg transform transition-transform duration-300 z-50 ${
+                    type === 'error' ? 'bg-red-500' : 'bg-green-500'
+                } text-white`;
+                
+                setTimeout(() => {
+                    toast.style.transform = 'translateY(0)';
+                }, 100);
+
+                setTimeout(() => {
+                    toast.style.transform = 'translateY(100%)';
+                }, 3000);
+            }
+        }
+
+        // 페이지 로드시 초기화
+        document.addEventListener('DOMContentLoaded', () => {
+            // 언어 초기화
+            initLanguage();
+            
+            new JoinFamily();
+        });
+    </script>
+    
+    <!-- AOS 초기화 -->
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+    <script>
+        AOS.init({
+            duration: 800,
+            once: true
+        });
+    </script>
+</body>
+</html>

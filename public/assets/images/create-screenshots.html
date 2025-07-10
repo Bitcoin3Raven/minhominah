@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PWA 스크린샷 생성기</title>
+</head>
+<body>
+    <h1>민호민아 PWA 스크린샷 생성</h1>
+    <p>이 페이지를 브라우저에서 열어 스크린샷을 다운로드하세요.</p>
+    
+    <div id="screenshots"></div>
+    
+    <script>
+        // 스크린샷 1 - 메인 화면
+        const canvas1 = document.createElement('canvas');
+        canvas1.width = 1280;
+        canvas1.height = 720;
+        const ctx1 = canvas1.getContext('2d');
+        
+        // 배경 그라데이션
+        const gradient1 = ctx1.createLinearGradient(0, 0, 1280, 720);
+        gradient1.addColorStop(0, '#FFE0E6');
+        gradient1.addColorStop(0.5, '#FFF5F7');
+        gradient1.addColorStop(1, '#E6F3FF');
+        ctx1.fillStyle = gradient1;
+        ctx1.fillRect(0, 0, 1280, 720);
+        
+        // 헤더
+        ctx1.fillStyle = 'rgba(255, 255, 255, 0.95)';
+        ctx1.fillRect(0, 0, 1280, 80);
+        ctx1.fillStyle = '#333';
+        ctx1.font = 'bold 32px Arial';
+        ctx1.textAlign = 'left';
+        ctx1.fillText('민호민아 성장앨범', 40, 50);
+        
+        // 메인 콘텐츠 - 그리드 레이아웃 시뮬레이션
+        const cardWidth = 350;
+        const cardHeight = 400;
+        const gap = 30;
+        const startX = 100;
+        const startY = 120;
+        
+        for (let i = 0; i < 6; i++) {
+            const x = startX + (i % 3) * (cardWidth + gap);
+            const y = startY + Math.floor(i / 3) * (cardHeight + gap);
+            
+            // 카드 배경
+            ctx1.fillStyle = 'white';
+            ctx1.shadowColor = 'rgba(0, 0, 0, 0.1)';
+            ctx1.shadowBlur = 10;
+            ctx1.fillRect(x, y, cardWidth, cardHeight);
+            ctx1.shadowBlur = 0;
+            
+            // 이미지 영역
+            ctx1.fillStyle = '#E5E7EB';
+            ctx1.fillRect(x, y, cardWidth, 250);
+            
+            // 플레이스홀더 이미지 아이콘
+            ctx1.fillStyle = '#9CA3AF';
+            ctx1.font = '48px Arial';
+            ctx1.textAlign = 'center';
+            ctx1.fillText('📷', x + cardWidth/2, y + 125);
+            
+            // 제목
+            ctx1.fillStyle = '#333';
+            ctx1.font = 'bold 20px Arial';
+            ctx1.textAlign = 'left';
+            ctx1.fillText(`추억 ${i + 1}`, x + 20, y + 290);
+            
+            // 날짜
+            ctx1.fillStyle = '#666';
+            ctx1.font = '16px Arial';
+            ctx1.fillText('2025년 1월', x + 20, y + 320);
+            
+            // 하트 아이콘
+            ctx1.fillStyle = '#FF69B4';
+            ctx1.font = '20px Arial';
+            ctx1.textAlign = 'right';
+            ctx1.fillText('♥ 12', x + cardWidth - 20, y + 320);
+        }
+        
+        // 다운로드 링크
+        canvas1.toBlob(blob => {
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = 'screenshot1.png';
+            link.textContent = 'Download Screenshot 1 (메인 화면)';
+            link.style.display = 'block';
+            link.style.margin = '10px';
+            document.getElementById('screenshots').appendChild(link);
+            
+            const img = document.createElement('img');
+            img.src = url;
+            img.style.width = '640px';
+            img.style.margin = '10px';
+            img.style.border = '1px solid #ccc';
+            document.getElementById('screenshots').appendChild(img);
+        });
+        
+        // 스크린샷 2 - 추억 추가 화면
+        const canvas2 = document.createElement('canvas');
+        canvas2.width = 1280;
+        canvas2.height = 720;
+        const ctx2 = canvas2.getContext('2d');
+        
+        // 배경
+        const gradient2 = ctx2.createLinearGradient(0, 0, 1280, 720);
+        gradient2.addColorStop(0, '#FFE0E6');
+        gradient2.addColorStop(0.5, '#FFF5F7');
+        gradient2.addColorStop(1, '#E6F3FF');
+        ctx2.fillStyle = gradient2;
+        ctx2.fillRect(0, 0, 1280, 720);
+        
+        // 폼 컨테이너
+        ctx2.fillStyle = 'white';
+        ctx2.shadowColor = 'rgba(0, 0, 0, 0.1)';
+        ctx2.shadowBlur = 20;
+        ctx2.fillRect(340, 80, 600, 560);
+        ctx2.shadowBlur = 0;
+        
+        // 제목
+        ctx2.fillStyle = '#333';
+        ctx2.font = 'bold 36px Arial';
+        ctx2.textAlign = 'center';
+        ctx2.fillText('새로운 추억 추가', 640, 140);
+        
+        // 입력 필드들
+        const fields = [
+            { label: '제목', y: 200 },
+            { label: '날짜', y: 280 },
+            { label: '장소', y: 360 },
+            { label: '설명', y: 440 }
+        ];
+        
+        fields.forEach(field => {
+            // 레이블
+            ctx2.fillStyle = '#666';
+            ctx2.font = '18px Arial';
+            ctx2.textAlign = 'left';
+            ctx2.fillText(field.label, 400, field.y);
+            
+            // 입력 필드
+            ctx2.strokeStyle = '#E5E7EB';
+            ctx2.lineWidth = 2;
+            ctx2.strokeRect(400, field.y + 10, 480, 40);
+        });
+        
+        // 사진 업로드 영역
+        ctx2.fillStyle = '#F3F4F6';
+        ctx2.fillRect(400, 520, 480, 80);
+        ctx2.strokeStyle = '#E5E7EB';
+        ctx2.setLineDash([5, 5]);
+        ctx2.strokeRect(400, 520, 480, 80);
+        ctx2.setLineDash([]);
+        
+        ctx2.fillStyle = '#9CA3AF';
+        ctx2.font = '16px Arial';
+        ctx2.textAlign = 'center';
+        ctx2.fillText('📸 사진을 드래그하거나 클릭하여 업로드', 640, 560);
+        
+        // 다운로드 링크
+        canvas2.toBlob(blob => {
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = 'screenshot2.png';
+            link.textContent = 'Download Screenshot 2 (추억 추가)';
+            link.style.display = 'block';
+            link.style.margin = '10px';
+            document.getElementById('screenshots').appendChild(link);
+            
+            const img = document.createElement('img');
+            img.src = url;
+            img.style.width = '640px';
+            img.style.margin = '10px';
+            img.style.border = '1px solid #ccc';
+            document.getElementById('screenshots').appendChild(img);
+        });
+    </script>
+</body>
+</html>
