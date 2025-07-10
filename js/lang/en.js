@@ -27,6 +27,25 @@ const en = {
     dark_mode: "Dark Mode",
     light_mode: "Light Mode",
     
+    // 로그인/회원가입
+    auth_login: "Login",
+    auth_signup: "Sign Up",
+    auth_email: "Email",
+    auth_password: "Password",
+    auth_name: "Name",
+    auth_email_placeholder: "Enter your email",
+    auth_password_placeholder: "Enter your password",
+    auth_name_placeholder: "Enter your name",
+    auth_no_account: "Don't have an account?",
+    auth_have_account: "Already have an account?",
+    auth_login_success: "Login successful!",
+    auth_signup_success: "Sign up successful! Please check your email for verification.",
+    auth_email_not_verified: "Email verification required. Please check your inbox.",
+    auth_login_failed: "Login failed",
+    auth_signup_failed: "Sign up failed",
+    auth_fill_all_fields: "Please fill in all fields.",
+    auth_email_spam_notice: "If you don't see the email:\n1. Check your spam folder\n2. Try logging in later\n3. Contact admin if issues persist",
+    
     // index.html - 메인 페이지
     hero_title: "Minho & Minah",
     hero_subtitle: "Precious Moments",

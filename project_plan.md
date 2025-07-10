@@ -159,6 +159,15 @@
   - Vercel 커스텀 도메인 설정 가이드 작성
   - docs/DOMAIN_SETUP_GUIDE.md 문서 생성
   - DNS 설정 방법 안내 (A 레코드, CNAME 설정)
+- dotname DNS 설정 진행:
+  - 기존 파킹 페이지 설정 확인 (parking3.dnstool.net)
+  - A 레코드 추가 필요: @ → 76.76.21.21
+  - CNAME 레코드 수정 필요: www → cname.vercel-dns.com
+  - 파킹 페이지 CNAME 삭제 필요
+- GitHub Desktop 설정:
+  - GitHub Desktop 설치 완료
+  - 기존 로컬 리포지토리 추가 방법 안내
+  - File → Add Local Repository로 C:\Users\thaih\Documents\minhominah 추가
 
 ### 2025-01-10 (이전 작업)
 - 프로젝트 계획 문서 생성

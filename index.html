@@ -617,7 +617,7 @@
                 
                 <!-- 로그인/회원가입 버튼 -->
                 <button onclick="showLoginForm()" class="px-3 sm:px-4 py-2 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg font-semibold hover:bg-gray-100 dark:hover:bg-gray-700 transition text-sm sm:text-base">
-                    <i class="fas fa-user mr-1 sm:mr-2"></i><span class="hidden sm:inline">로그인</span>
+                    <i class="fas fa-user mr-1 sm:mr-2"></i><span class="hidden sm:inline" data-lang="auth_login">로그인</span>
                 </button>
                 
                 <!-- 다크모드 토글 버튼 -->
@@ -2456,7 +2456,7 @@
         <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-md w-full mx-4">
             <div class="p-6">
                 <div class="flex justify-between items-center mb-4">
-                    <h2 id="authModalTitle" class="text-2xl font-bold text-gray-800 dark:text-gray-200">로그인</h2>
+                    <h2 id="authModalTitle" class="text-2xl font-bold text-gray-800 dark:text-gray-200" data-lang="auth_login">로그인</h2>
                     <button onclick="closeAuthModal()" class="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200">
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
@@ -2467,25 +2467,25 @@
                 <!-- 로그인 폼 -->
                 <div id="loginForm" class="space-y-4">
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">이메일</label>
-                        <input type="email" id="loginEmail" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white" placeholder="이메일을 입력하세요">
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2" data-lang="auth_email">이메일</label>
+                        <input type="email" id="loginEmail" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white" placeholder="이메일을 입력하세요" data-lang-placeholder="auth_email_placeholder">
                     </div>
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">비밀번호</label>
-                        <input type="password" id="loginPassword" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white" placeholder="비밀번호를 입력하세요">
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2" data-lang="auth_password">비밀번호</label>
+                        <input type="password" id="loginPassword" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white" placeholder="비밀번호를 입력하세요" data-lang-placeholder="auth_password_placeholder">
                     </div>
-                    <button onclick="handleLogin()" class="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 transition duration-300">로그인</button>
+                    <button onclick="handleLogin()" class="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 transition duration-300" data-lang="auth_login">로그인</button>
                     <p class="text-center text-sm text-gray-600 dark:text-gray-400">
-                        계정이 없으신가요? 
-                        <a href="#" onclick="showSignupForm()" class="text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300">회원가입</a>
+                        <span data-lang="auth_no_account">계정이 없으신가요?</span> 
+                        <a href="#" onclick="showSignupForm()" class="text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300" data-lang="auth_signup">회원가입</a>
                     </p>
                 </div>
                 
                 <!-- 회원가입 폼 -->
                 <div id="signupForm" class="space-y-4 hidden">
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">이름</label>
-                        <input type="text" id="signupName" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white" placeholder="이름을 입력하세요">
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2" data-lang="auth_name">이름</label>
+                        <input type="text" id="signupName" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white" placeholder="이름을 입력하세요" data-lang-placeholder="auth_name_placeholder">
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">이메일</label>
@@ -2495,10 +2495,10 @@
                         <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">비밀번호</label>
                         <input type="password" id="signupPassword" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white" placeholder="비밀번호를 입력하세요">
                     </div>
-                    <button onclick="handleSignup()" class="w-full bg-green-600 text-white py-2 px-4 rounded-md hover:bg-green-700 transition duration-300">회원가입</button>
+                    <button onclick="handleSignup()" class="w-full bg-green-600 text-white py-2 px-4 rounded-md hover:bg-green-700 transition duration-300" data-lang="auth_signup">회원가입</button>
                     <p class="text-center text-sm text-gray-600 dark:text-gray-400">
-                        이미 계정이 있으신가요? 
-                        <a href="#" onclick="showLoginForm()" class="text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300">로그인</a>
+                        <span data-lang="auth_have_account">이미 계정이 있으신가요?</span> 
+                        <a href="#" onclick="showLoginForm()" class="text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300" data-lang="auth_login">로그인</a>
                     </p>
                 </div>
             </div>
@@ -2506,6 +2506,33 @@
     </div>
     
     <script>
+        // 번역 헬퍼 함수
+        function getTranslation(key) {
+            const currentLang = localStorage.getItem('selectedLanguage') || 'ko';
+            
+            if (currentLang === 'ko') {
+                // 한국어 기본값
+                const koTranslations = {
+                    auth_login: '로그인',
+                    auth_signup: '회원가입',
+                    auth_fill_all_fields: '모든 필드를 입력해주세요.',
+                    auth_login_success: '로그인 성공!',
+                    auth_signup_success: '회원가입 성공! 이메일 인증 링크를 발송했습니다.',
+                    auth_email_not_verified: '아직 이메일 인증이 완료되지 않았습니다.\n일부 기능이 제한될 수 있습니다.',
+                    auth_login_failed: '로그인 실패',
+                    auth_signup_failed: '회원가입 실패',
+                    auth_email_spam_notice: '이메일이 오지 않는 경우:\n1. 스팸 폴더를 확인해주세요\n2. 잠시 후 다시 로그인을 시도해주세요\n3. 계속 문제가 있다면 관리자에게 문의해주세요'
+                };
+                return koTranslations[key] || key;
+            } else if (currentLang === 'en' && typeof en !== 'undefined') {
+                return en[key] || key;
+            } else if (currentLang === 'th' && typeof th !== 'undefined') {
+                return th[key] || key;
+            }
+            
+            return key;
+        }
+        
         // 인증 모달 함수들
         function showAuthModal() {
             document.getElementById('authModal').classList.remove('hidden');
@@ -2516,14 +2543,20 @@
         }
         
         function showLoginForm() {
-            document.getElementById('authModalTitle').textContent = '로그인';
+            const title = document.getElementById('authModalTitle');
+            title.setAttribute('data-lang', 'auth_login');
+            title.textContent = getTranslation('auth_login');
+            
             document.getElementById('loginForm').classList.remove('hidden');
             document.getElementById('signupForm').classList.add('hidden');
             showAuthModal();
         }
         
         function showSignupForm() {
-            document.getElementById('authModalTitle').textContent = '회원가입';
+            const title = document.getElementById('authModalTitle');
+            title.setAttribute('data-lang', 'auth_signup');
+            title.textContent = getTranslation('auth_signup');
+            
             document.getElementById('loginForm').classList.add('hidden');
             document.getElementById('signupForm').classList.remove('hidden');
         }
@@ -2533,7 +2566,7 @@
             const password = document.getElementById('loginPassword').value;
             
             if (!email || !password) {
-                alert('이메일과 비밀번호를 입력해주세요.');
+                alert(getTranslation('auth_fill_all_fields'));
                 return;
             }
             
@@ -2547,18 +2580,18 @@
                 
                 // 이메일 인증 여부 확인
                 if (data.user && !data.user.email_confirmed_at) {
-                    alert('로그인 성공!\n\n아직 이메일 인증이 완료되지 않았습니다.\n일부 기능이 제한될 수 있습니다.');
+                    alert(getTranslation('auth_login_success') + '\n\n' + getTranslation('auth_email_not_verified'));
                 } else {
-                    alert('로그인 성공!');
+                    alert(getTranslation('auth_login_success'));
                 }
                 
                 closeAuthModal();
                 location.reload();
             } catch (error) {
                 if (error.message.includes('Email not confirmed')) {
-                    alert('이메일 인증이 필요합니다.\n받은 이메일의 인증 링크를 클릭해주세요.\n\n이메일이 오지 않았다면 스팸 폴더를 확인해주세요.');
+                    alert(getTranslation('auth_email_not_verified'));
                 } else {
-                    alert('로그인 실패: ' + error.message);
+                    alert(getTranslation('auth_login_failed') + ': ' + error.message);
                 }
             }
         }
@@ -2569,7 +2602,7 @@
             const password = document.getElementById('signupPassword').value;
             
             if (!name || !email || !password) {
-                alert('모든 필드를 입력해주세요.');
+                alert(getTranslation('auth_fill_all_fields'));
                 return;
             }
             
@@ -2589,16 +2622,16 @@
                 console.log('회원가입 응답:', data);
                 
                 if (data.user && !data.session) {
-                    alert('회원가입 성공! 이메일 인증 링크를 발송했습니다.\n\n이메일이 오지 않는 경우:\n1. 스팸 폴더를 확인해주세요\n2. 잠시 후 다시 로그인을 시도해주세요\n3. 계속 문제가 있다면 관리자에게 문의해주세요');
+                    alert(getTranslation('auth_signup_success') + '\n\n' + getTranslation('auth_email_spam_notice'));
                 } else if (data.session) {
-                    alert('회원가입 성공! 자동으로 로그인되었습니다.');
+                    alert(getTranslation('auth_login_success'));
                     closeAuthModal();
                     location.reload();
                     return;
                 }
                 showLoginForm();
             } catch (error) {
-                alert('회원가입 실패: ' + error.message);
+                alert(getTranslation('auth_signup_failed') + ': ' + error.message);
             }
         }
         

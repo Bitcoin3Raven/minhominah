@@ -27,6 +27,25 @@ const th = {
     dark_mode: "โหมดมืด",
     light_mode: "โหมดสว่าง",
     
+    // 로그인/회원가입
+    auth_login: "เข้าสู่ระบบ",
+    auth_signup: "ลงทะเบียน",
+    auth_email: "อีเมล",
+    auth_password: "รหัสผ่าน",
+    auth_name: "ชื่อ",
+    auth_email_placeholder: "กรุณากรอกอีเมล",
+    auth_password_placeholder: "กรุณากรอกรหัสผ่าน",
+    auth_name_placeholder: "กรุณากรอกชื่อ",
+    auth_no_account: "ยังไม่มีบัญชี?",
+    auth_have_account: "มีบัญชีอยู่แล้ว?",
+    auth_login_success: "เข้าสู่ระบบสำเร็จ!",
+    auth_signup_success: "ลงทะเบียนสำเร็จ! กรุณาตรวจสอบอีเมลเพื่อยืนยัน",
+    auth_email_not_verified: "ต้องยืนยันอีเมล กรุณาตรวจสอบกล่องขาเข้า",
+    auth_login_failed: "เข้าสู่ระบบไม่สำเร็จ",
+    auth_signup_failed: "ลงทะเบียนไม่สำเร็จ",
+    auth_fill_all_fields: "กรุณากรอกข้อมูลให้ครบถ้วน",
+    auth_email_spam_notice: "หากไม่เห็นอีเมล:\n1. ตรวจสอบโฟลเดอร์สแปม\n2. ลองเข้าสู่ระบบใหม่ภายหลัง\n3. ติดต่อผู้ดูแลหากยังมีปัญหา",
+    
     // index.html - 메인 페이지
     hero_title: "มินโฮและมินอา",
     hero_subtitle: "ช่วงเวลาที่มีค่า",
