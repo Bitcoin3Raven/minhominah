@@ -34,7 +34,7 @@
    - SQL_EXECUTION_GUIDE.md 업데이트
 
 ### 🔄 즉시 필요한 작업
-1. **도메인 연결 설정**
+1. **도메인 연결 설정** (진행 중)
    - Vercel에서 "Add Domain" 클릭하여 minhominah.com 추가
    - dotname에서 DNS 설정 (A 레코드: 76.76.21.21)
    - SSL 인증서 자동 발급 대기
@@ -46,6 +46,11 @@
 3. **Supabase Dashboard에서 보안 설정**
    - SQL Editor에서 database-security-patch.sql 실행
    - Authentication 설정에서 OTP 시간 및 비밀번호 보호 설정
+
+4. **로그인 기능 개선** (추가 필요)
+   - 모든 페이지에 auth.js 적용
+   - 로그인하지 않은 사용자의 접근 제한
+   - 추억 로드 시 인증 확인
 
 ### 📌 프로젝트 접속 정보
 - **로컬**: C:\Users\thaih\Documents\minhominah
@@ -77,7 +82,12 @@
   - share.html - 공유 페이지 ✅
   - join-family.html - 가족 초대 페이지 ✅
 
-### 🟡 다음 작업: Supabase 보안 강화
+### 🟡 다음 작업: Supabase 보안 강화 및 로그인 기능 개선
+- [x] 로그인 상태 관리 기능 구현 ✅ (2025-01-10)
+  - [x] auth.js 모듈로 인증 상태 중앙 관리
+  - [x] 로그인 상태에 따른 헤더 UI 동적 변경
+  - [x] 사용자 드롭다운 메뉴 구현
+  - [x] 인증 관련 번역 추가 (한/영/태)
 - [ ] Supabase Dashboard에서 보안 설정 적용
   - [ ] SQL Editor에서 database-security-patch.sql 실행
   - [ ] Auth Settings에서 OTP 만료 시간 300초로 변경
@@ -168,13 +178,14 @@
   - GitHub Desktop 설치 완료
   - 기존 로컬 리포지토리 추가 방법 안내
   - File → Add Local Repository로 C:\Users\thaih\Documents\minhominah 추가
-- 로그인 상태 관리 기능 구현:
+- 로그인 상태 관리 기능 구현: ✅
   - auth.js 파일 생성 (인증 상태 관리 모듈)
   - 로그인 상태에 따른 헤더 UI 동적 변경
   - 사용자 드롭다운 메뉴 추가 (프로필, 설정, 로그아웃)
   - 로그인 후 페이지 새로고침 대신 UI 업데이트
   - 한국어, 영어, 태국어 번역 키 추가
   - 인증 상태 변경 리스너 구현
+  - GitHub 커밋 및 푸시 완료
 
 ### 2025-01-10 (이전 작업)
 - 프로젝트 계획 문서 생성
