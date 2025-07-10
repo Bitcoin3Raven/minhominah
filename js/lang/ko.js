@@ -420,6 +420,17 @@ const ko = {
     most_popular_tag: "가장 인기 있는 태그",
     chart_weekday_memories: "요일별 추억 등록",
     chart_media_type: "미디어 타입 분포"
+    
+    // 인증 관련
+    auth_login: \"로그인\",
+    auth_logout: \"로그아웃\",
+    auth_signup: \"회원가입\",
+    auth_login_success: \"로그인 성공!\",
+    auth_login_failed: \"로그인 실패\",
+    auth_signup_success: \"회원가입이 완료되었습니다! 이메일을 확인해주세요.\",
+    auth_email_not_verified: \"이메일 인증이 필요합니다. 이메일을 확인해주세요.\",
+    auth_fill_all_fields: \"모든 필드를 입력해주세요.\",
+    user_settings: \"설정\",
 };
 
 // 전역 변수로 노출

@@ -519,6 +519,17 @@ const th = {
     chart_tag_statistics: "สถิติแท็ก",
     person_memories_trend: "แนวโน้มความทรงจำตามบุคคล",
     top_10_tags: "แท็กยอดนิยม 10 อันดับ",
+    
+    // การยืนยันตัวตน
+    auth_login: "เข้าสู่ระบบ",
+    auth_logout: "ออกจากระบบ",
+    auth_signup: "สมัครสมาชิก",
+    auth_login_success: "เข้าสู่ระบบสำเร็จ!",
+    auth_login_failed: "เข้าสู่ระบบไม่สำเร็จ",
+    auth_signup_success: "สมัครสมาชิกเรียบร้อย! กรุณาตรวจสอบอีเมลของคุณ",
+    auth_email_not_verified: "ต้องยืนยันอีเมล กรุณาตรวจสอบอีเมลของคุณ",
+    auth_fill_all_fields: "กรุณากรอกข้อมูลให้ครบทุกช่อง",
+    user_settings: "การตั้งค่า",
     additional_stats: "ข้อมูลสถิติเพิ่มเติม",
     most_active_month: "เดือนที่มีกิจกรรมมากที่สุด",
     avg_monthly_memories: "ความทรงจำเฉลี่ยต่อเดือน",

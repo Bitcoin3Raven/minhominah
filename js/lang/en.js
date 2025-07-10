@@ -519,6 +519,17 @@ const en = {
     most_popular_tag: "Most Popular Tag",
     chart_weekday_memories: "Memories by Weekday",
     chart_media_type: "Media Type Distribution"
+    
+    // Authentication
+    auth_login: "Login",
+    auth_logout: "Logout",
+    auth_signup: "Sign Up",
+    auth_login_success: "Login successful!",
+    auth_login_failed: "Login failed",
+    auth_signup_success: "Sign up complete! Please check your email.",
+    auth_email_not_verified: "Email verification required. Please check your email.",
+    auth_fill_all_fields: "Please fill in all fields.",
+    user_settings: "Settings",
 };
 
 // 전역 변수로 노출
