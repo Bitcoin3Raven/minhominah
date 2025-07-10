@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>댓글 시스템 상태 확인 - 민호민아 성장앨범</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Supabase Client -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    
+    <!-- Supabase 설정 -->
+    <script src="../js/supabase.js"></script>
+    
+    <style>
+        .status-icon { font-size: 1.2rem; }
+        .ok { color: #10b981; }
+        .error { color: #ef4444; }
+        .warning { color: #f59e0b; }
+    </style>
+</head>
+<body class="bg-gray-100 p-8">
+    <div class="max-w-4xl mx-auto">
+        <h1 class="text-3xl font-bold mb-8">댓글 시스템 상태 확인</h1>
+        
+        <!-- 연결 상태 -->
+        <div class="bg-white rounded-lg shadow p-6 mb-6">
+            <h2 class="text-xl font-semibold mb-4">Supabase 연결 상태</h2>
+            <div id="connectionStatus" class="text-gray-600">
+                <span class="status-icon">⏳</span> 연결 확인 중...
+            </div>
+        </div>
+        
+        <!-- 테이블 상태 -->
+        <div class="bg-white rounded-lg shadow p-6 mb-6">
+            <h2 class="text-xl font-semibold mb-4">댓글 시스템 테이블</h2>
+            <div id="tableStatus" class="space-y-2">
+                <div class="text-gray-600">
+                    <span class="status-icon">⏳</span> 테이블 확인 중...
+                </div>
+            </div>
+        </div>
+        
+        <!-- 실시간 기능 상태 -->
+        <div class="bg-white rounded-lg shadow p-6 mb-6">
+            <h2 class="text-xl font-semibold mb-4">실시간 기능 상태</h2>
+            <div id="realtimeStatus" class="space-y-2">
+                <div class="text-gray-600">
+                    <span class="status-icon">⏳</span> 실시간 기능 확인 중...
+                </div>
+            </div>
+        </div>
+        
+        <!-- 함수 및 트리거 상태 -->
+        <div class="bg-white rounded-lg shadow p-6 mb-6">
+            <h2 class="text-xl font-semibold mb-4">필수 함수 상태</h2>
+            <div id="functionStatus" class="space-y-2">
+                <div class="text-gray-600">
+                    <span class="status-icon">⏳</span> 함수 확인 중...
+                </div>
+            </div>
+        </div>
+        
+        <!-- 전체 상태 요약 -->
+        <div class="bg-white rounded-lg shadow p-6 mb-6">
+            <h2 class="text-xl font-semibold mb-4">전체 상태 요약</h2>
+            <div id="summaryStatus" class="space-y-2">
+                <div class="text-gray-600">
+                    <span class="status-icon">⏳</span> 분석 중...
+                </div>
+            </div>
+        </div>
+        
+        <!-- 액션 버튼 -->
+        <div class="bg-white rounded-lg shadow p-6">
+            <h2 class="text-xl font-semibold mb-4">빠른 해결</h2>
+            <div class="space-y-4">
+                <button onclick="showQuickInstall()" 
+                        class="px-6 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 w-full">
+                    🚀 간편 설치 SQL 보기
+                </button>
+                <button onclick="checkStatus()" 
+                        class="px-6 py-3 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400 w-full">
+                    🔄 상태 다시 확인
+                </button>
+            </div>
+        </div>
+        
+        <!-- SQL 표시 모달 -->
+        <div id="sqlModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden">
+            <div class="flex items-center justify-center min-h-screen p-4">
+                <div class="bg-white rounded-lg shadow-xl max-w-3xl w-full max-h-[80vh] overflow-hidden">
+                    <div class="p-6 border-b">
+                        <h3 class="text-xl font-semibold">간편 설치 SQL</h3>
+                    </div>
+                    <div class="p-6 overflow-y-auto max-h-[60vh]">
+                        <p class="mb-4 text-sm text-gray-600">
+                            아래 SQL을 복사하여 Supabase SQL Editor에서 실행하세요:
+                        </p>
+                        <pre class="bg-gray-100 p-4 rounded text-sm overflow-x-auto">
+-- 댓글 시스템 간편 설치
+-- 이 스크립트를 Supabase SQL Editor에서 실행하세요
+
+-- 1. 누락된 테이블 생성
+CREATE TABLE IF NOT EXISTS comment_likes (
+    id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+    comment_id UUID NOT NULL REFERENCES comments(id) ON DELETE CASCADE,
+    user_id UUID NOT NULL REFERENCES auth.users(id),
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    UNIQUE(comment_id, user_id)
+);
+
+CREATE TABLE IF NOT EXISTS comment_notifications (
+    id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+    recipient_user_id UUID NOT NULL REFERENCES auth.users(id),
+    comment_id UUID NOT NULL REFERENCES comments(id) ON DELETE CASCADE,
+    type TEXT CHECK (type IN ('new_comment', 'reply', 'like')),
+    is_read BOOLEAN DEFAULT FALSE,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- 2. RLS 활성화
+ALTER TABLE comment_likes ENABLE ROW LEVEL SECURITY;
+ALTER TABLE comment_notifications ENABLE ROW LEVEL SECURITY;
+
+-- 3. RLS 정책
+CREATE POLICY "Anyone can view likes" ON comment_likes FOR SELECT USING (true);
+CREATE POLICY "Users can manage their likes" ON comment_likes FOR ALL USING (auth.uid() = user_id);
+CREATE POLICY "Users view own notifications" ON comment_notifications FOR SELECT USING (auth.uid() = recipient_user_id);
+CREATE POLICY "Users update own notifications" ON comment_notifications FOR UPDATE USING (auth.uid() = recipient_user_id);
+
+-- 4. 댓글 트리 함수
+CREATE OR REPLACE FUNCTION get_comments_tree(p_memory_id UUID)
+RETURNS JSON AS $$
+DECLARE
+    result JSON;
+BEGIN
+    WITH RECURSIVE comment_tree AS (
+        SELECT 
+            c.id, c.memory_id, c.user_id, c.parent_comment_id,
+            c.content, c.is_edited, c.created_at, c.updated_at,
+            p.username, p.full_name, p.avatar_url,
+            COUNT(DISTINCT cl.id) as like_count,
+            EXISTS(SELECT 1 FROM comment_likes WHERE comment_id = c.id AND user_id = auth.uid()) as is_liked_by_current_user,
+            0 as depth
+        FROM comments c
+        LEFT JOIN profiles p ON c.user_id = p.id
+        LEFT JOIN comment_likes cl ON c.id = cl.comment_id
+        WHERE c.memory_id = p_memory_id AND c.parent_comment_id IS NULL
+        GROUP BY c.id, p.username, p.full_name, p.avatar_url
+        
+        UNION ALL
+        
+        SELECT 
+            c.id, c.memory_id, c.user_id, c.parent_comment_id,
+            c.content, c.is_edited, c.created_at, c.updated_at,
+            p.username, p.full_name, p.avatar_url,
+            COUNT(DISTINCT cl.id) as like_count,
+            EXISTS(SELECT 1 FROM comment_likes WHERE comment_id = c.id AND user_id = auth.uid()) as is_liked_by_current_user,
+            ct.depth + 1 as depth
+        FROM comments c
+        INNER JOIN comment_tree ct ON c.parent_comment_id = ct.id
+        LEFT JOIN profiles p ON c.user_id = p.id
+        LEFT JOIN comment_likes cl ON c.id = cl.comment_id
+        GROUP BY c.id, p.username, p.full_name, p.avatar_url, ct.depth
+    )
+    SELECT json_agg(row_to_json(comment_tree) ORDER BY created_at) INTO result
+    FROM comment_tree;
+    
+    RETURN COALESCE(result, '[]'::json);
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+-- 5. 실시간 기능 활성화
+DO $$ BEGIN
+    ALTER PUBLICATION supabase_realtime ADD TABLE comments;
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+DO $$ BEGIN
+    ALTER PUBLICATION supabase_realtime ADD TABLE comment_likes;
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+                        </pre>
+                        <button onclick="copySQL()" 
+                                class="mt-4 px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600">
+                            📋 SQL 복사
+                        </button>
+                    </div>
+                    <div class="p-6 border-t">
+                        <button onclick="closeSQLModal()" 
+                                class="px-4 py-2 bg-gray-300 text-gray-700 rounded hover:bg-gray-400">
+                            닫기
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        let statusData = {
+            tables: {},
+            realtime: {},
+            functions: {},
+            overall: 'checking'
+        };
+        
+        // 페이지 로드 시 상태 확인
+        window.addEventListener('DOMContentLoaded', checkStatus);
+        
+        async function checkStatus() {
+            // 초기화
+            updateUI('checking');
+            
+            // 1. 연결 확인
+            const connected = await checkConnection();
+            if (!connected) return;
+            
+            // 2. 테이블 확인
+            await checkTables();
+            
+            // 3. 실시간 기능 확인
+            await checkRealtime();
+            
+            // 4. 함수 확인
+            await checkFunctions();
+            
+            // 5. 전체 상태 요약
+            updateSummary();
+        }
+        
+        async function checkConnection() {
+            try {
+                const { data, error } = await supabaseClient
+                    .from('memories')
+                    .select('count')
+                    .limit(1);
+                
+                if (error) throw error;
+                
+                document.getElementById('connectionStatus').innerHTML = 
+                    '<span class="status-icon ok">✅</span> Supabase 연결 성공';
+                return true;
+            } catch (error) {
+                document.getElementById('connectionStatus').innerHTML = 
+                    `<span class="status-icon error">❌</span> 연결 실패: ${error.message}`;
+                updateUI('error');
+                return false;
+            }
+        }
+        
+        async function checkTables() {
+            const tables = ['comments', 'comment_likes', 'comment_notifications'];
+            const tableStatus = document.getElementById('tableStatus');
+            let html = '';
+            
+            for (const table of tables) {
+                try {
+                    const { count, error } = await supabaseClient
+                        .from(table)
+                        .select('*', { count: 'exact', head: true });
+                    
+                    if (error) {
+                        statusData.tables[table] = false;
+                        html += `<div><span class="status-icon error">❌</span> ${table} - 테이블 없음</div>`;
+                    } else {
+                        statusData.tables[table] = true;
+                        html += `<div><span class="status-icon ok">✅</span> ${table} - 정상 (${count || 0}개 레코드)</div>`;
+                    }
+                } catch (e) {
+                    statusData.tables[table] = false;
+                    html += `<div><span class="status-icon error">❌</span> ${table} - 확인 실패</div>`;
+                }
+            }
+            
+            tableStatus.innerHTML = html;
+        }
+        
+        async function checkRealtime() {
+            const realtimeStatus = document.getElementById('realtimeStatus');
+            
+            try {
+                // 실시간 구독 테스트
+                const channel = supabaseClient
+                    .channel('test-channel')
+                    .on('postgres_changes', 
+                        { event: '*', schema: 'public', table: 'comments' },
+                        () => {}
+                    )
+                    .subscribe();
+                
+                // 구독 상태 확인
+                setTimeout(() => {
+                    const status = channel.state;
+                    if (status === 'SUBSCRIBED') {
+                        statusData.realtime.comments = true;
+                        realtimeStatus.innerHTML = 
+                            '<span class="status-icon ok">✅</span> 실시간 기능 활성화됨';
+                    } else {
+                        statusData.realtime.comments = false;
+                        realtimeStatus.innerHTML = 
+                            '<span class="status-icon warning">⚠️</span> 실시간 기능 비활성화 (설정 필요)';
+                    }
+                    channel.unsubscribe();
+                }, 2000);
+            } catch (error) {
+                statusData.realtime.comments = false;
+                realtimeStatus.innerHTML = 
+                    '<span class="status-icon error">❌</span> 실시간 기능 확인 실패';
+            }
+        }
+        
+        async function checkFunctions() {
+            const functionStatus = document.getElementById('functionStatus');
+            
+            try {
+                // get_comments_tree 함수 테스트
+                const { data, error } = await supabaseClient
+                    .rpc('get_comments_tree', { p_memory_id: '00000000-0000-0000-0000-000000000000' });
+                
+                if (error) {
+                    statusData.functions.get_comments_tree = false;
+                    functionStatus.innerHTML = 
+                        '<span class="status-icon error">❌</span> get_comments_tree 함수 - 없음';
+                } else {
+                    statusData.functions.get_comments_tree = true;
+                    functionStatus.innerHTML = 
+                        '<span class="status-icon ok">✅</span> get_comments_tree 함수 - 정상';
+                }
+            } catch (e) {
+                statusData.functions.get_comments_tree = false;
+                functionStatus.innerHTML = 
+                    '<span class="status-icon error">❌</span> 함수 확인 실패';
+            }
+        }
+        
+        function updateSummary() {
+            const summaryStatus = document.getElementById('summaryStatus');
+            
+            // 전체 상태 계산
+            const tableCount = Object.values(statusData.tables).filter(v => v).length;
+            const hasRealtime = Object.values(statusData.realtime).some(v => v);
+            const hasFunction = statusData.functions.get_comments_tree;
+            
+            let html = '';
+            let needsInstall = false;
+            
+            if (tableCount === 3 && hasFunction) {
+                html = '<div class="text-green-600 font-semibold">' +
+                       '<span class="status-icon ok">✅</span> 댓글 시스템이 정상적으로 설치되어 있습니다!</div>';
+                
+                if (!hasRealtime) {
+                    html += '<div class="text-yellow-600 mt-2">' +
+                           '<span class="status-icon warning">⚠️</span> 실시간 기능만 추가 설정이 필요합니다.</div>';
+                }
+            } else {
+                needsInstall = true;
+                html = '<div class="text-red-600 font-semibold">' +
+                       '<span class="status-icon error">❌</span> 댓글 시스템 설치가 필요합니다.</div>';
+                
+                html += '<div class="mt-2 text-sm text-gray-600">누락된 항목:</div>';
+                html += '<ul class="mt-1 text-sm text-gray-600 list-disc list-inside">';
+                
+                if (!statusData.tables.comment_likes) html += '<li>comment_likes 테이블</li>';
+                if (!statusData.tables.comment_notifications) html += '<li>comment_notifications 테이블</li>';
+                if (!hasFunction) html += '<li>get_comments_tree 함수</li>';
+                
+                html += '</ul>';
+            }
+            
+            summaryStatus.innerHTML = html;
+        }
+        
+        function updateUI(status) {
+            if (status === 'checking') {
+                // 초기 상태로 리셋
+                ['tableStatus', 'realtimeStatus', 'functionStatus', 'summaryStatus'].forEach(id => {
+                    document.getElementById(id).innerHTML = 
+                        '<div class="text-gray-600"><span class="status-icon">⏳</span> 확인 중...</div>';
+                });
+            }
+        }
+        
+        function showQuickInstall() {
+            document.getElementById('sqlModal').classList.remove('hidden');
+        }
+        
+        function closeSQLModal() {
+            document.getElementById('sqlModal').classList.add('hidden');
+        }
+        
+        function copySQL() {
+            const sqlText = document.querySelector('#sqlModal pre').textContent;
+            navigator.clipboard.writeText(sqlText).then(() => {
+                alert('SQL이 클립보드에 복사되었습니다!');
+            });
+        }
+    </script>
+</body>
+</html>

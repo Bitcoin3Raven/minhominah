@@ -306,7 +306,7 @@ a:hover {
 .hero-section {
   position: relative;
   overflow: hidden;
-  min-height: 60vh;
+  min-height: 40vh;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -447,6 +447,7 @@ a:hover {
 
 .filter-tag .emoji {
   font-size: 1.25rem;
+  pointer-events: none; /* 클릭 이벤트가 부모로 전달되도록 */
 }
 
 .filter-tag .count {
@@ -454,6 +455,11 @@ a:hover {
   background: rgba(0, 0, 0, 0.1);
   border-radius: var(--radius-full);
   font-size: 0.75rem;
+  pointer-events: none; /* 클릭 이벤트가 부모로 전달되도록 */
+}
+
+.filter-tag span {
+  pointer-events: none; /* 모든 span 요소의 클릭 비활성화 */
 }
 
 .filter-tag.active .count {
@@ -797,9 +803,8 @@ a:hover {
 }
 
 [data-theme="dark"] .theme-toggle {
-  background: var(--bg-secondary);
-  color: var(--text-primary);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  /* 하단 플로팅 버튼 제거 - 헤더에 통합됨 */
+  display: none !important;
 }
 
 [data-theme="dark"] .form-input {
@@ -926,26 +931,8 @@ a:hover {
    19. 테마 토글 버튼
    =========================== */
 .theme-toggle {
-  position: fixed;
-  bottom: 2rem;
-  right: 2rem;
-  width: 3rem;
-  height: 3rem;
-  border-radius: var(--radius-full);
-  background: white;
-  box-shadow: var(--shadow-lg);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  border: none;
-  transition: all var(--transition-base);
-  z-index: 50;
-}
-
-.theme-toggle:hover {
-  transform: scale(1.1);
-  box-shadow: var(--shadow-xl);
+  /* 하단 플로팅 버튼 제거 - 헤더에 통합됨 */
+  display: none !important;
 }
 
 /* ===========================
@@ -962,4 +949,145 @@ a:hover {
   font-size: 0.875rem;
   color: var(--gray-600);
   line-height: 1.5;
+}
+
+/* ===========================
+   21. 타임라인 레이아웃
+   =========================== */
+.timeline-layout {
+  position: relative;
+  padding: 2rem 0;
+}
+
+.timeline-layout::before {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: var(--gray-300);
+  transform: translateX(-50%);
+}
+
+@media (max-width: 768px) {
+  .timeline-layout::before {
+    left: 2rem;
+  }
+}
+
+.timeline-item {
+  position: relative;
+  display: flex;
+  align-items: flex-start;
+  margin-bottom: 3rem;
+}
+
+.timeline-item:nth-child(even) {
+  flex-direction: row-reverse;
+}
+
+@media (max-width: 768px) {
+  .timeline-item,
+  .timeline-item:nth-child(even) {
+    flex-direction: row;
+  }
+}
+
+.timeline-content {
+  width: calc(50% - 3rem);
+  position: relative;
+}
+
+.timeline-item:nth-child(even) .timeline-content {
+  text-align: right;
+}
+
+@media (max-width: 768px) {
+  .timeline-content {
+    width: calc(100% - 5rem);
+    margin-left: 5rem;
+  }
+  
+  .timeline-item:nth-child(even) .timeline-content {
+    text-align: left;
+    margin-left: 5rem;
+  }
+}
+
+.timeline-date-wrapper {
+  position: absolute;
+  left: 50%;
+  top: 0;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.timeline-item:nth-child(even) .timeline-date-wrapper {
+  flex-direction: row-reverse;
+}
+
+@media (max-width: 768px) {
+  .timeline-date-wrapper {
+    left: 2rem;
+  }
+  
+  .timeline-item:nth-child(even) .timeline-date-wrapper {
+    flex-direction: row;
+  }
+}
+
+.timeline-dot {
+  width: 1rem;
+  height: 1rem;
+  background: var(--primary-500);
+  border: 3px solid white;
+  border-radius: 50%;
+  box-shadow: 0 0 0 2px var(--primary-200);
+  z-index: 1;
+}
+
+.timeline-date {
+  background: var(--primary-100);
+  color: var(--primary-700);
+  padding: 0.25rem 0.75rem;
+  border-radius: var(--radius-full);
+  font-size: 0.875rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.timeline-card {
+  background: white;
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  box-shadow: var(--shadow-md);
+  transition: all var(--transition-base);
+}
+
+.timeline-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-lg);
+}
+
+/* 다크모드 타임라인 스타일 */
+html[data-theme="dark"] .timeline-layout::before {
+  background: var(--gray-700);
+}
+
+html[data-theme="dark"] .timeline-dot {
+  background: var(--primary-400);
+  border-color: var(--gray-800);
+  box-shadow: 0 0 0 2px var(--primary-900);
+}
+
+html[data-theme="dark"] .timeline-date {
+  background: var(--primary-900);
+  color: var(--primary-200);
+}
+
+html[data-theme="dark"] .timeline-card {
+  background: var(--gray-800);
 }

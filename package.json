@@ -6,7 +6,10 @@
   "scripts": {
     "dev": "live-server",
     "build": "echo 'No build needed for static site'",
-    "preview": "vercel dev"
+    "preview": "vercel dev",
+    "deploy": "git add . && git commit -m 'Update' && git push origin main",
+    "deploy:windows": "powershell.exe -File deploy-to-vercel.ps1",
+    "deploy:unix": "bash deploy-to-vercel.sh"
   },
   "keywords": [
     "photo-album",

@@ -77,6 +77,10 @@ CREATE POLICY "본인 메모리만 수정" ON memories
 
 CREATE POLICY "본인 메모리만 삭제" ON memories
   FOR DELETE USING (auth.uid() = created_by);
+
+-- 댓글 시스템 테이블 (선택사항)
+-- database-comments-schema.sql 파일 참조
+-- 댓글, 좋아요, 알림 기능 포함
 ```
 
 ### 5. Storage 버킷 생성 (이미지/동영상용)
@@ -86,7 +90,14 @@ CREATE POLICY "본인 메모리만 삭제" ON memories
 4. Public bucket 체크 (공개 이미지용)
 5. "Create bucket" 클릭
 
-### 6. 테스트 방법
+### 6. 실시간 기능 활성화 (댓글 시스템용)
+1. Supabase 대시보드 > Database > Replication 메뉴
+2. 다음 테이블들의 실시간 구독 활성화:
+   - `comments` (댓글 실시간 업데이트)
+   - `comment_likes` (좋아요 실시간 업데이트)
+3. "Enable replication" 클릭
+
+### 7. 테스트 방법
 1. `/test/test.html` 파일을 웹브라우저로 열기
 2. Supabase 연결 상태 확인
 3. 회원가입 테스트

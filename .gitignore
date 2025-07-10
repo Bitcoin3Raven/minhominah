@@ -21,6 +21,9 @@ Thumbs.db
 backup/
 backup_*/
 
+# Claude AI
+.claude/
+
 # Temporary files
 *.tmp
 *.temp
