@@ -377,7 +377,9 @@ class NotificationSystem {
 
     // 알림 패널 닫기
     closeNotificationPanel() {
-        this.notificationPanel.classList.add('hidden');
+        if (this.notificationPanel) {
+            this.notificationPanel.classList.add('hidden');
+        }
     }
 
     // 시간 포맷팅
