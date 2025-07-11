@@ -3048,12 +3048,32 @@
             }
         }
         
+        // Lazy loading 함수
+        function lazyLoadImages() {
+            const images = document.querySelectorAll('img[data-src]');
+            images.forEach(img => {
+                if (img.dataset.src && !img.src.includes('supabase')) {
+                    img.src = img.dataset.src;
+                }
+            });
+        }
+
+        // displayMemories 함수 수정 - lazy loading 추가
+        const originalDisplayMemories = displayMemories;
+        displayMemories = function() {
+            originalDisplayMemories();
+            setTimeout(lazyLoadImages, 100);
+        };
+
         // 로그인 버튼 클릭 이벤트 (헤더의 로그인 버튼용)
         document.addEventListener('DOMContentLoaded', function() {
             const loginButtons = document.querySelectorAll('[onclick*="showLogin"]');
             loginButtons.forEach(button => {
                 button.onclick = showLoginForm;
             });
+            
+            // 초기 lazy loading
+            setTimeout(lazyLoadImages, 500);
         });
     </script>
     
