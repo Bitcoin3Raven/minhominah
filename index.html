@@ -3109,6 +3109,21 @@
                 button.onclick = showLoginForm;
             });
             
+            // 갤러리 탭 이벤트 리스너 추가
+            const galleryTabs = document.querySelectorAll('.gallery-tabs button');
+            galleryTabs.forEach(tab => {
+                tab.addEventListener('click', function() {
+                    // 활성 탭 변경
+                    galleryTabs.forEach(t => t.classList.remove('active'));
+                    this.classList.add('active');
+                    
+                    // 레이아웃 변경
+                    const layout = this.dataset.layout;
+                    currentLayout = layout;
+                    displayMemories();
+                });
+            });
+            
             // 초기 lazy loading
             setTimeout(lazyLoadImages, 500);
         });
