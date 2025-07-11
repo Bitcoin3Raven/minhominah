@@ -216,7 +216,7 @@
             <div class="flex justify-between items-center">
                 <!-- 로고 -->
                 <div class="flex items-center">
-                    <a href="index.html" class="flex items-center hover:opacity-80 transition-opacity">
+                    <a href="/" class="flex items-center hover:opacity-80 transition-opacity">
                         <img src="assets/images/logo.png" alt="민호민아 성장앨범" class="h-10 w-auto dark:brightness-90" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
                         <span class="text-lg font-bold bg-gradient-to-r from-pink-500 to-blue-500 bg-clip-text text-transparent" style="display:none;" data-lang="site_title">민호민아</span>
                     </a>
@@ -224,7 +224,7 @@
                 
                 <!-- 데스크톱 네비게이션 -->
                 <nav class="hidden md:flex items-center space-x-1 lg:space-x-4">
-                    <a href="index.html" class="nav-item">
+                    <a href="/" class="nav-item">
                         <i class="fas fa-home"></i>
                         <span data-lang="nav_home">홈</span>
                     </a>
@@ -319,7 +319,7 @@
     <!-- 모바일 메뉴 -->
     <div id="mobileMenu" class="mobile-menu md:hidden">
         <div class="px-4 py-6 space-y-2">
-            <a href="index.html" class="mobile-menu-item ">
+            <a href="/" class="mobile-menu-item ">
                 <i class="fas fa-home"></i>
                 <span data-lang="nav_home">홈</span>
             </a>
@@ -392,7 +392,7 @@
         
         <!-- 앨범으로 돌아가기 버튼 - 절대 위치로 상단에 배치 -->
         <div class="absolute top-8 left-4 z-20">
-            <a href="index.html" class="btn btn-secondary dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600 flex items-center gap-2">
+            <a href="/" class="btn btn-secondary dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600 flex items-center gap-2">
                 <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
                     <polyline points="15 18 9 12 15 6"></polyline>
                 </svg>
@@ -531,7 +531,7 @@
                 
                 <!-- 제출 버튼 -->
                 <div class="flex justify-center gap-4">
-                    <button type="button" onclick="window.location.href='index.html'" class="btn btn-secondary" data-lang="btn_cancel">
+                    <button type="button" onclick="window.location.href='/'" class="btn btn-secondary" data-lang="btn_cancel">
                         취소
                     </button>
                     <button type="submit" class="btn btn-primary flex items-center gap-2">
@@ -1023,7 +1023,7 @@
                 
                 // 3초 후 메인 페이지로 이동
                 setTimeout(() => {
-                    window.location.href = 'index.html';
+                    window.location.href = '/';
                 }, 3000);
                 
             } catch (error) {

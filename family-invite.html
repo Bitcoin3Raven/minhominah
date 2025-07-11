@@ -67,7 +67,7 @@
                     초대가 만료되었거나 유효하지 않습니다
                 </p>
                 <div class="pt-4 space-y-2">
-                    <a href="index.html" 
+                    <a href="/" 
                        class="inline-block bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-white px-6 py-3 rounded-lg font-semibold hover:shadow-lg transition">
                         홈으로 돌아가기
                     </a>
@@ -261,7 +261,7 @@
                     .update({ status: 'rejected' })
                     .eq('id', currentInvitation.id);
 
-                window.location.href = 'index.html';
+                window.location.href = '/';
             } catch (error) {
                 console.error('초대 거절 실패:', error);
             }
@@ -301,7 +301,7 @@
         function redirectToLogin() {
             // 현재 URL 저장 (로그인 후 돌아올 수 있도록)
             const returnUrl = encodeURIComponent(window.location.href);
-            window.location.href = `index.html?return=${returnUrl}`;
+            window.location.href = `/?return=${returnUrl}`;
         }
 
         // 초기화
