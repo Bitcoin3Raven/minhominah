@@ -315,6 +315,16 @@
             color: white;
         }
         
+        /* Lazy loading 이미지 스타일 */
+        img.lazy-load {
+            opacity: 0;
+            transition: opacity 0.3s ease-in-out;
+        }
+        
+        img.lazy-load.loaded {
+            opacity: 1;
+        }
+        
         /* 커스텀 스크롤바 */
         .custom-scrollbar {
             scrollbar-width: thin;
@@ -2267,9 +2277,7 @@
             }
             
             // Lazy loading 설정
-            if (window.setupLazyLoading) {
-                window.setupLazyLoading();
-            }
+            setTimeout(lazyLoadImages, 100);
         }
         
         // 메모리 카드 생성 (개선된 디자인)
@@ -3048,13 +3056,40 @@
             }
         }
         
-        // Lazy loading 함수
+        // Lazy loading 함수 - IntersectionObserver 사용
+        let imageObserver = null;
+        
+        function setupImageObserver() {
+            if (imageObserver) {
+                imageObserver.disconnect();
+            }
+            
+            imageObserver = new IntersectionObserver((entries, observer) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        const img = entry.target;
+                        if (img.dataset.src) {
+                            img.src = img.dataset.src;
+                            img.removeAttribute('data-src');
+                            img.classList.add('loaded');
+                            observer.unobserve(img);
+                        }
+                    }
+                });
+            }, {
+                rootMargin: '50px 0px',
+                threshold: 0.01
+            });
+        }
+        
         function lazyLoadImages() {
+            if (!imageObserver) {
+                setupImageObserver();
+            }
+            
             const images = document.querySelectorAll('img[data-src]');
             images.forEach(img => {
-                if (img.dataset.src && !img.src.includes('supabase')) {
-                    img.src = img.dataset.src;
-                }
+                imageObserver.observe(img);
             });
         }
 
