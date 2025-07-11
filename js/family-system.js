@@ -22,7 +22,7 @@ class FamilySystem {
             const { data: { user }, error: userError } = await window.supabaseClient.auth.getUser();
             if (userError || !user) {
                 console.error('사용자 정보를 가져올 수 없습니다:', userError);
-                window.location.href = 'index.html';
+                window.location.href = '/';
                 return;
             }
             
@@ -520,7 +520,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     // 인증 상태 확인
     const { data: { user } } = await window.supabaseClient.auth.getUser();
     if (!user) {
-        window.location.href = 'index.html';
+        window.location.href = '/';
         return;
     }
     
