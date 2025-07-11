@@ -3059,11 +3059,13 @@
         }
 
         // displayMemories 함수 수정 - lazy loading 추가
-        const originalDisplayMemories = displayMemories;
-        displayMemories = function() {
-            originalDisplayMemories();
-            setTimeout(lazyLoadImages, 100);
-        };
+        if (typeof displayMemories !== 'undefined') {
+            const originalDisplayMemories = displayMemories;
+            displayMemories = function() {
+                originalDisplayMemories();
+                setTimeout(lazyLoadImages, 100);
+            };
+        }
 
         // 로그인 버튼 클릭 이벤트 (헤더의 로그인 버튼용)
         document.addEventListener('DOMContentLoaded', function() {
