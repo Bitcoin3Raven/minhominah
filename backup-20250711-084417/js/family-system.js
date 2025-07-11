@@ -11,15 +11,8 @@ class FamilySystem {
         if (this.initialized) return;
         
         try {
-            // Supabase 클라이언트 확인
-            if (!window.supabaseClient) {
-                console.error('Supabase 클라이언트가 초기화되지 않았습니다.');
-                this.showError('시스템 초기화 중입니다. 잠시 후 다시 시도해주세요.');
-                return;
-            }
-            
             // 현재 사용자 정보 가져오기
-            const { data: { user }, error: userError } = await window.supabaseClient.auth.getUser();
+            const { data: { user }, error: userError } = await supabase.auth.getUser();
             if (userError || !user) {
                 console.error('사용자 정보를 가져올 수 없습니다:', userError);
                 window.location.href = 'index.html';
@@ -41,13 +34,11 @@ class FamilySystem {
             // 로딩 상태 표시
             this.showLoadingState();
 
-            const { data: membership, error } = await window.supabaseClient
+            const { data: membership, error } = await supabase
                 .from('family_members')
                 .select(`
                     *,
-                    family_id,
-                    role,
-                    joined_at
+                    family_groups(*)
                 `)
                 .eq('user_id', this.currentUser.id)
                 .single();
@@ -57,18 +48,7 @@ class FamilySystem {
             }
 
             if (membership) {
-                // family_groups 정보를 별도로 조회
-                const { data: familyGroup, error: familyError } = await window.supabaseClient
-                    .from('family_groups')
-                    .select('*')
-                    .eq('id', membership.family_id)
-                    .single();
-                
-                if (familyError) {
-                    throw familyError;
-                }
-                
-                this.currentFamily = familyGroup;
+                this.currentFamily = membership.family_groups;
                 this.currentRole = membership.role;
                 this.displayFamilyInfo();
                 this.showFamilyState();
@@ -129,7 +109,7 @@ class FamilySystem {
                 return;
             }
 
-            const { data: family, error } = await window.supabaseClient
+            const { data: family, error } = await supabase
                 .from('family_groups')
                 .insert({
                     name: familyName,
@@ -169,7 +149,7 @@ class FamilySystem {
             }
 
             // 이미 가족 구성원인지 확인
-            const { data: existingMember } = await window.supabaseClient
+            const { data: existingMember } = await supabase
                 .from('family_members')
                 .select('id')
                 .eq('family_id', family.id)
@@ -182,7 +162,7 @@ class FamilySystem {
             }
 
             // 가족에 참여
-            const { error: joinError } = await window.supabaseClient
+            const { error: joinError } = await supabase
                 .from('family_members')
                 .insert({
                     family_id: family.id,
@@ -213,7 +193,7 @@ class FamilySystem {
             }
 
             // 이메일 중복 확인
-            const { data: existingInvite } = await window.supabaseClient
+            const { data: existingInvite } = await supabase
                 .from('family_invitations')
                 .select('id')
                 .eq('family_id', this.currentFamily.id)
@@ -227,7 +207,7 @@ class FamilySystem {
             }
 
             // 초대 생성
-            const { data: invitation, error } = await window.supabaseClient
+            const { data: invitation, error } = await supabase
                 .from('family_invitations')
                 .insert({
                     family_id: this.currentFamily.id,
@@ -255,7 +235,7 @@ class FamilySystem {
     async acceptInvitationByToken(token) {
         try {
             // RPC 함수 호출
-            const { data, error } = await window.supabaseClient
+            const { data, error } = await supabase
                 .rpc('accept_family_invitation', { p_token: token });
 
             if (error) throw error;
@@ -311,7 +291,7 @@ class FamilySystem {
 
     async loadFamilyMembers() {
         try {
-            const { data: members, error } = await window.supabaseClient
+            const { data: members, error } = await supabase
                 .from('family_members')
                 .select(`
                     *,
@@ -365,7 +345,7 @@ class FamilySystem {
 
     async loadPendingInvitations() {
         try {
-            const { data: invitations, error } = await window.supabaseClient
+            const { data: invitations, error } = await supabase
                 .from('family_invitations')
                 .select('*')
                 .eq('family_id', this.currentFamily.id)
@@ -404,7 +384,7 @@ class FamilySystem {
         if (!confirm('정말로 이 구성원을 제거하시겠습니까?')) return;
 
         try {
-            const { error } = await window.supabaseClient
+            const { error } = await supabase
                 .from('family_members')
                 .delete()
                 .eq('id', memberId);
@@ -423,7 +403,7 @@ class FamilySystem {
         if (!confirm('이 초대를 취소하시겠습니까?')) return;
 
         try {
-            const { error } = await window.supabaseClient
+            const { error } = await supabase
                 .from('family_invitations')
                 .update({ status: 'rejected' })
                 .eq('id', invitationId);
@@ -505,20 +485,8 @@ const familySystem = new FamilySystem();
 
 // 페이지 로드 시 초기화
 document.addEventListener('DOMContentLoaded', async () => {
-    // Supabase 클라이언트가 초기화될 때까지 대기
-    if (!window.supabaseClient) {
-        await new Promise(resolve => {
-            const checkInterval = setInterval(() => {
-                if (window.supabaseClient) {
-                    clearInterval(checkInterval);
-                    resolve();
-                }
-            }, 100);
-        });
-    }
-    
     // 인증 상태 확인
-    const { data: { user } } = await window.supabaseClient.auth.getUser();
+    const { data: { user } } = await supabase.auth.getUser();
     if (!user) {
         window.location.href = 'index.html';
         return;

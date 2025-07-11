@@ -72,13 +72,7 @@ function createUserMenu(user) {
 // 로그인 버튼 생성
 function createLoginButton() {
     const button = document.createElement('button');
-    button.onclick = function() {
-        if (typeof showLoginForm === 'function') {
-            showLoginForm();
-        } else {
-            console.error('showLoginForm 함수가 정의되지 않았습니다.');
-        }
-    };
+    button.onclick = showLoginForm;
     button.className = 'px-3 sm:px-4 py-2 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg font-semibold hover:bg-gray-100 dark:hover:bg-gray-700 transition text-sm sm:text-base';
     button.innerHTML = '<i class="fas fa-user mr-1 sm:mr-2"></i><span class="hidden sm:inline" data-lang="auth_login">로그인</span>';
     return button;
@@ -148,11 +142,7 @@ function getCurrentUser() {
 // 로그인 필요 여부 확인
 function requireAuth() {
     if (!currentUser) {
-        if (typeof showLoginForm === 'function') {
-            showLoginForm();
-        } else {
-            console.error('로그인이 필요하지만 showLoginForm 함수가 정의되지 않았습니다.');
-        }
+        showLoginForm();
         return false;
     }
     return true;

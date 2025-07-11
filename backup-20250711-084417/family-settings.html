@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="ko" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>가족 설정 - 민호민아 성장앨범</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        // Tailwind 다크모드 설정
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {}
+            }
+        }
+    </script>
+    
+    <!-- 다크모드 초기화 스크립트 -->
+    <script>
+        // 페이지 로드 전 다크모드 설정
+        if (localStorage.getItem('theme') === 'dark' || (!localStorage.getItem('theme') && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.add('dark');
+        } else {
+            document.documentElement.classList.remove('dark');
+        }
+    </script>
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/style-improved.css">
+    
+    <!-- AOS Animation -->
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+    
+    <style>
+        /* 히어로 섹션 스타일 통일 */
+        .hero-section {
+            background: 
+                radial-gradient(circle at 10% 10%, rgba(255, 182, 193, 0.8) 0%, rgba(255, 192, 203, 0.5) 25%, transparent 50%),
+                radial-gradient(circle at 90% 90%, rgba(135, 206, 235, 0.8) 0%, rgba(135, 206, 235, 0.5) 25%, transparent 50%),
+                linear-gradient(135deg, #ffe0e6 0%, #fff5f7 50%, #e6f3ff 100%);
+            color: #333;
+            padding: 40px 0;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .dark .hero-section {
+            background: 
+                radial-gradient(circle at 10% 10%, rgba(147, 51, 234, 0.3) 0%, rgba(147, 51, 234, 0.1) 25%, transparent 50%),
+                radial-gradient(circle at 90% 90%, rgba(59, 130, 246, 0.3) 0%, rgba(59, 130, 246, 0.1) 25%, transparent 50%),
+                linear-gradient(135deg, #1e293b 0%, #334155 50%, #1e293b 100%);
+            color: #f1f5f9;
+        }
+        
+        /* 다크모드 전환 애니메이션 */
+        * {
+            transition-property: background-color, border-color, color, fill, stroke;
+            transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+            transition-duration: 150ms;
+        }
+    </style>
+    
+    <!-- 언어 시스템 -->
+    <script src="js/lang/ko.js"></script>
+    <script src="js/lang/th.js"></script>
+    <script src="js/lang/en.js"></script>
+    <script src="js/language.js"></script>
+</head>
+<body class="bg-gray-50 dark:bg-gray-900 transition-colors duration-300">
+    <!-- 헤더 -->
+    <header class="fixed top-0 left-0 right-0 z-50 backdrop-blur-lg bg-white/90 dark:bg-gray-700/90 shadow-md">
+        <div class="container mx-auto px-4 py-4 flex justify-between items-center">
+            <h1 class="text-xl font-bold text-gray-800 dark:text-white">
+                <a href="index.html" class="hover:opacity-80 transition-opacity flex items-center">
+                    <img src="assets/images/logo.png" alt="Logo" class="h-10 w-auto">
+                </a>
+            </h1>
+            
+            <nav class="flex items-center space-x-2 sm:space-x-6">
+                <a href="index.html" class="text-gray-600 dark:text-white hover:text-gray-900 dark:hover:text-white transition-colors" data-lang-key="nav_home" title="홈">
+                    <i class="fas fa-home mr-1 sm:mr-2"></i><span class="hidden sm:inline" data-lang="nav_home">홈</span>
+                </a>
+                <a href="growth.html" class="text-gray-600 dark:text-white hover:text-gray-900 dark:hover:text-white transition-colors" data-lang-key="nav_growth" title="성장 기록">
+                    <i class="fas fa-chart-line mr-1 sm:mr-2"></i><span class="hidden sm:inline" data-lang="nav_growth">성장 기록</span>
+                </a>
+                <a href="statistics.html" class="text-gray-600 dark:text-white hover:text-gray-900 dark:hover:text-white transition-colors" data-lang-key="nav_statistics" title="통계">
+                    <i class="fas fa-chart-bar mr-1 sm:mr-2"></i><span class="hidden sm:inline" data-lang="nav_statistics">통계</span>
+                </a>
+                <a href="family-settings.html" class="text-gray-600 dark:text-white hover:text-gray-900 dark:hover:text-white transition-colors" data-lang-key="nav_family" title="가족 설정">
+                    <i class="fas fa-users mr-1 sm:mr-2"></i><span class="hidden sm:inline" data-lang="nav_family">가족 설정</span>
+                </a>
+                <a href="backup.html" class="text-gray-600 dark:text-white hover:text-gray-900 dark:hover:text-white transition-colors" data-lang-key="nav_backup" title="백업">
+                    <i class="fas fa-database mr-1 sm:mr-2"></i><span class="hidden sm:inline" data-lang="nav_backup">백업</span>
+                </a>
+                <a href="add-memory.html" class="px-3 sm:px-4 py-2 bg-gradient-to-r from-pink-500 to-blue-500 text-white rounded-lg font-semibold hover:shadow-lg transition text-sm sm:text-base" data-lang-key="nav_add_memory" title="추억 추가">
+                    <i class="fas fa-plus-circle mr-1 sm:mr-2"></i><span class="hidden sm:inline" data-lang="nav_add_memory">추억 추가</span>
+                </a>
+                
+                <!-- 다크모드 토글 버튼 -->
+                <button id="themeToggle" class="w-10 h-10 rounded-full bg-gray-200 dark:bg-gray-600 hover:bg-gray-300 dark:hover:bg-gray-500 transition-all duration-300 flex items-center justify-center hover:scale-110 shadow-lg dark:shadow-xl border border-gray-300 dark:border-gray-500">
+                    <svg id="sunIcon" class="w-6 h-6 text-yellow-500" fill="currentColor" viewBox="0 0 20 20" style="display: block;">
+                        <path fill-rule="evenodd" d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z"></path>
+                    </svg>
+                    <svg id="moonIcon" class="w-6 h-6 text-purple-400" fill="currentColor" viewBox="0 0 20 20" style="display: none;">
+                        <path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"></path>
+                    </svg>
+                </button>
+            </nav>
+        </div>
+    </header>
+
+    <!-- 메인 컨텐츠 -->
+    <main class="min-h-screen pt-16">
+        <!-- 히어로 섹션 -->
+        <section class="hero-section">
+            <div class="container mx-auto px-4 py-12 text-center">
+                <h1 class="text-4xl md:text-5xl font-bold text-gray-800 dark:text-white mb-4">
+                    <span class="text-gradient" data-lang="family_settings_title">우리 가족 설정</span>
+                </h1>
+                <p class="text-lg text-gray-600 dark:text-gray-300 max-w-2xl mx-auto" data-lang="family_settings_subtitle">
+                    가족 구성원을 초대하고 권한을 관리하세요
+                </p>
+            </div>
+        </section>
+
+        <!-- 가족 설정 컨테이너 -->
+        <div id="familySettings" class="container mx-auto px-4 py-8 max-w-4xl">
+            <!-- 로딩 상태 -->
+            <div id="loadingState" class="text-center py-12">
+                <div class="inline-flex items-center justify-center">
+                    <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
+                </div>
+                <p class="mt-4 text-gray-600 dark:text-gray-400" data-lang="loading_family_info">가족 정보를 불러오는 중...</p>
+            </div>
+
+            <!-- 가족이 없을 때 표시될 화면 -->
+            <div id="noFamilyState" class="hidden">
+                <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-8 text-center" data-aos="fade-up">
+                    <i class="fas fa-users text-6xl text-gray-300 dark:text-gray-600 mb-4"></i>
+                    <h2 class="text-2xl font-bold mb-4 text-gray-800 dark:text-white" data-lang="no_family_title">아직 가족이 없습니다</h2>
+                    <p class="text-gray-600 dark:text-gray-400 mb-6" data-lang="no_family_subtitle">
+                        새로운 가족을 만들거나 초대 코드로 기존 가족에 참여하세요
+                    </p>
+                    <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                        <button onclick="showCreateFamilyModal()" 
+                                class="px-6 py-3 bg-gradient-to-r from-pink-500 to-blue-500 text-white rounded-lg font-semibold hover:shadow-lg transition">
+                            <i class="fas fa-plus-circle mr-2"></i><span data-lang="create_family">가족 만들기</span>
+                        </button>
+                        <button onclick="showJoinFamilyModal()" 
+                                class="px-6 py-3 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-white rounded-lg font-semibold hover:shadow-lg transition">
+                            <i class="fas fa-sign-in-alt mr-2"></i><span data-lang="join_family">가족 참여하기</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 가족이 있을 때 표시될 화면 -->
+            <div id="familyState" class="hidden space-y-6">
+                <!-- 가족 정보 섹션 -->
+                <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6" data-aos="fade-up">
+                    <h2 class="text-2xl font-bold mb-4 text-gray-800 dark:text-white">
+                        <i class="fas fa-home mr-2 text-blue-500"></i><span data-lang="our_family_info">우리 가족 정보</span>
+                    </h2>
+                    <div class="space-y-4">
+                        <div class="flex items-center justify-between">
+                            <span class="text-gray-600 dark:text-gray-400" data-lang="family_name_label">가족 이름:</span>
+                            <span class="font-semibold text-gray-800 dark:text-white" id="familyName">-</span>
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <span class="text-gray-600 dark:text-gray-400" data-lang="invite_code_label">초대 코드:</span>
+                            <div class="flex items-center space-x-2">
+                                <code class="bg-gray-100 dark:bg-gray-700 px-3 py-1 rounded font-mono" id="inviteCode">-</code>
+                                <button onclick="copyInviteCode()" 
+                                        class="text-blue-500 hover:text-blue-700 transition">
+                                    <i class="fas fa-copy"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <span class="text-gray-600 dark:text-gray-400" data-lang="my_role_label">내 역할:</span>
+                            <span class="font-semibold" id="myRole">
+                                <span class="px-3 py-1 bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 rounded-full text-sm">
+                                    -
+                                </span>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 가족 구성원 목록 -->
+                <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6" data-aos="fade-up" data-aos-delay="100">
+                    <h3 class="text-xl font-bold mb-4 text-gray-800 dark:text-white">
+                        <i class="fas fa-users mr-2 text-green-500"></i><span data-lang="family_members">가족 구성원</span>
+                    </h3>
+                    <div class="space-y-3" id="familyMembersList">
+                        <!-- 동적으로 생성될 구성원 목록 -->
+                    </div>
+                </div>
+
+                <!-- 초대하기 섹션 (부모만 표시) -->
+                <div id="inviteSection" class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 hidden" data-aos="fade-up" data-aos-delay="200">
+                    <h3 class="text-xl font-bold mb-4 text-gray-800 dark:text-white">
+                        <i class="fas fa-paper-plane mr-2 text-purple-500"></i><span data-lang="invite_family">가족 초대하기</span>
+                    </h3>
+                    <form id="inviteForm" class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300" data-lang="email_address">이메일 주소</label>
+                            <input type="email" id="inviteEmail" 
+                                   class="w-full px-4 py-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent" 
+                                   placeholder="example@email.com" required>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300" data-lang="role">역할</label>
+                            <select id="inviteRole" 
+                                    class="w-full px-4 py-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                                <option value="family" data-lang="role_family">가족</option>
+                                <option value="viewer" data-lang="role_viewer">관람객</option>
+                                <option value="parent" data-lang="role_parent">부모</option>
+                            </select>
+                        </div>
+                        <button type="submit" 
+                                class="w-full bg-gradient-to-r from-purple-500 to-pink-500 text-white py-2 rounded-lg font-semibold hover:shadow-lg transition">
+                            <i class="fas fa-envelope mr-2"></i><span data-lang="send_invite_email">초대 메일 보내기</span>
+                        </button>
+                    </form>
+                </div>
+
+                <!-- 대기 중인 초대 목록 (부모만 표시) -->
+                <div id="pendingInvitesSection" class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 hidden" data-aos="fade-up" data-aos-delay="300">
+                    <h3 class="text-xl font-bold mb-4 text-gray-800 dark:text-white">
+                        <i class="fas fa-clock mr-2 text-orange-500"></i><span data-lang="pending_invites">대기 중인 초대</span>
+                    </h3>
+                    <div class="space-y-3" id="pendingInvitesList">
+                        <!-- 동적으로 생성될 초대 목록 -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- 가족 만들기 모달 -->
+    <div id="createFamilyModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 flex items-center justify-center p-4">
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-2xl max-w-md w-full p-6">
+            <h3 class="text-2xl font-bold mb-4 text-gray-800 dark:text-white" data-lang="create_new_family">새 가족 만들기</h3>
+            <form id="createFamilyForm" class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300" data-lang="family_name_label">가족 이름</label>
+                    <input type="text" id="newFamilyName" 
+                           class="w-full px-4 py-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white focus:ring-2 focus:ring-blue-500" 
+                           placeholder="우리 행복한 가족" required>
+                </div>
+                <div class="flex space-x-3">
+                    <button type="submit" 
+                            class="flex-1 bg-blue-500 text-white py-2 rounded-lg font-semibold hover:bg-blue-600 transition" data-lang="create">
+                        만들기
+                    </button>
+                    <button type="button" onclick="closeModal('createFamilyModal')" 
+                            class="flex-1 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-white py-2 rounded-lg font-semibold hover:bg-gray-300 dark:hover:bg-gray-600 transition" data-lang="cancel">
+                        취소
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- 가족 참여하기 모달 -->
+    <div id="joinFamilyModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 flex items-center justify-center p-4">
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-2xl max-w-md w-full p-6">
+            <h3 class="text-2xl font-bold mb-4 text-gray-800 dark:text-white" data-lang="join_family">가족 참여하기</h3>
+            <form id="joinFamilyForm" class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300" data-lang="invite_code_label">초대 코드</label>
+                    <input type="text" id="joinInviteCode" 
+                           class="w-full px-4 py-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white focus:ring-2 focus:ring-blue-500 font-mono uppercase" 
+                           placeholder="FAM-XXXXXX" required>
+                </div>
+                <div class="flex space-x-3">
+                    <button type="submit" 
+                            class="flex-1 bg-green-500 text-white py-2 rounded-lg font-semibold hover:bg-green-600 transition" data-lang="join">
+                        참여하기
+                    </button>
+                    <button type="button" onclick="closeModal('joinFamilyModal')" 
+                            class="flex-1 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-white py-2 rounded-lg font-semibold hover:bg-gray-300 dark:hover:bg-gray-600 transition" data-lang="cancel">
+                        취소
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- 푸터 -->
+    <footer class="bg-gray-100 dark:bg-gray-800 py-8 mt-16">
+        <div class="container mx-auto px-4 text-center text-gray-600 dark:text-gray-400">
+            <p>&copy; 2025 <span data-lang="site_title">민호민아 성장앨범</span>. <span data-lang="footer_rights">All rights reserved.</span></p>
+            <p class="mt-2">
+                <span data-lang="footer_made_with">Made with</span> 
+                <i class="fas fa-heart text-red-500 animate-pulse"></i> 
+                <span data-lang="footer_for">for</span> 
+                <span data-lang="footer_minho_mina">민호 & 민아</span>
+            </p>
+        </div>
+    </footer>
+
+    <!-- JavaScript -->
+    <script src="js/supabase.js"></script>
+    <script src="js/main.js"></script>
+    <script src="js/family-system.js"></script>
+    <script src="js/notification-system.js" defer></script>
+    <script>
+        // AOS 초기화
+        AOS.init({
+            duration: 800,
+            once: true
+        });
+
+        // 모달 관련 함수들
+        function showCreateFamilyModal() {
+            document.getElementById('createFamilyModal').classList.remove('hidden');
+        }
+
+        function showJoinFamilyModal() {
+            document.getElementById('joinFamilyModal').classList.remove('hidden');
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.add('hidden');
+        }
+
+        // 초대 코드 복사
+        async function copyInviteCode() {
+            const code = document.getElementById('inviteCode').textContent;
+            try {
+                await navigator.clipboard.writeText(code);
+                // 임시 알림 표시
+                const button = event.target.closest('button');
+                const originalHTML = button.innerHTML;
+                button.innerHTML = '<i class="fas fa-check text-green-500"></i>';
+                setTimeout(() => {
+                    button.innerHTML = originalHTML;
+                }, 2000);
+            } catch (err) {
+                console.error('복사 실패:', err);
+            }
+        }
+
+        // 다크모드 토글 기능
+        const themeToggle = document.getElementById('themeToggle');
+        const sunIcon = document.getElementById('sunIcon');
+        const moonIcon = document.getElementById('moonIcon');
+        
+        if (themeToggle) {
+            themeToggle.addEventListener('click', () => {
+                const isDark = document.documentElement.classList.contains('dark');
+                
+                if (isDark) {
+                    document.documentElement.classList.remove('dark');
+                    localStorage.setItem('theme', 'light');
+                    sunIcon.style.display = 'block';
+                    moonIcon.style.display = 'none';
+                } else {
+                    document.documentElement.classList.add('dark');
+                    localStorage.setItem('theme', 'dark');
+                    sunIcon.style.display = 'none';
+                    moonIcon.style.display = 'block';
+                }
+            });
+        }
+        
+        // 초기 아이콘 설정
+        if (document.documentElement.classList.contains('dark')) {
+            sunIcon.style.display = 'none';
+            moonIcon.style.display = 'block';
+        } else {
+            sunIcon.style.display = 'block';
+            moonIcon.style.display = 'none';
+        }
+    </script>
+</body>
+</html>

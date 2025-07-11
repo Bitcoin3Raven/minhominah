@@ -2,13 +2,9 @@
 // 생성 날짜: 2025-07-10
 // 설명: 추억에 댓글을 남기고 실시간으로 업데이트하는 기능
 
-// 전역 변수 (중복 선언 방지)
-if (typeof currentMemoryId === 'undefined') {
-    var currentMemoryId = null;
-}
-if (typeof commentSubscription === 'undefined') {
-    var commentSubscription = null;
-}
+// 전역 변수
+let currentMemoryId = null;
+let commentSubscription = null;
 
 // 댓글 시스템 초기화
 class CommentSystem {

@@ -1,7 +1,5 @@
 // 영어 번역 파일
 const en = {
-    // Site title
-    site_title: 'MinhoMina',
     // 네비게이션
     nav_home: "Home",
     nav_growth: "Growth Records",
@@ -447,13 +445,6 @@ const en = {
     join_title: "Family Invitation",
     join_subtitle: "Create precious memories together",
     invited_you: " invited you to",
-    
-    // Navigation additional translations
-    nav_main_menu: "Main Menu",
-    nav_photobook: "Create Photobook",
-    nav_family_settings: "Family Settings",
-    nav_share: "Share",
-    language: "Language",
     invited_to_group: " group",
     create_or_login: "Create account or login",
     accept_invitation: "Accept Invitation",
@@ -527,7 +518,7 @@ const en = {
     avg_monthly_memories: "Average Monthly Memories",
     most_popular_tag: "Most Popular Tag",
     chart_weekday_memories: "Memories by Weekday",
-    chart_media_type: "Media Type Distribution",
+    chart_media_type: "Media Type Distribution"
     
     // Authentication
     auth_login: "Login",

@@ -1,24 +1,16 @@
 // 알림 시스템 관리 클래스
 class NotificationSystem {
     constructor() {
-        this.supabase = null;
+        this.supabase = window.supabase;
         this.notifications = [];
         this.unreadCount = 0;
         this.notificationPanel = null;
         this.notificationBell = null;
         this.pushSubscription = null;
-        // init()을 나중에 호출하도록 변경
+        this.init();
     }
 
     async init() {
-        // Supabase 클라이언트가 초기화되었는지 확인
-        if (!window.supabaseClient) {
-            console.error('Supabase 클라이언트가 초기화되지 않았습니다.');
-            return;
-        }
-        
-        this.supabase = window.supabaseClient;
-        
         // 알림 UI 생성
         this.createNotificationUI();
         
@@ -705,21 +697,8 @@ class NotificationSystem {
 let notificationSystem;
 
 // DOM 로드 완료 시 초기화
-document.addEventListener('DOMContentLoaded', async () => {
-    // Supabase 클라이언트가 초기화될 때까지 잠시 대기
-    if (!window.supabaseClient) {
-        await new Promise(resolve => {
-            const checkInterval = setInterval(() => {
-                if (window.supabaseClient) {
-                    clearInterval(checkInterval);
-                    resolve();
-                }
-            }, 100);
-        });
-    }
-    
+document.addEventListener('DOMContentLoaded', () => {
     notificationSystem = new NotificationSystem();
-    await notificationSystem.init();
     
     // 페이지가 로드된 후 헤더에 알림 벨 추가
     setTimeout(() => {

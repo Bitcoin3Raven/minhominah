@@ -36,8 +36,6 @@
     
     <!-- Custom CSS -->
     <link rel="stylesheet" href="css/style.css">
-    <link rel="stylesheet" href="css/navigation.css">
-
     <link rel="stylesheet" href="css/style-improved.css">
     
     <!-- AOS Animation -->
@@ -161,179 +159,50 @@
             color: #f1f5f9;
         }
     </style>
-    <script src="js/navigation-responsive.js"></script>
 </head>
 <body class="bg-gray-50 dark:bg-gray-900 transition-colors duration-300">
     <!-- 헤더 -->
-        <!-- 헤더 영역 -->
-    <header class="fixed top-0 left-0 right-0 z-50 backdrop-blur-lg bg-white/90 dark:bg-gray-900/90 shadow-md transition-transform duration-300">
-        <div class="container mx-auto px-4 py-3">
-            <div class="flex justify-between items-center">
-                <!-- 로고 -->
-                <div class="flex items-center">
-                    <a href="index.html" class="flex items-center hover:opacity-80 transition-opacity">
-                        <img src="assets/images/logo.png" alt="민호민아 성장앨범" class="h-10 w-auto dark:brightness-90" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
-                        <span class="text-lg font-bold bg-gradient-to-r from-pink-500 to-blue-500 bg-clip-text text-transparent" style="display:none;" data-lang="site_title">민호민아</span>
-                    </a>
-                </div>
+    <header class="fixed top-0 left-0 right-0 z-50 backdrop-blur-lg bg-white/90 dark:bg-gray-700/90 shadow-md">
+        <div class="container mx-auto px-4 py-4 flex justify-between items-center">
+            <h1 class="text-xl font-bold text-gray-800 dark:text-white">
+                <a href="index.html" class="hover:opacity-80 transition-opacity flex items-center">
+                    <img src="assets/images/logo.png" alt="민호민아 성장앨범" class="h-10 w-auto">
+                </a>
+            </h1>
+            
+            <nav class="flex items-center space-x-2 sm:space-x-6">
+                <a href="index.html" class="text-gray-600 dark:text-white hover:text-gray-900 dark:hover:text-white transition-colors" data-lang-key="nav_home" title="홈">
+                    <i class="fas fa-home mr-1 sm:mr-2"></i><span class="hidden sm:inline" data-lang="nav_home">홈</span>
+                </a>
+                <a href="growth.html" class="text-gray-600 dark:text-white hover:text-gray-900 dark:hover:text-white transition-colors" data-lang-key="nav_growth" title="성장 기록">
+                    <i class="fas fa-chart-line mr-1 sm:mr-2"></i><span class="hidden sm:inline" data-lang="nav_growth">성장 기록</span>
+                </a>
+                <a href="statistics.html" class="text-gray-600 dark:text-white hover:text-gray-900 dark:hover:text-white transition-colors" data-lang-key="nav_statistics" title="통계">
+                    <i class="fas fa-chart-bar mr-1 sm:mr-2"></i><span class="hidden sm:inline" data-lang="nav_statistics">통계</span>
+                </a>
+                <a href="family-settings.html" class="text-gray-600 dark:text-white hover:text-gray-900 dark:hover:text-white transition-colors" data-lang-key="nav_family" title="가족 설정">
+                    <i class="fas fa-users mr-1 sm:mr-2"></i><span class="hidden sm:inline" data-lang="nav_family">가족 설정</span>
+                </a>
+                <a href="backup.html" class="text-gray-600 dark:text-white hover:text-gray-900 dark:hover:text-white transition-colors" data-lang-key="nav_backup" title="백업">
+                    <i class="fas fa-database mr-1 sm:mr-2"></i><span class="hidden sm:inline" data-lang="nav_backup">백업</span>
+                </a>
+                <a href="add-memory.html" class="px-3 sm:px-4 py-2 bg-gradient-to-r from-pink-500 to-blue-500 text-white rounded-lg font-semibold hover:shadow-lg transition text-sm sm:text-base" data-lang-key="nav_add_memory" title="추억 추가">
+                    <i class="fas fa-plus-circle mr-1 sm:mr-2"></i><span class="hidden sm:inline" data-lang="nav_add_memory">추억 추가</span>
+                </a>
                 
-                <!-- 데스크톱 네비게이션 -->
-                <nav class="hidden md:flex items-center space-x-1 lg:space-x-4">
-                    <a href="index.html" class="nav-item">
-                        <i class="fas fa-home"></i>
-                        <span data-lang="nav_home">홈</span>
-                    </a>
-                    
-                    <!-- 주요 메뉴 드롭다운 -->
-                    <div class="relative" data-dropdown-trigger="mainDropdown">
-                        <button class="nav-item flex items-center">
-                            <i class="fas fa-th"></i>
-                            <span data-lang="nav_main_menu">주요 메뉴</span>
-                            <i class="fas fa-chevron-down ml-1 text-xs"></i>
-                        </button>
-                        <div id="mainDropdown" class="dropdown-menu">
-                            <a href="add-memory.html" class="dropdown-item">
-                                <i class="fas fa-plus-circle text-green-500"></i>
-                                <span data-lang="nav_add_memory">추억 추가</span>
-                            </a>
-                            <a href="growth.html" class="dropdown-item">
-                                <i class="fas fa-chart-line text-blue-500"></i>
-                                <span data-lang="nav_growth">성장 기록</span>
-                            </a>
-                            <a href="statistics.html" class="dropdown-item">
-                                <i class="fas fa-chart-bar text-purple-500"></i>
-                                <span data-lang="nav_statistics">통계</span>
-                            </a>
-                            <a href="photobook-creator.html" class="dropdown-item">
-                                <i class="fas fa-book text-orange-500"></i>
-                                <span data-lang="nav_photobook">포토북 만들기</span>
-                            </a>
-                        </div>
-                    </div>
-                    
-                    <!-- 기족 메뉴 드롭다운 -->
-                    <div class="relative" data-dropdown-trigger="familyDropdown">
-                        <button class="nav-item flex items-center">
-                            <i class="fas fa-users"></i>
-                            <span data-lang="nav_family">가족</span>
-                            <i class="fas fa-chevron-down ml-1 text-xs"></i>
-                        </button>
-                        <div id="familyDropdown" class="dropdown-menu">
-                            <a href="family-settings.html" class="dropdown-item">
-                                <i class="fas fa-cog text-gray-500"></i>
-                                <span data-lang="nav_family_settings">가족 설정</span>
-                            </a>
-                            <a href="share.html" class="dropdown-item">
-                                <i class="fas fa-share-alt text-blue-500"></i>
-                                <span data-lang="nav_share">공유</span>
-                            </a>
-                            <a href="backup.html" class="dropdown-item">
-                                <i class="fas fa-database text-green-500"></i>
-                                <span data-lang="nav_backup">백업</span>
-                            </a>
-                        </div>
-                    </div>
-                    
-                    <!-- 추억 추가 버튼 -->
-                    <a href="add-memory.html" class="px-4 py-2 bg-gradient-to-r from-pink-500 to-blue-500 text-white rounded-lg font-medium hover:shadow-lg transition-all hover:scale-105">
-                        <i class="fas fa-plus-circle mr-2"></i>
-                        <span data-lang="nav_add_memory">추억 추가</span>
-                    </a>
-                    
-                    <!-- 로그인 버튼 -->
-                    <button id="authButton" onclick="showLoginForm()" class="nav-item">
-                        <i class="fas fa-user"></i>
-                        <span data-lang="auth_login">로그인</span>
-                    </button>
-                    
-                    <!-- 다크모드 토글 -->
-                    <button id="themeToggle" class="w-10 h-10 rounded-full bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 transition-all flex items-center justify-center">
-                        <svg id="sunIcon" class="w-5 h-5 text-yellow-500" fill="currentColor" viewBox="0 0 20 20">
-                            <path fill-rule="evenodd" d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z"></path>
-                        </svg>
-                        <svg id="moonIcon" class="w-5 h-5 text-purple-400" fill="currentColor" viewBox="0 0 20 20" style="display: none;">
-                            <path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"></path>
-                        </svg>
-                    </button>
-                </nav>
-                
-                <!-- 모바일 메뉴 버튼 -->
-                <button id="menuToggle" class="md:hidden p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+                <!-- 다크모드 토글 버튼 -->
+                <button id="themeToggle" class="w-10 h-10 rounded-full bg-gray-200 dark:bg-gray-600 hover:bg-gray-300 dark:hover:bg-gray-500 transition-all duration-300 flex items-center justify-center hover:scale-110 shadow-lg dark:shadow-xl border border-gray-300 dark:border-gray-500">
+                    <svg id="sunIcon" class="w-6 h-6 text-yellow-500" fill="currentColor" viewBox="0 0 20 20" style="display: block;">
+                        <path fill-rule="evenodd" d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z"></path>
+                    </svg>
+                    <svg id="moonIcon" class="w-6 h-6 text-purple-400" fill="currentColor" viewBox="0 0 20 20" style="display: none;">
+                        <path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"></path>
                     </svg>
                 </button>
-            </div>
+            </nav>
         </div>
-        
-        
-                
-                
     </header>
-    
-    <!-- 모바일 메뉴 -->
-    <div id="mobileMenu" class="mobile-menu md:hidden">
-        <div class="px-4 py-6 space-y-2">
-            <a href="index.html" class="mobile-menu-item ">
-                <i class="fas fa-home"></i>
-                <span data-lang="nav_home">홈</span>
-            </a>
-            <a href="add-memory.html" class="mobile-menu-item">
-                <i class="fas fa-plus-circle"></i>
-                <span data-lang="nav_add_memory">추억 추가</span>
-            </a>
-            <a href="growth.html" class="mobile-menu-item">
-                <i class="fas fa-chart-line"></i>
-                <span data-lang="nav_growth">성장 기록</span>
-            </a>
-            <a href="statistics.html" class="mobile-menu-item">
-                <i class="fas fa-chart-bar"></i>
-                <span data-lang="nav_statistics">통계</span>
-            </a>
-            <a href="photobook-creator.html" class="mobile-menu-item">
-                <i class="fas fa-book"></i>
-                <span data-lang="nav_photobook">포토북 만들기</span>
-            </a>
-            <a href="family-settings.html" class="mobile-menu-item">
-                <i class="fas fa-users"></i>
-                <span data-lang="nav_family_settings">가족 설정</span>
-            </a>
-            <a href="share.html" class="mobile-menu-item">
-                <i class="fas fa-share-alt"></i>
-                <span data-lang="nav_share">공유</span>
-            </a>
-            <a href="backup.html" class="mobile-menu-item">
-                <i class="fas fa-database"></i>
-                <span data-lang="nav_backup">백업</span>
-            </a>
-            
-            <div class="pt-4 border-t border-gray-200 dark:border-gray-700 space-y-2">
-                <div class="text-sm text-gray-500 dark:text-gray-400 px-3 mb-2" data-lang="language">언어</div>
-                <div class="grid grid-cols-3 gap-2 px-3">
-                    <button onclick="changeLanguage('ko')" class="lang-btn">
-                        <span class="block text-lg">🇰🇷</span>
-                        <span class="block text-xs mt-1">한국어</span>
-                    </button>
-                    <button onclick="changeLanguage('th')" class="lang-btn">
-                        <span class="block text-lg">🇹🇭</span>
-                        <span class="block text-xs mt-1">ไทย</span>
-                    </button>
-                    <button onclick="changeLanguage('en')" class="lang-btn">
-                        <span class="block text-lg">🇺🇸</span>
-                        <span class="block text-xs mt-1">English</span>
-                    </button>
-                </div>
-            </div>
-            
-            <button onclick="showLoginForm()" class="mobile-menu-item w-full">
-                <i class="fas fa-user"></i>
-                <span data-lang="auth_login">로그인</span>
-            </button>
-        </div>
-    </div>
-    
-    <!-- 모바일 메뉴 오버레이 -->
-    <div id="menuOverlay" class="menu-overlay md:hidden"></div>
+
     <!-- 메인 컨텐츠 -->
     <main class="min-h-screen pt-16">
         <!-- 히어로 섹션 -->
@@ -512,7 +381,6 @@
 
     <!-- JavaScript -->
     <script src="js/supabase.js"></script>
-    <script src="js/auth.js"></script>
     <script src="js/main.js"></script>
     <script src="js/photobook-creator.js"></script>
     <script src="js/notification-system.js" defer></script>
@@ -522,112 +390,6 @@
             duration: 800,
             once: true
         });
-        
-        // getTranslation 함수 추가
-        function getTranslation(key) {
-            const currentLang = localStorage.getItem('language') || 'ko';
-            
-            if (currentLang === 'ko' && typeof ko !== 'undefined') {
-                return ko[key] || key;
-            } else if (currentLang === 'en' && typeof en !== 'undefined') {
-                return en[key] || key;
-            } else if (currentLang === 'th' && typeof th !== 'undefined') {
-                return th[key] || key;
-            }
-            
-            return key;
-        }
-        
-        // 인증 모달 함수들
-        function showAuthModal() {
-            document.getElementById('authModal').classList.remove('hidden');
-        }
-        
-        function closeAuthModal() {
-            document.getElementById('authModal').classList.add('hidden');
-        }
-        
-        function showLoginForm() {
-            const title = document.getElementById('authModalTitle');
-            title.setAttribute('data-lang', 'auth_login');
-            title.textContent = getTranslation('auth_login');
-            
-            document.getElementById('loginForm').classList.remove('hidden');
-            document.getElementById('signupForm').classList.add('hidden');
-            showAuthModal();
-        }
-        
-        function showSignupForm() {
-            const title = document.getElementById('authModalTitle');
-            title.setAttribute('data-lang', 'auth_signup');
-            title.textContent = getTranslation('auth_signup');
-            
-            document.getElementById('loginForm').classList.add('hidden');
-            document.getElementById('signupForm').classList.remove('hidden');
-        }
-        
-        async function handleLogin() {
-            const email = document.getElementById('loginEmail').value;
-            const password = document.getElementById('loginPassword').value;
-            
-            if (!email || !password) {
-                alert(getTranslation('auth_fill_all_fields'));
-                return;
-            }
-            
-            try {
-                const { data, error } = await supabaseClient.auth.signInWithPassword({
-                    email: email,
-                    password: password
-                });
-                
-                if (error) throw error;
-                
-                // 이메일 인증 여부 확인
-                if (data.user && !data.user.email_confirmed_at) {
-                    alert(getTranslation('auth_login_success') + '\n\n' + getTranslation('auth_email_not_verified'));
-                } else {
-                    alert(getTranslation('auth_login_success'));
-                }
-                
-                closeAuthModal();
-                window.location.reload();
-            } catch (error) {
-                console.error('로그인 오류:', error);
-                alert(getTranslation('auth_login_error') + ': ' + error.message);
-            }
-        }
-        
-        async function handleSignup() {
-            const name = document.getElementById('signupName').value;
-            const email = document.getElementById('signupEmail').value;
-            const password = document.getElementById('signupPassword').value;
-            
-            if (!name || !email || !password) {
-                alert(getTranslation('auth_fill_all_fields'));
-                return;
-            }
-            
-            try {
-                const { data, error } = await supabaseClient.auth.signUp({
-                    email: email,
-                    password: password,
-                    options: {
-                        data: {
-                            name: name
-                        }
-                    }
-                });
-                
-                if (error) throw error;
-                
-                alert(getTranslation('auth_signup_success') + '\n\n' + getTranslation('auth_check_email'));
-                showLoginForm();
-            } catch (error) {
-                console.error('회원가입 오류:', error);
-                alert(getTranslation('auth_signup_error') + ': ' + error.message);
-            }
-        }
         
         // 다크모드 토글 기능
         const themeToggle = document.getElementById('themeToggle');
@@ -659,60 +421,6 @@
             moonIcon.style.display = 'none';
         }
     </script>
-
-    <!-- 인증 모달 -->
-    <div id="authModal" class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center z-50">
-        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-md w-full mx-4">
-            <div class="p-6">
-                <div class="flex justify-between items-center mb-4">
-                    <h2 id="authModalTitle" class="text-2xl font-bold text-gray-800 dark:text-gray-200" data-lang="auth_login">로그인</h2>
-                    <button onclick="closeAuthModal()" class="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                        </svg>
-                    </button>
-                </div>
-                
-                <!-- 로그인 폼 -->
-                <div id="loginForm" class="space-y-4">
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2" data-lang="auth_email">이메일</label>
-                        <input type="email" id="loginEmail" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white" placeholder="이메일을 입력하세요" data-lang-placeholder="auth_email_placeholder">
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2" data-lang="auth_password">비밀번호</label>
-                        <input type="password" id="loginPassword" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white" placeholder="비밀번호를 입력하세요" data-lang-placeholder="auth_password_placeholder">
-                    </div>
-                    <button onclick="handleLogin()" class="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 transition duration-300" data-lang="auth_login">로그인</button>
-                    <p class="text-center text-sm text-gray-600 dark:text-gray-400">
-                        <span data-lang="auth_no_account">계정이 없으신가요?</span> 
-                        <a href="#" onclick="showSignupForm()" class="text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300" data-lang="auth_signup">회원가입</a>
-                    </p>
-                </div>
-                
-                <!-- 회원가입 폼 -->
-                <div id="signupForm" class="space-y-4 hidden">
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2" data-lang="auth_name">이름</label>
-                        <input type="text" id="signupName" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white" placeholder="이름을 입력하세요" data-lang-placeholder="auth_name_placeholder">
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">이메일</label>
-                        <input type="email" id="signupEmail" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white" placeholder="이메일을 입력하세요">
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">비밀번호</label>
-                        <input type="password" id="signupPassword" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white" placeholder="비밀번호를 입력하세요">
-                    </div>
-                    <button onclick="handleSignup()" class="w-full bg-green-600 text-white py-2 px-4 rounded-md hover:bg-green-700 transition duration-300" data-lang="auth_signup">회원가입</button>
-                    <p class="text-center text-sm text-gray-600 dark:text-gray-400">
-                        <span data-lang="auth_have_account">이미 계정이 있으신가요?</span> 
-                        <a href="#" onclick="showLoginForm()" class="text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300" data-lang="auth_login">로그인</a>
-                    </p>
-                </div>
-            </div>
-        </div>
-    </div>
     
     <!-- 푸터 -->
     <footer class="bg-gray-100 dark:bg-gray-800 py-8 mt-16">

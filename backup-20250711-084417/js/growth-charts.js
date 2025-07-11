@@ -20,30 +20,15 @@ document.addEventListener('DOMContentLoaded', async () => {
 // 인물 정보 로드
 async function loadPeople() {
     try {
-        // Supabase 연결 확인
-        if (typeof supabaseClient !== 'undefined' && supabaseClient.from) {
-            const { data, error } = await supabaseClient
-                .from('people')
-                .select('*')
-                .order('name');
-                
-            if (error) throw error;
-            people = data || [];
-        } else {
-            // Supabase를 사용할 수 없는 경우 기본 데이터 사용
-            console.warn('Supabase 연결이 없습니다. 기본 데이터를 사용합니다.');
-            people = [
-                { id: 1, name: '민호', birthdate: '2020-01-01' },
-                { id: 2, name: '민아', birthdate: '2022-06-15' }
-            ];
-        }
+        const { data, error } = await supabase
+            .from('people')
+            .select('*')
+            .order('name');
+            
+        if (error) throw error;
+        people = data || [];
     } catch (error) {
         console.error('인물 정보 로드 실패:', error);
-        // 에러 발생 시에도 기본 데이터 제공
-        people = [
-            { id: 1, name: '민호', birthdate: '2020-01-01' },
-            { id: 2, name: '민아', birthdate: '2022-06-15' }
-        ];
     }
 }
 
@@ -183,41 +168,22 @@ async function loadGrowthRecords() {
             return;
         }
         
-        // Supabase 사용 가능 여부 확인
-        if (typeof supabaseClient !== 'undefined' && supabaseClient.from) {
-            // 성장 기록 조회
-            const { data, error } = await supabaseClient
-                .from('growth_records')
-                .select('*')
-                .eq('person_id', person.id)
-                .order('record_date', { ascending: true });
-                
-            if (error) throw error;
+        // 성장 기록 조회
+        const { data, error } = await supabase
+            .from('growth_records')
+            .select('*')
+            .eq('person_id', person.id)
+            .order('record_date', { ascending: true });
             
-            growthRecords = data || [];
-        } else {
-            // 로컬 스토리지에서 데이터 로드
-            const localRecords = JSON.parse(localStorage.getItem('growthRecords') || '[]');
-            growthRecords = localRecords.filter(r => r.person_id === person.id)
-                .sort((a, b) => new Date(a.record_date) - new Date(b.record_date));
-        }
+        if (error) throw error;
         
+        growthRecords = data || [];
         updateCharts();
         updateStatistics();
         updateRecordsTable();
         
     } catch (error) {
         console.error('성장 기록 로드 실패:', error);
-        // 에러 발생 시 로컬 스토리지 사용
-        const localRecords = JSON.parse(localStorage.getItem('growthRecords') || '[]');
-        const person = people.find(p => p.name === currentPerson);
-        if (person) {
-            growthRecords = localRecords.filter(r => r.person_id === person.id)
-                .sort((a, b) => new Date(a.record_date) - new Date(b.record_date));
-            updateCharts();
-            updateStatistics();
-            updateRecordsTable();
-        }
     }
 }
 
@@ -400,35 +366,18 @@ async function handleAddRecord(e) {
             return;
         }
         
-        const newRecord = {
-            id: Date.now(), // 임시 ID
-            person_id: person.id,
-            record_date: recordDate,
-            height_cm: height,
-            weight_kg: weight,
-            notes: notes || null
-        };
-        
-        // Supabase 사용 가능 여부 확인
-        if (typeof supabaseClient !== 'undefined' && supabaseClient.from) {
-            // 기록 추가
-            const { error } = await supabaseClient
-                .from('growth_records')
-                .insert({
-                    person_id: person.id,
-                    record_date: recordDate,
-                    height_cm: height,
-                    weight_kg: weight,
-                    notes: notes || null
-                });
-                
-            if (error) throw error;
-        } else {
-            // 로컬 스토리지에 저장
-            const localRecords = JSON.parse(localStorage.getItem('growthRecords') || '[]');
-            localRecords.push(newRecord);
-            localStorage.setItem('growthRecords', JSON.stringify(localRecords));
-        }
+        // 기록 추가
+        const { error } = await supabase
+            .from('growth_records')
+            .insert({
+                person_id: person.id,
+                record_date: recordDate,
+                height_cm: height,
+                weight_kg: weight,
+                notes: notes || null
+            });
+            
+        if (error) throw error;
         
         // 성공
         hideAddRecordModal();
@@ -441,37 +390,9 @@ async function handleAddRecord(e) {
             await selectPerson(personName);
         }
         
-        // 성공 메시지
-        alert('성장 기록이 추가되었습니다.');
-        
     } catch (error) {
         console.error('기록 추가 실패:', error);
         alert('기록 추가에 실패했습니다.');
-        
-        // 에러 발생 시에도 로컬 스토리지에 저장 시도
-        try {
-            const localRecords = JSON.parse(localStorage.getItem('growthRecords') || '[]');
-            const newRecord = {
-                id: Date.now(),
-                person_id: person.id,
-                record_date: recordDate,
-                height_cm: height,
-                weight_kg: weight,
-                notes: notes || null
-            };
-            localRecords.push(newRecord);
-            localStorage.setItem('growthRecords', JSON.stringify(localRecords));
-            
-            hideAddRecordModal();
-            if (currentPerson === personName) {
-                await loadGrowthRecords();
-            } else {
-                await selectPerson(personName);
-            }
-            alert('성장 기록이 로컬에 저장되었습니다.');
-        } catch (localError) {
-            console.error('로컬 저장도 실패:', localError);
-        }
     }
 }
 
@@ -480,39 +401,19 @@ async function deleteRecord(recordId) {
     if (!confirm('이 기록을 삭제하시겠습니까?')) return;
     
     try {
-        // Supabase 사용 가능 여부 확인
-        if (typeof supabaseClient !== 'undefined' && supabaseClient.from) {
-            const { error } = await supabaseClient
-                .from('growth_records')
-                .delete()
-                .eq('id', recordId);
-                
-            if (error) throw error;
-        } else {
-            // 로컬 스토리지에서 삭제
-            const localRecords = JSON.parse(localStorage.getItem('growthRecords') || '[]');
-            const updatedRecords = localRecords.filter(r => r.id !== recordId);
-            localStorage.setItem('growthRecords', JSON.stringify(updatedRecords));
-        }
+        const { error } = await supabase
+            .from('growth_records')
+            .delete()
+            .eq('id', recordId);
+            
+        if (error) throw error;
         
         // 데이터 새로고침
         await loadGrowthRecords();
-        alert('기록이 삭제되었습니다.');
         
     } catch (error) {
         console.error('기록 삭제 실패:', error);
         alert('기록 삭제에 실패했습니다.');
-        
-        // 에러 발생 시에도 로컬 스토리지에서 삭제 시도
-        try {
-            const localRecords = JSON.parse(localStorage.getItem('growthRecords') || '[]');
-            const updatedRecords = localRecords.filter(r => r.id !== recordId);
-            localStorage.setItem('growthRecords', JSON.stringify(updatedRecords));
-            await loadGrowthRecords();
-            alert('기록이 로컬에서 삭제되었습니다.');
-        } catch (localError) {
-            console.error('로컬 삭제도 실패:', localError);
-        }
     }
 }
 

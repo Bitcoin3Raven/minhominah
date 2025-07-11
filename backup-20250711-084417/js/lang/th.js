@@ -1,7 +1,5 @@
 // 태국어 번역 파일
 const th = {
-    // ชื่อเว็บไซต์
-    site_title: 'มินโฮมินอา',
     // 네비게이션
     nav_home: "หน้าแรก",
     nav_growth: "บันทึกการเติบโต",
@@ -447,13 +445,6 @@ const th = {
     share_memory_not_found: "ไม่พบความทรงจำ",
     share_memory_error: "ความทรงจำที่ขอไม่มีอยู่หรือหมดอายุแล้ว",
     btn_back_home: "กลับสู่หน้าแรก",
-    
-    // Navigation additional translations
-    nav_main_menu: "เมนูหลัก",
-    nav_photobook: "สร้างโฟโต้บุค",
-    nav_family_settings: "ตั้งค่าครอบครัว",
-    nav_share: "แชร์",
-    language: "ภาษา",
     
     // join-family.html page
     join_family_title: "คำเชิญครอบครัว - MinhoMinah",
