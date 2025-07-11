@@ -392,13 +392,14 @@ async function handleAddRecord(e) {
     const weight = parseFloat(document.getElementById('recordWeight').value);
     const notes = document.getElementById('recordNotes').value;
     
+    // 인물 ID 찾기 (try 블록 밖에서 정의)
+    const person = people.find(p => p.name === personName);
+    if (!person) {
+        alert('인물을 찾을 수 없습니다.');
+        return;
+    }
+    
     try {
-        // 인물 ID 찾기
-        const person = people.find(p => p.name === personName);
-        if (!person) {
-            alert('인물을 찾을 수 없습니다.');
-            return;
-        }
         
         const newRecord = {
             id: Date.now(), // 임시 ID

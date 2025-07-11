@@ -1383,6 +1383,26 @@
         
         // people 테이블에서 민호/민아 정보 로드
         async function loadChildrenInfo() {
+            // 로컬 스토리지에서 캐시 확인
+            const cached = localStorage.getItem('childrenBirthInfo');
+            if (cached) {
+                const parsedCache = JSON.parse(cached);
+                // 24시간 이내의 캐시만 사용
+                if (parsedCache.timestamp && Date.now() - parsedCache.timestamp < 24 * 60 * 60 * 1000) {
+                    Object.assign(childrenInfo, parsedCache.data);
+                    console.log('Children info loaded from cache');
+                    
+                    // UI 업데이트
+                    if (childrenInfo.minho.birthdate) {
+                        document.getElementById('minhoBirthdate').value = childrenInfo.minho.birthdate;
+                    }
+                    if (childrenInfo.mina.birthdate) {
+                        document.getElementById('minaBirthdate').value = childrenInfo.mina.birthdate;
+                    }
+                    return;
+                }
+            }
+            
             const { data: people, error } = await supabaseClient
                 .from('people')
                 .select('*')
@@ -1398,6 +1418,12 @@
                         childrenInfo.mina.id = person.id;
                     }
                 });
+                
+                // 캐시에 저장
+                localStorage.setItem('childrenBirthInfo', JSON.stringify({
+                    data: childrenInfo,
+                    timestamp: Date.now()
+                }));
                 
                 // 생년월일이 설정되어 있으면 UI 업데이트
                 if (childrenInfo.minho.birthdate) {
@@ -1646,13 +1672,16 @@
         // 나이별 필터 초기화
         function initializeAgeFilters() {
             const ageButtons = document.getElementById('ageFilterButtons');
-            ageButtons.innerHTML = '';
             
             // 생년월일이 설정된 경우만 나이별 버튼 생성
             if (!childrenInfo.minho.birthdate && !childrenInfo.mina.birthdate) {
+                ageButtons.innerHTML = '';
                 document.getElementById('birthdateSetup').classList.remove('hidden');
                 return;
             }
+            
+            // 기존 내용 초기화
+            ageButtons.innerHTML = '';
             
             // 현재 날짜 기준으로 현재 나이 계산
             const today = new Date();
@@ -1876,15 +1905,29 @@
                 document.getElementById('minaMemories').textContent = '0';
                 document.getElementById('totalPhotos').textContent = '0';
             } else {
-                // 실제 데이터 로드
-                await loadPeople();
-                await loadMemories();
-                await loadChildrenInfo();  // 아이들 생년월일 정보 로드
-                await loadTags();  // 태그 로드
-                updateStats();
+                // 로딩 중 상태 표시 (스켈레톤 UI)
+                showLoadingState();
                 
-                // 나이별 필터 초기화
-                initializeAgeFilters();
+                // 병렬로 데이터 로드 (성능 개선)
+                const [peopleResult, childrenResult, tagsResult] = await Promise.allSettled([
+                    loadPeople(),
+                    loadChildrenInfo(),
+                    loadTags()
+                ]);
+                
+                // 나이별 필터 먼저 초기화 (빠른 UI 표시)
+                if (childrenResult.status === 'fulfilled') {
+                    initializeAgeFilters();
+                }
+                
+                // 메모리 데이터 로드 (별도로 처리)
+                loadMemories().then(() => {
+                    updateStats();
+                    hideLoadingState();
+                }).catch(error => {
+                    console.error('메모리 로드 실패:', error);
+                    hideLoadingState();
+                });
             }
             
             // 언어 변경 이벤트 리스너 추가
@@ -2405,6 +2448,31 @@
                 .getPublicUrl(path);
             
             return data.publicUrl;
+        }
+        
+        // 로딩 상태 표시
+        function showLoadingState() {
+            // 나이별 필터에 스켈레톤 버튼 표시 (0-10세만 미리 표시)
+            const ageButtons = document.getElementById('ageFilterButtons');
+            let skeletonHTML = '';
+            for (let i = 0; i <= 10; i++) {
+                skeletonHTML += `<div class="age-filter-btn opacity-50 animate-pulse bg-gray-200">${i}세</div>`;
+            }
+            ageButtons.innerHTML = skeletonHTML;
+            
+            // 통계에 로딩 표시
+            document.querySelectorAll('.counter').forEach(counter => {
+                counter.textContent = '...';
+                counter.classList.add('animate-pulse');
+            });
+        }
+        
+        // 로딩 상태 숨김
+        function hideLoadingState() {
+            // 통계 애니메이션 제거
+            document.querySelectorAll('.counter').forEach(counter => {
+                counter.classList.remove('animate-pulse');
+            });
         }
         
         // 통계 업데이트

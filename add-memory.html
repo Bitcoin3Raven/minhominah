@@ -39,6 +39,7 @@
     <script src="js/supabase.js"></script>
     <script src="js/auth.js"></script>
     <script src="js/tag-system.js"></script>
+    <script src="js/tag-system-fix.js" defer></script>
     <script src="js/notification-system.js" defer></script>
     <script src="js/image-optimizer.js"></script>
     <script src="js/add-memory-fix.js" defer></script>
@@ -418,8 +419,8 @@
             <h2 class="text-2xl font-bold mb-4" data-lang="add_memory_login_required">로그인이 필요합니다</h2>
             <p class="text-gray-600 mb-6" data-lang="add_memory_login_desc">추억을 추가하려면 먼저 로그인해주세요.</p>
             <div class="grid md:grid-cols-2 gap-4 max-w-md">
-                <input type="email" id="loginEmail" placeholder="이메일" class="form-input" data-lang-placeholder="add_memory_email">
-                <input type="password" id="loginPassword" placeholder="비밀번호" class="form-input" data-lang-placeholder="add_memory_password">
+                <input type="email" id="quickLoginEmail" placeholder="이메일" class="form-input" data-lang-placeholder="add_memory_email">
+                <input type="password" id="quickLoginPassword" placeholder="비밀번호" class="form-input" data-lang-placeholder="add_memory_password">
             </div>
             <button class="btn btn-primary mt-4" onclick="login()">
                 <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" class="mr-2">
@@ -632,8 +633,8 @@
         }
         
         async function handleLogin() {
-            const email = document.getElementById('loginEmail').value;
-            const password = document.getElementById('loginPassword').value;
+            const email = document.getElementById('modalLoginEmail').value;
+            const password = document.getElementById('modalLoginPassword').value;
             
             if (!email || !password) {
                 alert(getTranslation('auth_fill_all_fields'));
@@ -734,8 +735,8 @@
         
         // 로그인
         async function login() {
-            const email = document.getElementById('loginEmail').value;
-            const password = document.getElementById('loginPassword').value;
+            const email = document.getElementById('quickLoginEmail').value;
+            const password = document.getElementById('quickLoginPassword').value;
             
             try {
                 const { data, error } = await supabaseClient.auth.signInWithPassword({
@@ -900,6 +901,10 @@
             }
             
             try {
+                // 현재 사용자 정보 디버깅
+                console.log('현재 사용자:', currentUser);
+                console.log('사용자 ID:', currentUser.id);
+                
                 // 1. 추억 데이터 저장
                 const { data: memoryData, error: memoryError } = await supabaseClient
                     .from('memories')
@@ -913,7 +918,10 @@
                     .select()
                     .single();
                 
-                if (memoryError) throw memoryError;
+                if (memoryError) {
+                    console.error('메모리 저장 오류 상세:', memoryError);
+                    throw memoryError;
+                }
                 
                 // 2. 사람 연결
                 const peopleConnections = [];
@@ -1040,7 +1048,9 @@
             
             for (let i = 0; i < selectedFiles.length; i++) {
                 const file = selectedFiles[i];
-                const fileName = `memories/${memoryId}/${Date.now()}-${file.name}`;
+                // 파일명 안전하게 처리 (특수문자 제거, 공백을 언더스코어로 변경)
+                const safeFileName = file.name.replace(/[^a-zA-Z0-9.-]/g, '_');
+                const fileName = `memories/${memoryId}/${Date.now()}-${safeFileName}`;
                 
                 // 진행률 업데이트
                 progressFill.style.width = `${((i + 1) / selectedFiles.length) * 100}%`;
@@ -1118,9 +1128,16 @@
         }
         
         // 페이지 로드시 초기화
-        window.addEventListener('DOMContentLoaded', () => {
-            checkAuth();
-            loadPeople();
+        window.addEventListener('DOMContentLoaded', async () => {
+            // 인증 상태 확인
+            const user = await checkAuthStatus();
+            if (user) {
+                currentUser = user;
+                document.getElementById('authCheck').style.display = 'none';
+                document.getElementById('addMemoryForm').style.display = 'block';
+                loadPeople();
+            }
+            
             initTheme();
             AOS.init();
             // 언어 시스템 초기화
@@ -1147,11 +1164,11 @@
                 <div id="loginForm" class="space-y-4">
                     <div>
                         <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2" data-lang="auth_email">이메일</label>
-                        <input type="email" id="loginEmail" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white" placeholder="이메일을 입력하세요" data-lang-placeholder="auth_email_placeholder">
+                        <input type="email" id="modalLoginEmail" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white" placeholder="이메일을 입력하세요" data-lang-placeholder="auth_email_placeholder">
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2" data-lang="auth_password">비밀번호</label>
-                        <input type="password" id="loginPassword" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white" placeholder="비밀번호를 입력하세요" data-lang-placeholder="auth_password_placeholder">
+                        <input type="password" id="modalLoginPassword" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white" placeholder="비밀번호를 입력하세요" data-lang-placeholder="auth_password_placeholder">
                     </div>
                     <button onclick="handleLogin()" class="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 transition duration-300" data-lang="auth_login">로그인</button>
                     <p class="text-center text-sm text-gray-600 dark:text-gray-400">

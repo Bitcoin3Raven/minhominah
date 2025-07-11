@@ -290,13 +290,16 @@ function setupLazyLoading() {
         threshold: 0.01
     });
     
-    // 모든 lazy-load 이미지 관찰
-    document.querySelectorAll('img[data-src]').forEach(img => {
+    // 모든 lazy-load 이미지 관찰 (클래스명과 data-src 모두 확인)
+    document.querySelectorAll('img.lazy-load[data-src], img[data-src]').forEach(img => {
         imageObserver.observe(img);
     });
     
     return imageObserver;
 }
+
+// window 객체에 함수 등록
+window.setupLazyLoading = setupLazyLoading;
 
 // 페이지 로드 시 lazy loading 설정
 if (document.readyState === 'loading') {

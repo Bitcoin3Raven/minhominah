@@ -59,7 +59,7 @@ class SmartTagSystem {
     
     async loadExistingTags() {
         try {
-            const { data, error } = await supabase
+            const { data, error } = await window.supabaseClient
                 .from('tags')
                 .select('*')
                 .order('name');
@@ -356,7 +356,7 @@ class SmartTagSystem {
         
         // 새 태그 생성
         try {
-            const { data, error } = await supabase
+            const { data, error } = await window.supabaseClient
                 .from('tags')
                 .insert({
                     name: tagName,

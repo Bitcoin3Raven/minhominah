@@ -19,6 +19,14 @@ class NotificationSystem {
         
         this.supabase = window.supabaseClient;
         
+        // 현재 사용자 정보 가져오기
+        const { data: { user } } = await this.supabase.auth.getUser();
+        if (!user) {
+            console.log('로그인된 사용자가 없습니다.');
+            return;
+        }
+        this.userId = user.id;
+        
         // 알림 UI 생성
         this.createNotificationUI();
         
@@ -190,7 +198,8 @@ class NotificationSystem {
 
         // 패널 외부 클릭 시 닫기
         document.addEventListener('click', (e) => {
-            if (!e.target.closest('#notificationBell') && !e.target.closest('#notificationPanel')) {
+            // notificationPanel이 존재하는 경우에만 처리
+            if (this.notificationPanel && !e.target.closest('#notificationBell') && !e.target.closest('#notificationPanel')) {
                 this.closeNotificationPanel();
             }
         });
@@ -406,9 +415,10 @@ class NotificationSystem {
             const { data, error } = await this.supabase
                 .from('notification_settings')
                 .select('*')
-                .single();
+                .eq('user_id', this.userId)
+                .maybeSingle();
 
-            if (error && error.code !== 'PGRST116') throw error;
+            if (error) throw error;
 
             this.settings = data || {
                 anniversary_enabled: true,
