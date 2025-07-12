@@ -2741,8 +2741,10 @@
     </div>
 
     <script>
-        // 전역 변수
-        let currentMemoryId = null;
+        // 전역 변수 - comment-system.js와 중복 방지
+        if (typeof currentMemoryId === 'undefined') {
+            var currentMemoryId = null;
+        }
         
         // 추억 상세 모달 관련 함수들
         function viewMemoryDetail(memoryId) {

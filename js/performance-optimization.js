@@ -3,12 +3,15 @@
  * 가상 스크롤과 필터 캐싱을 통한 성능 개선
  */
 
-// Feature flags
-const PERFORMANCE_FLAGS = {
-    VIRTUAL_SCROLL: true,
+// Feature flags - 전역 변수로 노출
+window.PERFORMANCE_FLAGS = {
+    VIRTUAL_SCROLL: true,  // 가상 스크롤 활성화
     FILTER_CACHE: true,
-    DEBUG_MODE: false
+    DEBUG_MODE: true      // 디버깅을 위해 임시로 활성화
 };
+
+// 로컬 참조용
+const PERFORMANCE_FLAGS = window.PERFORMANCE_FLAGS;
 
 // 원본 함수 백업
 let originalDisplayMemories = null;
@@ -129,6 +132,21 @@ function renderMemoryBatch(memories, container, append) {
 }
 
 /**
+ * 미디어 URL 가져오기
+ */
+function getMediaUrl(mediaFile) {
+    if (!mediaFile) return '';
+    
+    // 썸네일이 있으면 썸네일 사용, 없으면 원본 사용
+    const path = mediaFile.thumbnail_path || mediaFile.file_path;
+    const { data } = supabaseClient.storage
+        .from('media')
+        .getPublicUrl(path);
+    
+    return data.publicUrl;
+}
+
+/**
  * 메모리 요소 생성 (기존 코드에서 추출)
  */
 function createMemoryElement(memory, layout) {
@@ -144,9 +162,10 @@ function createMemoryElement(memory, layout) {
     }
     
     // 이미지 URL 설정
-    const imageUrl = memory.photos && memory.photos.length > 0 
-        ? memory.photos[0].url 
-        : '/assets/images/placeholder.svg';
+    const hasMedia = memory.media_files && memory.media_files.length > 0;
+    const imageUrl = hasMedia 
+        ? getMediaUrl(memory.media_files[0])
+        : 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300"%3E%3Crect width="400" height="300" fill="%23f3f4f6"/%3E%3C/svg%3E';
     
     // 사람 정보
     const peopleNames = memory.memory_people
@@ -168,7 +187,7 @@ function createMemoryElement(memory, layout) {
             <div class="aspect-w-16 aspect-h-12 bg-gray-200 dark:bg-gray-700">
                 <img 
                     data-src="${imageUrl}" 
-                    src="/assets/images/placeholder.svg"
+                    src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 300'%3E%3Crect width='400' height='300' fill='%23f3f4f6'/%3E%3C/svg%3E"
                     alt="${memory.title || '추억'}" 
                     class="w-full h-full object-cover lazy-load"
                     loading="lazy"
@@ -197,13 +216,13 @@ function createMemoryElement(memory, layout) {
                     </div>
                 ` : ''}
                 <div class="flex justify-between items-center pt-3 border-t border-gray-200 dark:border-gray-700">
-                    <button onclick="openMemoryDetail(${memory.id})" 
+                    <button onclick="viewMemoryDetail(${memory.id})" 
                         class="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 text-sm font-medium">
                         자세히 보기
                     </button>
                     <div class="flex gap-3 text-gray-500 dark:text-gray-400 text-sm">
-                        ${memory.photos && memory.photos.length > 1 ? `
-                            <span><i class="fas fa-images"></i> ${memory.photos.length}</span>
+                        ${memory.media_files && memory.media_files.length > 1 ? `
+                            <span><i class="fas fa-images"></i> ${memory.media_files.length}</span>
                         ` : ''}
                         ${memory.likes_count > 0 ? `
                             <span><i class="fas fa-heart"></i> ${memory.likes_count}</span>
