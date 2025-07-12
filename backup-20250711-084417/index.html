@@ -1506,6 +1506,49 @@
             }
         });
         
+        // Lazy Loading 함수 추가
+        function initLazyLoading() {
+            const lazyImages = document.querySelectorAll('img.lazy-load');
+            console.log('Lazy loading 초기화 - 이미지 개수:', lazyImages.length);
+            
+            if ("IntersectionObserver" in window) {
+                const imageObserver = new IntersectionObserver((entries, observer) => {
+                    entries.forEach(entry => {
+                        if (entry.isIntersecting) {
+                            const img = entry.target;
+                            const src = img.getAttribute('data-src');
+                            if (src) {
+                                console.log('Lazy loading image:', src);
+                                img.src = src;
+                                img.classList.remove('lazy-load');
+                                img.classList.add('lazy-loaded');
+                                imageObserver.unobserve(img);
+                            }
+                        }
+                    });
+                }, {
+                    rootMargin: "100px" // 100px 전에 로딩 시작
+                });
+                
+                lazyImages.forEach(img => imageObserver.observe(img));
+            } else {
+                // Fallback for browsers that don't support IntersectionObserver
+                lazyImages.forEach(img => {
+                    const src = img.getAttribute('data-src');
+                    if (src) {
+                        img.src = src;
+                        img.classList.remove('lazy-load');
+                        img.classList.add('lazy-loaded');
+                    }
+                });
+            }
+        }
+        
+        // 메모리 표시 후 lazy loading 재초기화를 위한 함수
+        function reinitializeLazyLoading() {
+            setTimeout(initLazyLoading, 100); // DOM 업데이트 후 실행
+        }
+        
         // 페이지 로드시 초기화
         window.addEventListener('DOMContentLoaded', async function() {
             // Service Worker 등록 (PWA)
@@ -1517,6 +1560,9 @@
                     console.log('Service Worker 등록 실패:', error);
                 }
             }
+            
+            // Lazy Loading 초기화
+            initLazyLoading();
             
             // 테스트를 위한 더미 데이터 설정
             if (!window.supabaseClient) {
@@ -1886,6 +1932,9 @@
             if (window.setupLazyLoading) {
                 window.setupLazyLoading();
             }
+            
+            // Lazy loading 재초기화 (새로 추가된 이미지들을 위해)
+            reinitializeLazyLoading();
         }
         
         // 메모리 카드 생성 (개선된 디자인)
@@ -2055,13 +2104,21 @@
         
         // 미디어 URL 가져오기
         function getMediaUrl(mediaFile) {
-            if (!mediaFile) return '';
+            if (!mediaFile) {
+                console.warn('getMediaUrl: mediaFile is null or undefined');
+                return '';
+            }
             
             // 썸네일이 있으면 썸네일 사용, 없으면 원본 사용
             const path = mediaFile.thumbnail_path || mediaFile.file_path;
+            console.log('getMediaUrl - mediaFile:', mediaFile);
+            console.log('getMediaUrl - using path:', path);
+            
             const { data } = supabaseClient.storage
                 .from('media')
                 .getPublicUrl(path);
+            
+            console.log('getMediaUrl - generated URL:', data.publicUrl);
             
             return data.publicUrl;
         }
