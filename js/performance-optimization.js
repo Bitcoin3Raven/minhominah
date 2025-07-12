@@ -5,9 +5,9 @@
 
 // Feature flags - 전역 변수로 노출
 window.PERFORMANCE_FLAGS = {
-    VIRTUAL_SCROLL: true,  // 가상 스크롤 활성화
+    VIRTUAL_SCROLL: false,  // 가상 스크롤 임시 비활성화 (원본 함수 사용)
     FILTER_CACHE: true,
-    DEBUG_MODE: true      // 디버깅을 위해 임시로 활성화
+    DEBUG_MODE: false     // 성능 모니터 비활성화
 };
 
 // 로컬 참조용
@@ -97,8 +97,12 @@ async function optimizedDisplayMemories(append = false) {
         }
         
         // Lazy loading 재초기화
-        if (window.imageOptimizer) {
-            window.imageOptimizer.setupLazyLoading();
+        if (typeof lazyLoadImages === 'function') {
+            setTimeout(lazyLoadImages, 100);
+        } else if (typeof setupLazyLoading === 'function') {
+            setupLazyLoading();
+        } else if (window.setupLazyLoading) {
+            window.setupLazyLoading();
         }
         
         // AOS 애니메이션 새로고침
