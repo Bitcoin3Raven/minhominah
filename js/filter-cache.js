@@ -236,7 +236,7 @@ function performFiltering(filters) {
             return memory.title?.toLowerCase().includes(searchTerm) ||
                    memory.description?.toLowerCase().includes(searchTerm) ||
                    memory.memory_tags?.some(tag => 
-                       tag.tag_name.toLowerCase().includes(searchTerm)
+                       tag?.tag_name?.toLowerCase().includes(searchTerm)
                    );
         });
     }
