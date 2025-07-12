@@ -45,6 +45,10 @@
     
     <!-- Supabase 클라이언트 -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    
+    <!-- 프로젝트 스크립트 -->
+    <script src="js/supabase.js"></script>
+    <script src="js/auth.js"></script>
 
     <!-- 언어 시스템 -->
     <script src="js/lang/ko.js"></script>
@@ -865,6 +869,20 @@
             }
         }
 
+        // 언어 변경 함수
+        function changeLanguage(lang) {
+            if (window.languageManager) {
+                window.languageManager.changeLanguage(lang);
+            }
+        }
+        
+        // 언어 시스템 초기화 함수
+        function initializeLanguage() {
+            if (typeof LanguageManager !== 'undefined') {
+                window.languageManager = new LanguageManager();
+            }
+        }
+        
         // 페이지 로드 시 초기화
         document.addEventListener('DOMContentLoaded', () => {
             initTheme();

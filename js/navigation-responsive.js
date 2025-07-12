@@ -1,4 +1,20 @@
 // 반응형 네비게이션 시스템
+
+// 전역 언어 변경 함수
+window.changeLanguage = function(lang) {
+    if (window.languageManager) {
+        window.languageManager.changeLanguage(lang);
+    } else if (typeof LanguageManager !== 'undefined') {
+        // languageManager가 아직 초기화되지 않았다면 초기화
+        window.languageManager = new LanguageManager();
+        window.languageManager.changeLanguage(lang);
+    } else {
+        // LanguageManager가 로드되지 않았다면 기본 동작
+        localStorage.setItem('selectedLanguage', lang);
+        location.reload();
+    }
+};
+
 document.addEventListener('DOMContentLoaded', function() {
     // 햄버거 메뉴 토글
     const menuToggle = document.getElementById('menuToggle');
