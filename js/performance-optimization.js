@@ -5,7 +5,7 @@
 
 // Feature flags - 전역 변수로 노출
 window.PERFORMANCE_FLAGS = {
-    VIRTUAL_SCROLL: false,  // 가상 스크롤 임시 비활성화 (원본 함수 사용)
+    VIRTUAL_SCROLL: true,  // 가상 스크롤 활성화
     FILTER_CACHE: true,
     DEBUG_MODE: false     // 성능 모니터 비활성화
 };

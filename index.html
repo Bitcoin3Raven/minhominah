@@ -11,16 +11,7 @@
     <link rel="apple-touch-icon" href="/assets/images/icon-192x192.png">
     
     <!-- Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        // Tailwind 다크모드 설정
-        tailwind.config = {
-            darkMode: 'class',
-            theme: {
-                extend: {}
-            }
-        }
-    </script>
+    <link rel="stylesheet" href="css/tailwind.css">
     
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
@@ -52,13 +43,8 @@
     <!-- Kakao SDK -->
     <script src="https://t1.kakaocdn.net/kakao_js_sdk/2.5.0/kakao.min.js"
         integrity="sha384-kYPsUbBPlktXsY6/oNHSUDZoTX6+YI51f63jCPEIPFP09ttByAdxd2mEjKuhdqn4" crossorigin="anonymous"></script>
-    <script>
-        // Kakao SDK 초기화 (실제 JavaScript 키로 교체 필요)
-        if (typeof Kakao !== 'undefined') {
-            // Kakao.init('YOUR_KAKAO_JAVASCRIPT_KEY');
-            console.log('Kakao SDK loaded. Please add your JavaScript key.');
-        }
-    </script>
+    <script src="js/kakao-config.js"></script>
+    
     
     <!-- 다크모드 초기화 스크립트 -->
     <script>
@@ -2155,7 +2141,7 @@
                         });
                         return hasMinHo && hasMinA;
                     } else {
-                        // 민호만 또는 민아만
+                        // 민호가 포함된 또는 민아가 포함된 모든 사진
                         return memory.memory_people.some(mp => {
                             const person = peopleData[mp.person_id];
                             return person && person.name.toLowerCase() === 
