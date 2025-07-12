@@ -190,12 +190,11 @@ function createMemoryElement(memory, layout) {
         <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300" data-aos="fade-up">
             <div class="bg-gray-200 dark:bg-gray-700" style="position: relative; overflow: hidden;">
                 <img 
-                    data-src="${imageUrl}" 
-                    src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 300'%3E%3Crect width='400' height='300' fill='%23f3f4f6'/%3E%3C/svg%3E"
+                    src="${imageUrl}" 
                     alt="${memory.title || '추억'}" 
-                    class="w-full h-full object-cover lazy-load"
-                    loading="lazy"
+                    class="w-full h-full object-cover"
                     style="display: block; width: 100%; height: auto; min-height: 200px;"
+                    onerror="this.style.display='none'; this.parentElement.style.backgroundColor='#e5e7eb';"
                 >
             </div>
             <div class="p-4">
