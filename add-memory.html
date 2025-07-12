@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ko" data-theme="light">
+<html lang="ko">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -44,6 +44,16 @@
     <script src="js/image-optimizer.js"></script>
     <script src="js/add-memory-fix.js" defer></script>
     
+    <!-- 다크모드 초기화 스크립트 -->
+    <script>
+        // 페이지 로드 전 다크모드 설정
+        if (localStorage.getItem('theme') === 'dark' || (!localStorage.getItem('theme') && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.add('dark');
+        } else {
+            document.documentElement.classList.remove('dark');
+        }
+    </script>
+    
     <style>
         /* 히어로 섹션 스타일 */
         .hero-section {
@@ -54,7 +64,7 @@
         }
         
         /* 다크모드 히어로 섹션 */
-        [data-theme="dark"] .hero-section {
+        .dark .hero-section {
             background: 
                 radial-gradient(circle at 10% 10%, rgba(219, 39, 119, 0.3) 0%, rgba(219, 39, 119, 0.1) 25%, transparent 50%),
                 radial-gradient(circle at 90% 90%, rgba(59, 130, 246, 0.3) 0%, rgba(59, 130, 246, 0.1) 25%, transparent 50%),
@@ -550,40 +560,7 @@
     </div>
     
     <script>
-        // 다크모드 토글 기능
-        function initTheme() {
-            const themeToggle = document.getElementById('themeToggle');
-            const sunIcon = document.getElementById('sunIcon');
-            const moonIcon = document.getElementById('moonIcon');
-
-            // 초기 아이콘 상태 설정
-            const initialTheme = document.documentElement.getAttribute('data-theme');
-            if (initialTheme === 'dark') {
-                sunIcon.style.display = 'none';
-                moonIcon.style.display = 'block';
-            } else {
-                sunIcon.style.display = 'block';
-                moonIcon.style.display = 'none';
-            }
-
-            themeToggle.addEventListener('click', () => {
-                const currentTheme = document.documentElement.getAttribute('data-theme');
-                const newTheme = currentTheme === 'light' ? 'dark' : 'light';
-                
-                document.documentElement.setAttribute('data-theme', newTheme);
-                localStorage.setItem('theme', newTheme);
-                
-                if (newTheme === 'dark') {
-                    document.documentElement.classList.add('dark');
-                    sunIcon.style.display = 'none';
-                    moonIcon.style.display = 'block';
-                } else {
-                    document.documentElement.classList.remove('dark');
-                    sunIcon.style.display = 'block';
-                    moonIcon.style.display = 'none';
-                }
-            });
-        }
+        // 첫 번째 initTheme 함수 제거 (중복)
         
         // currentUser는 auth.js에서 이미 선언되어 있음
         let selectedFiles = [];
@@ -1105,15 +1082,24 @@
             
             // 저장된 테마 불러오기
             const savedTheme = localStorage.getItem('theme') || 'light';
-            htmlElement.setAttribute('data-theme', savedTheme);
+            if (savedTheme === 'dark') {
+                htmlElement.classList.add('dark');
+            } else {
+                htmlElement.classList.remove('dark');
+            }
             updateThemeIcon(savedTheme);
             
             // 테마 토글 이벤트
             themeToggle.addEventListener('click', () => {
-                const currentTheme = htmlElement.getAttribute('data-theme');
-                const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+                const isDark = htmlElement.classList.contains('dark');
+                const newTheme = isDark ? 'light' : 'dark';
                 
-                htmlElement.setAttribute('data-theme', newTheme);
+                if (newTheme === 'dark') {
+                    htmlElement.classList.add('dark');
+                } else {
+                    htmlElement.classList.remove('dark');
+                }
+                
                 localStorage.setItem('theme', newTheme);
                 updateThemeIcon(newTheme);
             });
