@@ -306,17 +306,17 @@
             color: white;
         }
         
-        /* Lazy loading 이미지 스타일 */
-        img.lazy-load {
+        /* Lazy loading 이미지 스타일 - 임시 수정 */
+        img {
             opacity: 1 !important;
-            transition: opacity 0.3s ease-in-out;
-            min-height: 200px; /* 최소 높이 설정 */
-            background-color: #f0f0f0; /* 로딩 중 배경색 */
+            visibility: visible !important;
         }
         
-        img.lazy-load.loaded {
+        .memory-card img,
+        .timeline-card img {
             opacity: 1 !important;
-            background-color: transparent;
+            visibility: visible !important;
+            display: block !important;
         }
         
         /* 커스텀 스크롤바 */
@@ -2270,8 +2270,7 @@
                 AOS.refresh();
             }
             
-            // Lazy loading 설정
-            setTimeout(lazyLoadImages, 100);
+            // 이미지 로드 완료
         }
         
         // 메모리 카드 생성 (개선된 디자인)
@@ -2293,11 +2292,10 @@
                     <div class="memory-card modern-card">
                         <div class="image-wrapper">
                             ${hasMedia ? 
-                                `<img data-src="${getMediaUrl(memory.media_files[0])}" 
-                                     src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 300'%3E%3Crect width='400' height='300' fill='%23f3f4f6'/%3E%3C/svg%3E"
+                                `<img src="${getMediaUrl(memory.media_files[0])}" 
                                      alt="${memory.title}" 
-                                     class="lazy-load"
-                                     loading="lazy">` : 
+                                     class="memory-image"
+                                     onerror="this.style.display='none'">` : 
                                 '<div class="no-image-placeholder flex items-center justify-center h-full bg-gray-100">📷</div>'
                             }
                             <div class="overlay">
@@ -3053,51 +3051,9 @@
             }
         }
         
-        // Lazy loading 함수 - IntersectionObserver 사용
-        let imageObserver = null;
-        
-        function setupImageObserver() {
-            if (imageObserver) {
-                imageObserver.disconnect();
-            }
-            
-            imageObserver = new IntersectionObserver((entries, observer) => {
-                entries.forEach(entry => {
-                    if (entry.isIntersecting) {
-                        const img = entry.target;
-                        if (img.dataset.src) {
-                            img.src = img.dataset.src;
-                            img.removeAttribute('data-src');
-                            img.classList.add('loaded');
-                            observer.unobserve(img);
-                        }
-                    }
-                });
-            }, {
-                rootMargin: '50px 0px',
-                threshold: 0.01
-            });
-        }
-        
-        function lazyLoadImages() {
-            if (!imageObserver) {
-                setupImageObserver();
-            }
-            
-            const images = document.querySelectorAll('img[data-src]');
-            images.forEach(img => {
-                imageObserver.observe(img);
-            });
-        }
+        // Lazy Loading 제거됨 - 이미지 직접 로드
 
-        // displayMemories 함수 수정 - lazy loading 추가
-        if (typeof displayMemories !== 'undefined') {
-            const originalDisplayMemories = displayMemories;
-            displayMemories = function() {
-                originalDisplayMemories();
-                setTimeout(lazyLoadImages, 100);
-            };
-        }
+        // displayMemories 함수 - 단순화됨
 
         // 로그인 버튼 클릭 이벤트 (헤더의 로그인 버튼용)
         document.addEventListener('DOMContentLoaded', function() {
@@ -3121,8 +3077,7 @@
                 });
             });
             
-            // 초기 lazy loading
-            setTimeout(lazyLoadImages, 500);
+            // 초기화 완료
         });
     </script>
     
