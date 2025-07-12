@@ -93,7 +93,10 @@ window.uploadImage = async function(file) {
         }
         
         const fileExt = file.name.split('.').pop();
-        const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
+        // 더 짧고 깔끔한 파일명 생성 (timestamp + 랜덤 문자열)
+        const timestamp = Date.now();
+        const randomStr = Math.random().toString(36).substring(2, 8);
+        const fileName = `${timestamp}-${randomStr}.${fileExt}`;
         const filePath = `memories/${user.id}/${fileName}`;
         
         const { data, error } = await window.supabaseClient.storage
