@@ -308,12 +308,15 @@
         
         /* Lazy loading 이미지 스타일 */
         img.lazy-load {
-            opacity: 0;
+            opacity: 1 !important;
             transition: opacity 0.3s ease-in-out;
+            min-height: 200px; /* 최소 높이 설정 */
+            background-color: #f0f0f0; /* 로딩 중 배경색 */
         }
         
         img.lazy-load.loaded {
-            opacity: 1;
+            opacity: 1 !important;
+            background-color: transparent;
         }
         
         /* 커스텀 스크롤바 */
@@ -2446,6 +2449,7 @@
                 .from('media')
                 .getPublicUrl(path);
             
+            console.log('Media URL generated:', data.publicUrl, 'for path:', path);
             return data.publicUrl;
         }
         
