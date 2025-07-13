@@ -1,0 +1,42 @@
+/* AOS 애니메이션 문제 해결을 위한 오버라이드 CSS */
+
+/* 모든 AOS 요소의 기본 opacity를 1로 설정 */
+[data-aos] {
+    opacity: 1 !important;
+    pointer-events: auto !important;
+    transform: none !important;
+}
+
+/* 애니메이션 전 상태도 보이도록 설정 */
+[data-aos]:not(.aos-animate) {
+    opacity: 1 !important;
+    transform: none !important;
+}
+
+/* 메모리 카드 특별 처리 */
+.memory-card [data-aos],
+.memory-card .bg-white,
+.memory-card .dark\:bg-gray-800 {
+    opacity: 1 !important;
+    visibility: visible !important;
+}
+
+/* 갤러리 그리드 내부 모든 요소 보이기 */
+.gallery-grid * {
+    opacity: 1 !important;
+    visibility: visible !important;
+}
+
+/* 이미지 강제 표시 */
+.memory-card img,
+.gallery-grid img {
+    opacity: 1 !important;
+    visibility: visible !important;
+    display: block !important;
+}
+
+/* AOS 애니메이션 완전 비활성화 옵션 */
+.no-aos [data-aos] {
+    transition: none !important;
+    animation: none !important;
+}

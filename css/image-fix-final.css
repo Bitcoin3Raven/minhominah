@@ -1,0 +1,200 @@
+/* 최종 이미지 표시 문제 해결 CSS */
+
+/* 1. 갤러리 컨테이너 기본 설정 */
+#memoriesContainer {
+    position: relative;
+    z-index: 1;
+}
+
+/* 2. 갤러리 그리드 레이아웃 */
+.gallery-grid {
+    display: grid !important;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)) !important;
+    gap: 20px !important;
+    position: relative !important;
+    z-index: 1 !important;
+}
+
+/* 3. 메모리 아이템 컨테이너 */
+.memory-item {
+    position: relative !important;
+    z-index: 1 !important;
+}
+
+/* 4. 메모리 카드 기본 설정 */
+.memory-card {
+    position: relative !important;
+    background: white !important;
+    border-radius: 10px !important;
+    overflow: hidden !important;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1) !important;
+    z-index: 1 !important;
+    display: block !important;
+}
+
+/* 5. 이미지 래퍼 - 가장 중요한 부분 */
+.memory-card .image-wrapper {
+    position: relative !important;
+    width: 100% !important;
+    height: 200px !important;
+    overflow: hidden !important;
+    background-color: #f3f4f6 !important;
+    display: block !important;
+    z-index: 1 !important;
+}
+
+/* 6. 이미지 자체 - 절대 위치 대신 상대 위치 사용 */
+.memory-card .image-wrapper img,
+.memory-card .memory-image {
+    position: relative !important; /* absolute 대신 relative 사용 */
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: cover !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    display: block !important;
+    z-index: 1 !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    max-width: none !important;
+    min-width: 100% !important;
+    min-height: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: none !important;
+    outline: none !important;
+    transform: none !important;
+    filter: none !important;
+}
+
+/* 7. 오버레이 수정 */
+.memory-card .overlay {
+    position: absolute !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    background: linear-gradient(to bottom, transparent 0%, rgba(0,0,0,0.7) 100%) !important;
+    opacity: 0 !important;
+    transition: opacity 0.3s !important;
+    z-index: 2 !important;
+    pointer-events: none !important;
+    height: 200px !important; /* 이미지 래퍼와 동일한 높이 */
+}
+
+.memory-card:hover .overlay {
+    opacity: 1 !important;
+}
+
+.memory-card .overlay button {
+    pointer-events: auto !important;
+    position: relative !important;
+    z-index: 3 !important;
+}
+
+/* 8. 카드 컨텐츠 영역 */
+.memory-card .card-content,
+.memory-card .memory-content {
+    position: relative !important;
+    padding: 15px !important;
+    background: white !important;
+    z-index: 1 !important;
+}
+
+/* 9. placeholder 처리 */
+.no-image-placeholder {
+    position: absolute !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    background-color: #f3f4f6 !important;
+    color: #9ca3af !important;
+    font-size: 2rem !important;
+    z-index: 0 !important;
+}
+
+/* 10. 모든 가능한 방해 요소 제거 */
+.memory-card::before,
+.memory-card::after,
+.image-wrapper::before,
+.image-wrapper::after,
+.memory-card *::before,
+.memory-card *::after {
+    display: none !important;
+}
+
+/* 11. 다크모드 지원 */
+[data-theme="dark"] .memory-card {
+    background: #2d2d2d !important;
+}
+
+[data-theme="dark"] .memory-card .card-content,
+[data-theme="dark"] .memory-card .memory-content {
+    background: #2d2d2d !important;
+}
+
+[data-theme="dark"] .memory-card .image-wrapper {
+    background-color: #1a1a1a !important;
+}
+
+[data-theme="dark"] .no-image-placeholder {
+    background-color: #1a1a1a !important;
+    color: #6b7280 !important;
+}
+
+/* 12. 모바일 반응형 */
+@media (max-width: 768px) {
+    .gallery-grid {
+        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)) !important;
+        gap: 15px !important;
+    }
+    
+    .memory-card .image-wrapper {
+        height: 180px !important;
+    }
+    
+    .memory-card .overlay {
+        height: 180px !important;
+    }
+}
+
+/* 13. 디버깅용 스타일 (필요시 활성화) */
+.debug-images .memory-card {
+    border: 2px solid red !important;
+}
+
+.debug-images .memory-card .image-wrapper {
+    border: 2px solid blue !important;
+}
+
+.debug-images .memory-card img {
+    border: 2px solid green !important;
+}
+
+/* 14. 레이아웃 시프트 방지 */
+.memory-card {
+    min-height: 300px;
+}
+
+/* 15. 타임라인 레이아웃의 이미지도 동일하게 처리 */
+.timeline-card img {
+    position: relative !important;
+    width: 100% !important;
+    height: auto !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    display: block !important;
+}
+
+/* 16. 마지막 리셋 - 가장 높은 우선순위 */
+.gallery-grid .memory-item .memory-card .image-wrapper img {
+    opacity: 1 !important;
+    visibility: visible !important;
+    display: block !important;
+}
