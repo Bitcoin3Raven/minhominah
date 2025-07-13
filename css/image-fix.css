@@ -1,0 +1,83 @@
+/* 이미지 표시 문제 해결을 위한 추가 CSS */
+
+/* 메모리 카드 이미지 강제 표시 */
+.memory-card .image-wrapper {
+    position: relative;
+    width: 100%;
+    height: 200px;
+    overflow: hidden;
+    background-color: #f3f4f6;
+}
+
+.memory-card .image-wrapper img,
+.memory-card .memory-image {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    opacity: 1 !important;
+    visibility: visible !important;
+    display: block !important;
+    z-index: 1;
+}
+
+/* 오버레이가 이미지를 가리지 않도록 */
+.memory-card .overlay {
+    z-index: 2;
+    pointer-events: none;
+}
+
+.memory-card .overlay button {
+    pointer-events: auto;
+}
+
+/* 이미지 로딩 중 표시 */
+.memory-card img[src=""] {
+    display: none;
+}
+
+/* No image placeholder */
+.no-image-placeholder {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #f3f4f6;
+    color: #9ca3af;
+    font-size: 2rem;
+}
+
+/* 이미지 로드 에러 시 */
+.memory-card img.error {
+    display: none;
+}
+
+/* 타임라인 이미지도 동일하게 처리 */
+.timeline-card img {
+    opacity: 1 !important;
+    visibility: visible !important;
+    display: block !important;
+}
+
+/* 모든 lazy-load 이미지 강제 표시 */
+img.lazy-load,
+img[loading="lazy"] {
+    opacity: 1 !important;
+    visibility: visible !important;
+}
+
+/* 디버깅을 위한 임시 스타일 */
+.memory-card {
+    border: 1px solid #e5e7eb;
+}
+
+.image-wrapper {
+    min-height: 200px;
+    background-color: #f9fafb;
+}
