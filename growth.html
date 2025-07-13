@@ -6,21 +6,8 @@
     <title>성장 기록 - 민호민아 성장앨범</title>
     
     <!-- Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            darkMode: 'class',
-            theme: {
-                extend: {
-                    colors: {
-                        primary: '#FF6B6B',
-                        secondary: '#4ECDC4'
-                    }
-                }
-            }
-        }
-    </script>
-    
+    <link rel="stylesheet" href="css/tailwind.css">
+
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
@@ -28,7 +15,7 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     
     <!-- Custom Styles -->
-    <link rel="stylesheet" href="css/main.css">
+    <link rel="stylesheet" href="css/style-improved.css">
     
     <!-- Dark Mode Initialization -->
     <script>
@@ -46,12 +33,13 @@
     <script src="js/lang/en.js"></script>
     <script src="js/language.js"></script>
     <script src="js/navigation-responsive.js"></script>
+    <link rel="stylesheet" href="css/navigation.css">
 </head>
 <body class="bg-gray-50 dark:bg-gray-900 min-h-screen">
     <!-- Header -->
         <!-- 헤더 영역 -->
     <header class="fixed top-0 left-0 right-0 z-50 backdrop-blur-lg bg-white/90 dark:bg-gray-900/90 shadow-md transition-transform duration-300">
-        <div class="container mx-auto px-4 py-3">
+        <div class="container mx-auto px-4 py-4">
             <div class="flex justify-between items-center">
                 <!-- 로고 -->
                 <div class="flex items-center">
@@ -149,10 +137,7 @@
                 </button>
             </div>
         </div>
-        
-        
-                
-                
+
     </header>
     
     <!-- 모바일 메뉴 -->

@@ -6,17 +6,8 @@
     <title>가족 설정 - 민호민아 성장앨범</title>
     
     <!-- Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        // Tailwind 다크모드 설정
-        tailwind.config = {
-            darkMode: 'class',
-            theme: {
-                extend: {}
-            }
-        }
-    </script>
-    
+    <link rel="stylesheet" href="css/tailwind.css">
+
     <!-- 다크모드 초기화 스크립트 -->
     <script>
         // 페이지 로드 전 다크모드 설정
@@ -31,7 +22,10 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     
     <!-- Custom CSS -->
-    <link rel="stylesheet" href="css/main.css">
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/navigation.css">
+
+    <link rel="stylesheet" href="css/style-improved.css">
     
     <!-- AOS Animation -->
     <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
@@ -78,7 +72,7 @@
     <!-- 헤더 -->
         <!-- 헤더 영역 -->
     <header class="fixed top-0 left-0 right-0 z-50 backdrop-blur-lg bg-white/90 dark:bg-gray-900/90 shadow-md transition-transform duration-300">
-        <div class="container mx-auto px-4 py-3">
+        <div class="container mx-auto px-4 py-4">
             <div class="flex justify-between items-center">
                 <!-- 로고 -->
                 <div class="flex items-center">
@@ -176,10 +170,7 @@
                 </button>
             </div>
         </div>
-        
-        
-                
-                
+
     </header>
     
     <!-- 모바일 메뉴 -->
