@@ -22,7 +22,8 @@ class FamilySystem {
             const { data: { user }, error: userError } = await window.supabaseClient.auth.getUser();
             if (userError || !user) {
                 console.error('사용자 정보를 가져올 수 없습니다:', userError);
-                window.location.href = '/';
+                // 로그인하지 않은 사용자를 위한 처리
+                this.showNoAuthState();
                 return;
             }
             
@@ -498,6 +499,32 @@ class FamilySystem {
             setTimeout(() => toast.remove(), 300);
         }, 3000);
     }
+
+    showNoAuthState() {
+        // 로딩 상태 숨기기
+        const loadingState = document.getElementById('loadingState');
+        if (loadingState) {
+            loadingState.classList.add('hidden');
+        }
+        
+        // 로그인 필요 메시지 표시
+        const familySettings = document.getElementById('familySettings');
+        if (familySettings) {
+            familySettings.innerHTML = `
+                <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-8 text-center" data-aos="fade-up">
+                    <i class="fas fa-lock text-6xl text-gray-300 dark:text-gray-600 mb-4"></i>
+                    <h2 class="text-2xl font-bold mb-4 text-gray-800 dark:text-white">로그인이 필요합니다</h2>
+                    <p class="text-gray-600 dark:text-gray-400 mb-6">
+                        가족 설정을 이용하려면 먼저 로그인해주세요.
+                    </p>
+                    <button onclick="showLoginForm()" 
+                            class="px-6 py-3 bg-gradient-to-r from-pink-500 to-blue-500 text-white rounded-lg font-semibold hover:shadow-lg transition">
+                        <i class="fas fa-sign-in-alt mr-2"></i>로그인하기
+                    </button>
+                </div>
+            `;
+        }
+    }
 }
 
 // 전역 인스턴스 생성
@@ -517,14 +544,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     }
     
-    // 인증 상태 확인
-    const { data: { user } } = await window.supabaseClient.auth.getUser();
-    if (!user) {
-        window.location.href = '/';
-        return;
-    }
-    
-    // 가족 시스템 초기화
+    // 가족 시스템 초기화 (인증 확인은 init 메서드 내에서 처리)
     await familySystem.init();
 });
 
