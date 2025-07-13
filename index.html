@@ -28,6 +28,9 @@
     <link rel="stylesheet" href="css/navigation.css">
     <link rel="stylesheet" href="css/style-improved.css">
     
+    <!-- Tailwind CSS (마지막에 로드하여 우선순위 확보) -->
+    <link rel="stylesheet" href="css/tailwind.css">
+    
     <script>
         // Tailwind 다크모드 설정
         tailwind.config = {
@@ -117,7 +120,7 @@
         }
         
         .filter-buttons {
-            display: flex;
+            display: block;
             gap: 10px;
             flex-wrap: wrap;
         }
@@ -184,10 +187,8 @@
             height: 200px;
             overflow: hidden;
             background: #f0f0f0;
-            display: flex;
-            align-items: center;
-            justify-content: center;
             position: relative;
+            display: block !important;
         }
         
         .image-wrapper img {
@@ -322,7 +323,7 @@
             height: 16px;
             border-radius: 50%;
             font-size: 10px;
-            display: flex;
+            display: block;
             align-items: center;
             justify-content: center;
             font-weight: bold;
@@ -345,10 +346,15 @@
         }
         
         .memory-card img,
-        .timeline-card img {
+        .timeline-card img,
+        .modern-card img,
+        .image-wrapper img {
             opacity: 1 !important;
             visibility: visible !important;
             display: block !important;
+            width: 100% !important;
+            height: 100% !important;
+            object-fit: cover !important;
         }
         
         /* 커스텀 스크롤바 */
@@ -381,7 +387,7 @@
             inset: 0;
             background: rgba(0, 0, 0, 0.95);
             z-index: 1000;
-            display: flex;
+            display: block;
             align-items: center;
             justify-content: center;
         }
@@ -390,7 +396,7 @@
             width: 100%;
             height: 100%;
             position: relative;
-            display: flex;
+            display: block;
             flex-direction: column;
             align-items: center;
             justify-content: center;
@@ -406,7 +412,7 @@
             width: 48px;
             height: 48px;
             border-radius: 50%;
-            display: flex;
+            display: block;
             align-items: center;
             justify-content: center;
             cursor: pointer;
@@ -422,7 +428,7 @@
         .slideshow-content {
             max-width: 90vw;
             max-height: 80vh;
-            display: flex;
+            display: block;
             align-items: center;
             gap: 40px;
         }
@@ -453,7 +459,7 @@
         .slideshow-controls {
             position: absolute;
             bottom: 40px;
-            display: flex;
+            display: block;
             gap: 20px;
             align-items: center;
         }
@@ -466,7 +472,7 @@
             width: 48px;
             height: 48px;
             border-radius: 50%;
-            display: flex;
+            display: block;
             align-items: center;
             justify-content: center;
             cursor: pointer;
@@ -543,7 +549,7 @@
             background: rgba(255, 255, 255, 0.9);
             border: none;
             cursor: pointer;
-            display: flex;
+            display: block;
             align-items: center;
             justify-content: center;
             transition: all 0.3s;
@@ -590,7 +596,7 @@
         }
         
         .memory-detail-meta {
-            display: flex;
+            display: block;
             flex-wrap: wrap;
             gap: 16px;
             margin-bottom: 20px;
@@ -602,7 +608,7 @@
         }
         
         .memory-detail-meta-item {
-            display: flex;
+            display: block;
             align-items: center;
             gap: 6px;
         }
@@ -618,7 +624,7 @@
         }
         /* 반응형 네비게이션 스타일 */
         .nav-item {
-            display: flex;
+            display: block;
             align-items: center;
             gap: 6px;
             padding: 8px 12px;
@@ -685,7 +691,7 @@
         }
         
         .dropdown-item {
-            display: flex;
+            display: block;
             align-items: center;
             gap: 12px;
             padding: 12px 16px;
@@ -735,7 +741,7 @@
         }
         
         .mobile-menu-item {
-            display: flex;
+            display: block;
             align-items: center;
             gap: 12px;
             padding: 14px 16px;
