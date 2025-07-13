@@ -308,14 +308,20 @@ a:hover {
   margin-bottom: 0.5rem;
 }
 
-/* Fix for memory card images */
-.memory-card.modern-card .image-wrapper {
+/* Fix for memory card images - More specific selectors */
+.gallery-grid .memory-card.modern-card .image-wrapper,
+.masonry-layout .memory-card.modern-card .image-wrapper,
+.timeline-layout .memory-card.modern-card .image-wrapper {
   position: relative !important;
   height: 200px !important;
   overflow: hidden !important;
+  display: block !important;
 }
 
-.memory-card.modern-card .memory-image {
+.gallery-grid .memory-card.modern-card .memory-image,
+.masonry-layout .memory-card.modern-card .memory-image,
+.timeline-layout .memory-card.modern-card .memory-image,
+.memory-card.modern-card img.memory-image {
   position: relative !important;
   z-index: 1 !important;
   opacity: 1 !important;
@@ -326,8 +332,20 @@ a:hover {
   object-fit: cover !important;
 }
 
+/* Make sure overlay doesn't block images */
 .memory-card.modern-card .overlay {
   z-index: 2 !important;
+  pointer-events: none !important;
+}
+
+.memory-card.modern-card:hover .overlay {
+  pointer-events: auto !important;
+}
+
+/* Remove any filters or opacity from parent elements */
+.memory-card.modern-card {
+  opacity: 1 !important;
+  filter: none !important;
 }
 
 /* Ensure selection mode buttons are clickable */
