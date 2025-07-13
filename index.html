@@ -27,28 +27,21 @@
     <link rel="stylesheet" href="css/style.css">
     <link rel="stylesheet" href="css/navigation.css">
     <link rel="stylesheet" href="css/style-improved.css">
-    <link rel="stylesheet" href="css/main.css">
     
     <!-- Tailwind CSS (마지막에 로드하여 우선순위 확보) -->
     <link rel="stylesheet" href="css/tailwind.css">
-    
     <script>
         // Tailwind 다크모드 설정
-        if (typeof tailwind !== 'undefined') {
-            tailwind.config = {
-                darkMode: 'class',
-                theme: {
-                    extend: {}
-                }
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {}
             }
         }
     </script>
     <script src="js/supabase.js"></script>
     <script src="js/auth.js"></script>
     <script src="js/performance-config.js"></script>
-    <script src="js/permissions.js"></script>
-    <script src="js/memory-actions.js"></script>
-    <script src="js/bulk-actions.js"></script>
     <script src="js/comment-system.js" defer></script>
     <script src="js/share-system.js" defer></script>
     <script src="js/notification-system.js" defer></script>
@@ -179,28 +172,11 @@
         .memory-image {
             width: 100%;
             height: 200px;
-            object-fit: cover;
-            display: block !important;
-            opacity: 1 !important;
-            visibility: visible !important;
-        }
-        
-        .image-wrapper {
-            width: 100%;
-            height: 200px;
-            overflow: hidden;
             background: #f0f0f0;
-            position: relative;
-            display: block !important;
-        }
-        
-        .image-wrapper img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            display: block !important;
-            opacity: 1 !important;
-            visibility: visible !important;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #999;
         }
         
         .memory-content {
@@ -326,7 +302,7 @@
             height: 16px;
             border-radius: 50%;
             font-size: 10px;
-            display: block;
+            display: flex;
             align-items: center;
             justify-content: center;
             font-weight: bold;
@@ -349,15 +325,10 @@
         }
         
         .memory-card img,
-        .timeline-card img,
-        .modern-card img,
-        .image-wrapper img {
+        .timeline-card img {
             opacity: 1 !important;
             visibility: visible !important;
             display: block !important;
-            width: 100% !important;
-            height: 100% !important;
-            object-fit: cover !important;
         }
         
         /* 커스텀 스크롤바 */
@@ -390,7 +361,7 @@
             inset: 0;
             background: rgba(0, 0, 0, 0.95);
             z-index: 1000;
-            display: block;
+            display: flex;
             align-items: center;
             justify-content: center;
         }
@@ -399,7 +370,7 @@
             width: 100%;
             height: 100%;
             position: relative;
-            display: block;
+            display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
@@ -415,7 +386,7 @@
             width: 48px;
             height: 48px;
             border-radius: 50%;
-            display: block;
+            display: flex;
             align-items: center;
             justify-content: center;
             cursor: pointer;
@@ -431,7 +402,7 @@
         .slideshow-content {
             max-width: 90vw;
             max-height: 80vh;
-            display: block;
+            display: flex;
             align-items: center;
             gap: 40px;
         }
@@ -462,7 +433,7 @@
         .slideshow-controls {
             position: absolute;
             bottom: 40px;
-            display: block;
+            display: flex;
             gap: 20px;
             align-items: center;
         }
@@ -475,7 +446,7 @@
             width: 48px;
             height: 48px;
             border-radius: 50%;
-            display: block;
+            display: flex;
             align-items: center;
             justify-content: center;
             cursor: pointer;
@@ -552,7 +523,7 @@
             background: rgba(255, 255, 255, 0.9);
             border: none;
             cursor: pointer;
-            display: block;
+            display: flex;
             align-items: center;
             justify-content: center;
             transition: all 0.3s;
@@ -599,7 +570,7 @@
         }
         
         .memory-detail-meta {
-            display: block;
+            display: flex;
             flex-wrap: wrap;
             gap: 16px;
             margin-bottom: 20px;
@@ -611,7 +582,7 @@
         }
         
         .memory-detail-meta-item {
-            display: block;
+            display: flex;
             align-items: center;
             gap: 6px;
         }
@@ -627,7 +598,7 @@
         }
         /* 반응형 네비게이션 스타일 */
         .nav-item {
-            display: block;
+            display: flex;
             align-items: center;
             gap: 6px;
             padding: 8px 12px;
@@ -694,7 +665,7 @@
         }
         
         .dropdown-item {
-            display: block;
+            display: flex;
             align-items: center;
             gap: 12px;
             padding: 12px 16px;
@@ -744,7 +715,7 @@
         }
         
         .mobile-menu-item {
-            display: block;
+            display: flex;
             align-items: center;
             gap: 12px;
             padding: 14px 16px;
@@ -841,43 +812,6 @@
                 padding-right: 1rem;
             }
         }
-        
-        /* 버튼 스타일 추가 */
-        .btn {
-            padding: 8px 16px;
-            border-radius: 8px;
-            font-weight: 500;
-            transition: all 0.2s;
-            cursor: pointer;
-            border: none;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-        }
-        
-        .btn-secondary {
-            background: #f3f4f6;
-            color: #4b5563;
-            border: 1px solid #e5e7eb;
-        }
-        
-        .btn-secondary:hover {
-            background: #e5e7eb;
-            color: #374151;
-            transform: translateY(-1px);
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-        
-        .dark .btn-secondary {
-            background: #374151;
-            color: #d1d5db;
-            border-color: #4b5563;
-        }
-        
-        .dark .btn-secondary:hover {
-            background: #4b5563;
-            color: white;
-        }
     </style>
     
     <!-- 언어 시스템 -->
@@ -886,7 +820,6 @@
     <script src="js/lang/en.js"></script>
     <script src="js/language.js"></script>
     <script src="js/navigation-responsive.js"></script>
-    <script src="js/family-system.js"></script>
 </head>
 <body>
     <!-- 헤더 영역 -->
@@ -1149,10 +1082,6 @@
             <div class="flex items-center justify-between mb-4">
                 <h3 class="text-lg font-semibold text-gray-800" data-lang="filter_title">추억 필터</h3>
                 <div class="flex gap-2">
-                    <button id="selectionModeBtn" onclick="bulkActions.toggleSelectionMode()" class="btn btn-secondary flex items-center gap-2">
-                        <i class="fas fa-check-square"></i>
-                        <span>선택 모드</span>
-                    </button>
                     <button onclick="startSlideshow()" class="btn btn-secondary flex items-center gap-2">
                         <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
                             <polygon points="5 3 19 12 5 21 5 3"></polygon>
@@ -2208,7 +2137,6 @@
             
             // 필터링
             let filteredMemories = allMemories;
-            window.filteredMemories = filteredMemories; // 전역 변수로 저장
             
             // 1. 인물 필터
             if (currentFilter !== 'all') {
@@ -2332,9 +2260,6 @@
                 return;
             }
             
-            // 필터링된 결과를 전역 변수에 업데이트
-            window.filteredMemories = filteredMemories;
-            
             // 레이아웃에 따라 다르게 표시
             if (currentLayout === 'timeline') {
                 // 날짜별로 정렬 (타임라인은 시간순)
@@ -2353,15 +2278,6 @@
             if (typeof AOS !== 'undefined') {
                 AOS.refresh();
             }
-            
-            // 삭제 버튼 추가 (권한이 있는 경우)
-            setTimeout(() => {
-                document.querySelectorAll('.memory-card').forEach((card, index) => {
-                    if (filteredMemories[index]) {
-                        memoryActions.addDeleteButton(card, filteredMemories[index]);
-                    }
-                });
-            }, 100);
             
             // 이미지 로드 완료
         }
@@ -2388,8 +2304,7 @@
                                 `<img src="${getMediaUrl(memory.media_files[0])}" 
                                      alt="${memory.title}" 
                                      class="memory-image"
-                                     loading="lazy"
-                                     onerror="this.onerror=null; this.src='data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 width=%27400%27 height=%27200%27 viewBox=%270 0 400 200%27%3E%3Crect width=%27400%27 height=%27200%27 fill=%27%23f3f4f6%27/%3E%3Ctext x=%2750%25%27 y=%2750%25%27 dominant-baseline=%27middle%27 text-anchor=%27middle%27 font-family=%27Arial%27 font-size=%2714%27 fill=%27%239ca3af%27%3E이미지 로드 실패%3C/text%3E%3C/svg%3E'">` : 
+                                     onerror="this.style.display='none'">` : 
                                 '<div class="no-image-placeholder flex items-center justify-center h-full bg-gray-100">📷</div>'
                             }
                             <div class="overlay">
@@ -2754,16 +2669,6 @@
                     <div class="flex items-center justify-between">
                         <h2 id="modalTitle" class="text-2xl font-bold text-gray-900 dark:text-white"></h2>
                         <div class="flex items-center gap-3">
-                            <!-- 수정 버튼 -->
-                            <button id="editMemoryBtn" onclick="editMemoryFromModal()" 
-                                    class="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition duration-200 text-sm hidden">
-                                <i class="fas fa-edit mr-2"></i>수정
-                            </button>
-                            <!-- 삭제 버튼 -->
-                            <button id="deleteMemoryBtn" onclick="deleteMemoryFromModal()" 
-                                    class="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition duration-200 text-sm hidden">
-                                <i class="fas fa-trash mr-2"></i>삭제
-                            </button>
                             <!-- 공유 버튼 -->
                             <button id="shareMemoryBtn" onclick="shareMemory()" 
                                     class="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition duration-200 text-sm">
@@ -2853,22 +2758,6 @@
 
             // 제목 설정
             document.getElementById('modalTitle').textContent = memory.title;
-            
-            // 수정 버튼 표시 여부 결정
-            const editBtn = document.getElementById('editMemoryBtn');
-            if (memoryPermissions.canEdit(memory)) {
-                editBtn.classList.remove('hidden');
-            } else {
-                editBtn.classList.add('hidden');
-            }
-            
-            // 삭제 버튼 표시 여부 결정
-            const deleteBtn = document.getElementById('deleteMemoryBtn');
-            if (memoryPermissions.canDelete(memory)) {
-                deleteBtn.classList.remove('hidden');
-            } else {
-                deleteBtn.classList.add('hidden');
-            }
 
             // 미디어 표시
             const mediaSection = document.getElementById('modalMediaSection');
@@ -2947,40 +2836,6 @@
             }
         }
 
-        function editMemoryFromModal() {
-            if (!currentMemoryId) return;
-            
-            const memory = allMemories.find(m => m.id === currentMemoryId);
-            if (!memory) return;
-            
-            // 상세 모달 닫기
-            closeMemoryModal();
-            
-            // 수정 모달 열기
-            memoryActions.editMemory(memory);
-        }
-        
-        function deleteMemoryFromModal() {
-            if (!currentMemoryId) return;
-            
-            const memory = allMemories.find(m => m.id === currentMemoryId);
-            if (!memory) return;
-            
-            // 메모리 카드 엘리먼트 찾기
-            const memoryCards = document.querySelectorAll('.memory-card');
-            let targetCard = null;
-            
-            memoryCards.forEach(card => {
-                const parentItem = card.closest('.memory-item');
-                if (parentItem && parentItem.querySelector(`[onclick*="${currentMemoryId}"]`)) {
-                    targetCard = parentItem;
-                }
-            });
-            
-            // 삭제 실행
-            memoryActions.deleteMemory(currentMemoryId, targetCard);
-        }
-        
         function closeMemoryModal() {
             const modal = document.getElementById('memoryDetailModal');
             modal.classList.add('hidden');
