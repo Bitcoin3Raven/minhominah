@@ -17,59 +17,6 @@ const photobookCreator = {
         this.setupEventListeners();
         this.setDefaultDates();
         this.loadMemories();
-        
-        // 샘플 데이터 추가 버튼 (디버깅용)
-        this.addSampleDataButton();
-    },
-    
-    // 샘플 데이터 추가 버튼 (디버깅용)
-    addSampleDataButton() {
-        const container = document.getElementById('photobookCreatorContainer');
-        if (container && this.memories.length === 0) {
-            const button = document.createElement('button');
-            button.className = 'px-4 py-2 bg-yellow-500 text-white rounded-lg mb-4';
-            button.textContent = '샘플 데이터 추가 (테스트용)';
-            button.onclick = () => this.addSampleData();
-            container.insertBefore(button, container.firstChild);
-        }
-    },
-    
-    // 샘플 데이터 추가
-    addSampleData() {
-        const sampleMemories = [
-            {
-                id: Date.now() + 1,
-                title: 'First Day of School',
-                description: 'Minho started kindergarten today! He was so excited and made new friends.',
-                date: '2024-03-01',
-                people: ['민호'],
-                tags: ['school', 'milestone'],
-                images: []
-            },
-            {
-                id: Date.now() + 2,
-                title: 'Birthday Party',
-                description: 'Mina celebrated her 3rd birthday with family and friends.',
-                date: '2024-06-15',
-                people: ['민아'],
-                tags: ['birthday', 'celebration'],
-                images: []
-            },
-            {
-                id: Date.now() + 3,
-                title: 'Family Picnic',
-                description: 'A wonderful day at the park with both kids.',
-                date: '2024-07-20',
-                people: ['민호', '민아'],
-                tags: ['family', 'outdoor'],
-                images: []
-            }
-        ];
-        
-        localStorage.setItem('memories', JSON.stringify(sampleMemories));
-        this.memories = sampleMemories;
-        alert('샘플 데이터가 추가되었습니다. 페이지를 새로고침하세요.');
-        location.reload();
     },
 
     // 이벤트 리스너 설정
@@ -129,14 +76,39 @@ const photobookCreator = {
     // 추억 데이터 로드
     async loadMemories() {
         try {
-            const memoriesData = localStorage.getItem('memories');
-            console.log('localStorage에서 추억 데이터 로드 시도...');
-            if (memoriesData) {
-                this.memories = JSON.parse(memoriesData);
-                console.log(`${this.memories.length}개의 추억을 로드했습니다.`);
-            } else {
-                console.log('localStorage에 추억 데이터가 없습니다.');
+            console.log('Supabase에서 추억 데이터 로드 시도...');
+            
+            // Supabase가 초기화되어 있는지 확인
+            if (!window.supabase) {
+                console.error('Supabase가 초기화되지 않았습니다.');
                 this.memories = [];
+                return;
+            }
+            
+            const { data, error } = await supabase
+                .from('memories')
+                .select(`
+                    *,
+                    media_files(*),
+                    memory_people(
+                        person_id,
+                        people(*)
+                    ),
+                    memory_tags(
+                        tag_id,
+                        tags(*)
+                    )
+                `)
+                .order('memory_date', { ascending: false });
+            
+            if (error) throw error;
+            
+            this.memories = data || [];
+            console.log(`${this.memories.length}개의 추억을 로드했습니다.`);
+            
+            // 디버깅: 첫 번째 메모리 확인
+            if (this.memories.length > 0) {
+                console.log('첫 번째 메모리:', this.memories[0]);
             }
         } catch (error) {
             console.error('추억 로드 오류:', error);
@@ -150,27 +122,48 @@ const photobookCreator = {
 
         // 날짜 필터
         if (this.options.startDate) {
-            filtered = filtered.filter(m => m.date >= this.options.startDate);
+            filtered = filtered.filter(m => {
+                const memoryDate = m.memory_date ? m.memory_date.split('T')[0] : '';
+                return memoryDate >= this.options.startDate;
+            });
         }
         if (this.options.endDate) {
-            filtered = filtered.filter(m => m.date <= this.options.endDate);
+            filtered = filtered.filter(m => {
+                const memoryDate = m.memory_date ? m.memory_date.split('T')[0] : '';
+                return memoryDate <= this.options.endDate;
+            });
         }
 
         // 인물 필터
         switch (this.options.personFilter) {
             case 'minho':
-                filtered = filtered.filter(m => m.people.includes('민호') && !m.people.includes('민아'));
+                filtered = filtered.filter(m => {
+                    const people = m.memory_people || [];
+                    const hasMinHo = people.some(mp => mp.people && mp.people.name === '민호');
+                    const hasMinA = people.some(mp => mp.people && mp.people.name === '민아');
+                    return hasMinHo && !hasMinA;
+                });
                 break;
             case 'mina':
-                filtered = filtered.filter(m => m.people.includes('민아') && !m.people.includes('민호'));
+                filtered = filtered.filter(m => {
+                    const people = m.memory_people || [];
+                    const hasMinHo = people.some(mp => mp.people && mp.people.name === '민호');
+                    const hasMinA = people.some(mp => mp.people && mp.people.name === '민아');
+                    return hasMinA && !hasMinHo;
+                });
                 break;
             case 'both':
-                filtered = filtered.filter(m => m.people.includes('민호') && m.people.includes('민아'));
+                filtered = filtered.filter(m => {
+                    const people = m.memory_people || [];
+                    const hasMinHo = people.some(mp => mp.people && mp.people.name === '민호');
+                    const hasMinA = people.some(mp => mp.people && mp.people.name === '민아');
+                    return hasMinHo && hasMinA;
+                });
                 break;
         }
 
         // 날짜순 정렬
-        filtered.sort((a, b) => new Date(a.date) - new Date(b.date));
+        filtered.sort((a, b) => new Date(a.memory_date) - new Date(b.memory_date));
 
         return filtered;
     },
@@ -323,28 +316,28 @@ const photobookCreator = {
             <div class="h-full p-6" style="background: ${template.pageBackground}">
                 <div class="mb-4">
                     <h3 class="text-xl font-bold" style="color: ${template.titleColor}">${memory.title}</h3>
-                    <p class="text-sm" style="color: ${template.subtitleColor}">${this.formatDateKorean(memory.date)}</p>
+                    <p class="text-sm" style="color: ${template.subtitleColor}">${this.formatDateKorean(memory.memory_date)}</p>
                 </div>
-                ${memory.images && memory.images.length > 0 ? `
+                ${memory.media_files && memory.media_files.length > 0 ? `
                     <div class="mb-4">
-                        <img src="${memory.images[0]}" alt="${memory.title}" 
+                        <img src="${this.getMediaUrl(memory.media_files[0])}" alt="${memory.title}" 
                              class="w-full h-48 object-cover rounded-lg">
                     </div>
                 ` : ''}
-                <p class="text-sm leading-relaxed" style="color: ${template.textColor}">${memory.description}</p>
+                <p class="text-sm leading-relaxed" style="color: ${template.textColor}">${memory.description || ''}</p>
                 <div class="mt-4 flex flex-wrap gap-2">
-                    ${memory.people.map(person => `
+                    ${(memory.memory_people || []).map(mp => mp.people ? `
                         <span class="px-2 py-1 text-xs rounded-full" 
                               style="background: ${template.tagBackground}; color: ${template.tagColor}">
-                            ${person}
+                            ${mp.people.name}
                         </span>
-                    `).join('')}
-                    ${memory.tags.map(tag => `
+                    ` : '').join('')}
+                    ${(memory.memory_tags || []).map(mt => mt.tags ? `
                         <span class="px-2 py-1 text-xs rounded-full" 
                               style="background: ${template.tagBackground}; color: ${template.tagColor}">
-                            #${tag}
+                            #${mt.tags.name}
                         </span>
-                    `).join('')}
+                    ` : '').join('')}
                 </div>
             </div>
         `;
@@ -402,16 +395,22 @@ const photobookCreator = {
         };
 
         memories.forEach(memory => {
-            const hasMinho = memory.people.includes('민호');
-            const hasMina = memory.people.includes('민아');
+            const people = memory.memory_people || [];
+            const hasMinho = people.some(mp => mp.people && mp.people.name === '민호');
+            const hasMina = people.some(mp => mp.people && mp.people.name === '민아');
             
             if (hasMinho) stats.minhoCount++;
             if (hasMina) stats.minaCount++;
             if (hasMinho && hasMina) stats.togetherCount++;
             
-            memory.tags.forEach(tag => {
-                stats.tagCounts[tag] = (stats.tagCounts[tag] || 0) + 1;
-            });
+            if (memory.memory_tags) {
+                memory.memory_tags.forEach(mt => {
+                    if (mt.tags) {
+                        const tagName = mt.tags.name;
+                        stats.tagCounts[tagName] = (stats.tagCounts[tagName] || 0) + 1;
+                    }
+                });
+            }
         });
 
         // 가장 많이 사용된 태그 찾기
@@ -428,7 +427,7 @@ const photobookCreator = {
         const groups = {};
         
         memories.forEach(memory => {
-            const date = new Date(memory.date);
+            const date = new Date(memory.memory_date);
             const monthKey = `${date.getFullYear()}년 ${date.getMonth() + 1}월`;
             
             if (!groups[monthKey]) {
@@ -438,6 +437,21 @@ const photobookCreator = {
         });
         
         return groups;
+    },
+    
+    // 미디어 URL 가져오기
+    getMediaUrl(mediaFile) {
+        if (!mediaFile || !mediaFile.file_path) return '';
+        
+        // Supabase storage URL 생성
+        if (window.supabase) {
+            const { data } = supabase.storage
+                .from('media')
+                .getPublicUrl(mediaFile.file_path);
+            return data.publicUrl;
+        }
+        
+        return '';
     },
 
     // 한국어 날짜 포맷
@@ -686,7 +700,7 @@ const photobookCreator = {
             pdf.setFontSize(10);
             pdf.setTextColor(...this.hexToRgb(template.textColor));
             // 날짜를 영문으로 표시
-            const dateStr = new Date(memory.date).toLocaleDateString('en-US');
+            const dateStr = new Date(memory.memory_date).toLocaleDateString('en-US');
             pdf.text(`${dateStr} - ${memory.title || 'Memory'}`, 40, yPos + 1);
             
             yPos += step;
@@ -711,12 +725,17 @@ const photobookCreator = {
         let yPos = 50;
         
         // 이미지가 있으면 추가
-        if (memory.images && memory.images.length > 0) {
+        if (memory.media_files && memory.media_files.length > 0) {
             try {
-                // 이미지를 base64로 변환하거나 URL 사용
-                const imgData = memory.images[0];
-                pdf.addImage(imgData, 'JPEG', 20, yPos, 170, 100);
-                yPos += 110;
+                // 이미지 URL 가져오기
+                const imgUrl = this.getMediaUrl(memory.media_files[0]);
+                if (imgUrl) {
+                    // 주의: jsPDF에서 외부 이미지를 직접 사용하려면 CORS 설정이 필요합니다
+                    // 여기서는 이미지 추가를 스킵하거나 다른 방법을 사용해야 합니다
+                    console.log('이미지 URL:', imgUrl);
+                    // pdf.addImage(imgData, 'JPEG', 20, yPos, 170, 100);
+                    // yPos += 110;
+                }
             } catch (error) {
                 console.error('이미지 추가 오류:', error);
             }
@@ -725,14 +744,16 @@ const photobookCreator = {
         // 설명
         pdf.setFontSize(11);
         pdf.setTextColor(...this.hexToRgb(template.textColor));
-        const lines = pdf.splitTextToSize(memory.description, 170);
+        const lines = pdf.splitTextToSize(memory.description || '', 170);
         pdf.text(lines, 20, yPos);
         yPos += lines.length * 5 + 10;
         
         // 태그
-        if (memory.people.length > 0 || memory.tags.length > 0) {
+        const peopleNames = (memory.memory_people || []).map(mp => mp.people ? mp.people.name : '').filter(n => n);
+        const tagNames = (memory.memory_tags || []).map(mt => mt.tags ? `#${mt.tags.name}` : '').filter(t => t);
+        if (peopleNames.length > 0 || tagNames.length > 0) {
             pdf.setFontSize(10);
-            const tags = [...memory.people, ...memory.tags.map(t => `#${t}`)];
+            const tags = [...peopleNames, ...tagNames];
             pdf.text(tags.join(' · '), 20, yPos);
         }
     },
