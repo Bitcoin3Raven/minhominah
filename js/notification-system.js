@@ -370,6 +370,8 @@ class NotificationSystem {
 
     // 알림 패널 토글
     toggleNotificationPanel() {
+        if (!this.notificationPanel) return;
+        
         if (this.notificationPanel.classList.contains('hidden')) {
             this.openNotificationPanel();
         } else {
@@ -379,6 +381,8 @@ class NotificationSystem {
 
     // 알림 패널 열기
     openNotificationPanel() {
+        if (!this.notificationPanel) return;
+        
         this.notificationPanel.classList.remove('hidden');
         // 패널이 열릴 때 알림 목록 새로고침
         this.loadNotifications();
@@ -386,7 +390,7 @@ class NotificationSystem {
 
     // 알림 패널 닫기
     closeNotificationPanel() {
-        if (this.notificationPanel) {
+        if (this.notificationPanel && this.notificationPanel.classList) {
             this.notificationPanel.classList.add('hidden');
         }
     }

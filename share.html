@@ -18,6 +18,21 @@
     <meta name="twitter:description" content="민호와 민아의 성장 이야기를 담은 특별한 추억입니다.">
     <meta name="twitter:image" content="/assets/images/og-default.jpg">
 
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    
+    <!-- Supabase 클라이언트 -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/navigation.css">
+
+    <link rel="stylesheet" href="css/style-improved.css">
+    
+    <!-- Tailwind CSS (마지막에 로드하여 우선순위 확보) -->
+    <link rel="stylesheet" href="css/tailwind.css">
+
     <!-- 언어 시스템 -->
     <script src="js/lang/ko.js"></script>
     <script src="js/lang/th.js"></script>
@@ -834,6 +849,20 @@
             }
         }
 
+        // 언어 변경 함수
+        function changeLanguage(lang) {
+            if (window.languageManager) {
+                window.languageManager.changeLanguage(lang);
+            }
+        }
+        
+        // 언어 시스템 초기화 함수
+        function initializeLanguage() {
+            if (typeof LanguageManager !== 'undefined') {
+                window.languageManager = new LanguageManager();
+            }
+        }
+        
         // 페이지 로드 시 초기화
         document.addEventListener('DOMContentLoaded', () => {
             initTheme();

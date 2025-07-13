@@ -17,7 +17,7 @@ class PerformanceMonitor {
         
         this.maxMetricSize = 100; // 각 메트릭 최대 보관 개수
         this.displayElement = null;
-        this.isEnabled = PERFORMANCE_FLAGS?.DEBUG_MODE || false;
+        this.isEnabled = window.PERFORMANCE_FLAGS?.DEBUG_MODE || false;
     }
     
     /**
@@ -360,7 +360,7 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 // 개발자 콘솔 명령어 노출
-if (PERFORMANCE_FLAGS?.DEBUG_MODE) {
+if (window.PERFORMANCE_FLAGS?.DEBUG_MODE) {
     window.perfReport = () => window.performanceMonitor.printDetailedReport();
     window.perfExport = () => window.performanceMonitor.exportToCSV();
     console.log('Performance monitoring commands available: perfReport(), perfExport()');

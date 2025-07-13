@@ -186,13 +186,13 @@
     <header class="fixed top-0 left-0 right-0 z-50 backdrop-blur-lg bg-white/90 dark:bg-gray-700/90 shadow-md">
         <div class="container mx-auto px-4 py-4 flex justify-between items-center">
             <h1 class="text-xl font-bold text-gray-800 dark:text-white">
-                <a href="index.html" class="hover:opacity-80 transition-opacity flex items-center">
+                <a href="/" class="hover:opacity-80 transition-opacity flex items-center">
                     <img src="assets/images/logo.png" alt="Logo" class="h-10 w-auto">
                 </a>
             </h1>
             
             <nav class="flex items-center space-x-2 sm:space-x-6">
-                <a href="index.html" class="text-gray-600 dark:text-white hover:text-gray-900 dark:hover:text-white transition-colors" data-lang-key="nav_home" title="홈">
+                <a href="/" class="text-gray-600 dark:text-white hover:text-gray-900 dark:hover:text-white transition-colors" data-lang-key="nav_home" title="홈">
                     <i class="fas fa-home mr-1 sm:mr-2"></i><span class="hidden sm:inline" data-lang="nav_home">홈</span>
                 </a>
                 <a href="growth.html" class="text-gray-600 dark:text-white hover:text-gray-900 dark:hover:text-white transition-colors" data-lang-key="nav_growth" title="성장 기록">
@@ -240,7 +240,7 @@
         
         <!-- 앨범으로 돌아가기 버튼 - 절대 위치로 상단에 배치 -->
         <div class="absolute top-8 left-4 z-20">
-            <a href="index.html" class="btn btn-secondary dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600 flex items-center gap-2">
+            <a href="/" class="btn btn-secondary dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600 flex items-center gap-2">
                 <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
                     <polyline points="15 18 9 12 15 6"></polyline>
                 </svg>
@@ -763,7 +763,7 @@
                 
                 // 3초 후 메인 페이지로 이동
                 setTimeout(() => {
-                    window.location.href = 'index.html';
+                    window.location.href = '/';
                 }, 3000);
                 
             } catch (error) {

@@ -7,7 +7,7 @@
 window.PERFORMANCE_FLAGS = {
     VIRTUAL_SCROLL: true,  // 가상 스크롤 활성화
     FILTER_CACHE: true,
-    DEBUG_MODE: true      // 디버깅을 위해 임시로 활성화
+    DEBUG_MODE: false     // 성능 모니터 비활성화
 };
 
 // 로컬 참조용
@@ -97,8 +97,12 @@ async function optimizedDisplayMemories(append = false) {
         }
         
         // Lazy loading 재초기화
-        if (window.imageOptimizer) {
-            window.imageOptimizer.setupLazyLoading();
+        if (typeof lazyLoadImages === 'function') {
+            setTimeout(lazyLoadImages, 100);
+        } else if (typeof setupLazyLoading === 'function') {
+            setupLazyLoading();
+        } else if (window.setupLazyLoading) {
+            window.setupLazyLoading();
         }
         
         // AOS 애니메이션 새로고침
@@ -184,13 +188,13 @@ function createMemoryElement(memory, layout) {
     // 카드 내용 생성
     memoryCard.innerHTML = `
         <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300" data-aos="fade-up">
-            <div class="aspect-w-16 aspect-h-12 bg-gray-200 dark:bg-gray-700">
+            <div class="bg-gray-200 dark:bg-gray-700" style="position: relative; overflow: hidden;">
                 <img 
-                    data-src="${imageUrl}" 
-                    src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 300'%3E%3Crect width='400' height='300' fill='%23f3f4f6'/%3E%3C/svg%3E"
+                    src="${imageUrl}" 
                     alt="${memory.title || '추억'}" 
-                    class="w-full h-full object-cover lazy-load"
-                    loading="lazy"
+                    class="w-full h-full object-cover"
+                    style="display: block; width: 100%; height: auto; min-height: 200px;"
+                    onerror="this.style.display='none'; this.parentElement.style.backgroundColor='#e5e7eb';"
                 >
             </div>
             <div class="p-4">

@@ -42,7 +42,7 @@ class FilterCache {
             // 성능 모니터에 캐시 히트 기록
             window.performanceMonitor?.trackCacheHit(true);
             
-            if (PERFORMANCE_FLAGS?.DEBUG_MODE) {
+            if (window.PERFORMANCE_FLAGS?.DEBUG_MODE) {
                 console.log('Cache hit:', {
                     key,
                     hitRate: this.getHitRate()
@@ -70,7 +70,7 @@ class FilterCache {
             const firstKey = this.cache.keys().next().value;
             this.cache.delete(firstKey);
             
-            if (PERFORMANCE_FLAGS?.DEBUG_MODE) {
+            if (window.PERFORMANCE_FLAGS?.DEBUG_MODE) {
                 console.log('Cache eviction:', firstKey);
             }
         }
@@ -78,7 +78,7 @@ class FilterCache {
         // 결과 저장 (깊은 복사)
         this.cache.set(key, results.map(item => ({...item})));
         
-        if (PERFORMANCE_FLAGS?.DEBUG_MODE) {
+        if (window.PERFORMANCE_FLAGS?.DEBUG_MODE) {
             console.log('Cache set:', {
                 key,
                 size: results.length,
@@ -236,7 +236,7 @@ function performFiltering(filters) {
             return memory.title?.toLowerCase().includes(searchTerm) ||
                    memory.description?.toLowerCase().includes(searchTerm) ||
                    memory.memory_tags?.some(tag => 
-                       tag.tag_name.toLowerCase().includes(searchTerm)
+                       tag?.tag_name?.toLowerCase().includes(searchTerm)
                    );
         });
     }
@@ -290,6 +290,6 @@ function showCacheStats() {
 }
 
 // 개발 모드에서 전역 함수로 노출
-if (PERFORMANCE_FLAGS?.DEBUG_MODE) {
+if (window.PERFORMANCE_FLAGS?.DEBUG_MODE) {
     window.showCacheStats = showCacheStats;
 }

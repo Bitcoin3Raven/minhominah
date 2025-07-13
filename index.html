@@ -8,7 +8,10 @@
     <!-- PWA 설정 (로컬 파일에서는 비활성화) -->
     <!-- <link rel="manifest" href="/manifest.json"> -->
     <meta name="theme-color" content="#3B82F6">
-    <!-- <link rel="apple-touch-icon" href="/assets/images/icon-192x192.png"> -->
+<link rel="apple-touch-icon" href="/assets/images/icon-192x192.png">
+    
+    <!-- Tailwind CSS -->
+    <link rel="stylesheet" href="css/tailwind.css">
     
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
@@ -43,22 +46,17 @@
     <script src="js/share-system.js" defer></script>
     <script src="js/notification-system.js" defer></script>
     <script src="js/image-optimizer.js" defer></script>
+    <script src="js/performance-optimization.js" defer></script>
     <script src="js/memory-data-manager.js" defer></script>
     <script src="js/scroll-manager.js" defer></script>
     <script src="js/filter-cache.js" defer></script>
     <script src="js/performance-monitor.js" defer></script>
-    <script src="js/performance-optimization.js" defer></script>
     
     <!-- Kakao SDK -->
     <script src="https://t1.kakaocdn.net/kakao_js_sdk/2.5.0/kakao.min.js"
         integrity="sha384-kYPsUbBPlktXsY6/oNHSUDZoTX6+YI51f63jCPEIPFP09ttByAdxd2mEjKuhdqn4" crossorigin="anonymous"></script>
-    <script>
-        // Kakao SDK 초기화 (실제 JavaScript 키로 교체 필요)
-        if (typeof Kakao !== 'undefined') {
-            // Kakao.init('YOUR_KAKAO_JAVASCRIPT_KEY');
-            console.log('Kakao SDK loaded. Please add your JavaScript key.');
-        }
-    </script>
+    <script src="js/kakao-config.js"></script>
+    
     
     <!-- 다크모드 초기화 스크립트 -->
     <script>
@@ -320,14 +318,17 @@
             color: white;
         }
         
-        /* Lazy loading 이미지 스타일 */
-        img.lazy-load {
-            opacity: 0;
-            transition: opacity 0.3s ease-in-out;
+        /* Lazy loading 이미지 스타일 - 임시 수정 */
+        img {
+            opacity: 1 !important;
+            visibility: visible !important;
         }
         
-        img.lazy-load.loaded {
-            opacity: 1;
+        .memory-card img,
+        .timeline-card img {
+            opacity: 1 !important;
+            visibility: visible !important;
+            display: block !important;
         }
         
         /* 커스텀 스크롤바 */
@@ -823,7 +824,7 @@
 <body>
     <!-- 헤더 영역 -->
     <header class="fixed top-0 left-0 right-0 z-50 backdrop-blur-lg bg-white/90 dark:bg-gray-900/90 shadow-md transition-transform duration-300">
-        <div class="container mx-auto px-4 py-4">
+<div class="container mx-auto px-4 py-6">
             <div class="flex justify-between items-center">
                 <!-- 로고 -->
                 <div class="flex items-center">
@@ -835,7 +836,7 @@
                 
                 <!-- 데스크톱 네비게이션 -->
                 <nav class="hidden md:flex items-center space-x-1 lg:space-x-4">
-                    <a href="index.html" class="nav-item active">
+                    <a href="/" class="nav-item active">
                         <i class="fas fa-home"></i>
                         <span data-lang="nav_home">홈</span>
                     </a>
@@ -927,7 +928,7 @@
     <!-- 모바일 메뉴 -->
     <div id="mobileMenu" class="mobile-menu md:hidden">
         <div class="px-4 py-6 space-y-2">
-            <a href="index.html" class="mobile-menu-item active">
+            <a href="/" class="mobile-menu-item active">
                 <i class="fas fa-home"></i>
                 <span data-lang="nav_home">홈</span>
             </a>
@@ -2152,7 +2153,7 @@
                         });
                         return hasMinHo && hasMinA;
                     } else {
-                        // 민호만 또는 민아만
+                        // 민호가 포함된 또는 민아가 포함된 모든 사진
                         return memory.memory_people.some(mp => {
                             const person = peopleData[mp.person_id];
                             return person && person.name.toLowerCase() === 
@@ -2278,8 +2279,7 @@
                 AOS.refresh();
             }
             
-            // Lazy loading 설정
-            setTimeout(lazyLoadImages, 100);
+            // 이미지 로드 완료
         }
         
         // 메모리 카드 생성 (개선된 디자인)
@@ -2301,11 +2301,10 @@
                     <div class="memory-card modern-card">
                         <div class="image-wrapper">
                             ${hasMedia ? 
-                                `<img data-src="${getMediaUrl(memory.media_files[0])}" 
-                                     src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 300'%3E%3Crect width='400' height='300' fill='%23f3f4f6'/%3E%3C/svg%3E"
+                                `<img src="${getMediaUrl(memory.media_files[0])}" 
                                      alt="${memory.title}" 
-                                     class="lazy-load"
-                                     loading="lazy">` : 
+                                     class="memory-image"
+                                     onerror="this.style.display='none'">` : 
                                 '<div class="no-image-placeholder flex items-center justify-center h-full bg-gray-100">📷</div>'
                             }
                             <div class="overlay">
@@ -2457,6 +2456,7 @@
                 .from('media')
                 .getPublicUrl(path);
             
+            console.log('Media URL generated:', data.publicUrl, 'for path:', path);
             return data.publicUrl;
         }
         
@@ -3060,51 +3060,9 @@
             }
         }
         
-        // Lazy loading 함수 - IntersectionObserver 사용
-        let imageObserver = null;
-        
-        function setupImageObserver() {
-            if (imageObserver) {
-                imageObserver.disconnect();
-            }
-            
-            imageObserver = new IntersectionObserver((entries, observer) => {
-                entries.forEach(entry => {
-                    if (entry.isIntersecting) {
-                        const img = entry.target;
-                        if (img.dataset.src) {
-                            img.src = img.dataset.src;
-                            img.removeAttribute('data-src');
-                            img.classList.add('loaded');
-                            observer.unobserve(img);
-                        }
-                    }
-                });
-            }, {
-                rootMargin: '50px 0px',
-                threshold: 0.01
-            });
-        }
-        
-        function lazyLoadImages() {
-            if (!imageObserver) {
-                setupImageObserver();
-            }
-            
-            const images = document.querySelectorAll('img[data-src]');
-            images.forEach(img => {
-                imageObserver.observe(img);
-            });
-        }
+        // Lazy Loading 제거됨 - 이미지 직접 로드
 
-        // displayMemories 함수 수정 - lazy loading 추가
-        if (typeof displayMemories !== 'undefined') {
-            const originalDisplayMemories = displayMemories;
-            displayMemories = function() {
-                originalDisplayMemories();
-                setTimeout(lazyLoadImages, 100);
-            };
-        }
+        // displayMemories 함수 - 단순화됨
 
         // 로그인 버튼 클릭 이벤트 (헤더의 로그인 버튼용)
         document.addEventListener('DOMContentLoaded', function() {
@@ -3128,8 +3086,7 @@
                 });
             });
             
-            // 초기 lazy loading
-            setTimeout(lazyLoadImages, 500);
+            // 초기화 완료
         });
     </script>
     
