@@ -76,43 +76,6 @@
     </script>
     
     <style>
-        /* Critical image display fixes - must override all other styles */
-        .memory-item .memory-card.modern-card .image-wrapper {
-            position: relative !important;
-            height: 200px !important;
-            overflow: visible !important;
-            display: block !important;
-        }
-        
-        .memory-item .memory-card.modern-card .memory-image,
-        .memory-item .memory-card.modern-card img {
-            position: relative !important;
-            z-index: 1 !important;
-            opacity: 1 !important;
-            visibility: visible !important;
-            display: block !important;
-            width: 100% !important;
-            height: 100% !important;
-            object-fit: cover !important;
-        }
-        
-        .memory-item .memory-card.modern-card .overlay {
-            position: absolute !important;
-            top: 0 !important;
-            left: 0 !important;
-            right: 0 !important;
-            bottom: 0 !important;
-            z-index: 2 !important;
-            pointer-events: none !important;
-            opacity: 0 !important;
-            background: linear-gradient(to bottom, transparent 60%, rgba(0,0,0,0.7) 100%) !important;
-        }
-        
-        .memory-item .memory-card.modern-card:hover .overlay {
-            opacity: 1 !important;
-            pointer-events: auto !important;
-        }
-        
         /* 추가 스타일 */
         .hero-section {
             background: 
