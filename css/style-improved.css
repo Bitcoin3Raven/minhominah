@@ -256,6 +256,7 @@ a:hover {
   overflow: hidden;
   height: 200px;
   width: 100%;
+  background: var(--gray-100);
 }
 
 .modern-card .image-wrapper img {
@@ -263,6 +264,9 @@ a:hover {
   height: 100%;
   object-fit: cover;
   transition: transform var(--transition-slow);
+  position: relative;
+  z-index: 1;
+  display: block;
 }
 
 .modern-card:hover .image-wrapper img {
@@ -272,7 +276,7 @@ a:hover {
 .modern-card .overlay {
   position: absolute;
   inset: 0;
-  background: linear-gradient(to bottom, transparent 0%, rgba(0,0,0,0.7) 100%);
+  background: linear-gradient(to bottom, transparent 60%, rgba(0,0,0,0.7) 100%);
   opacity: 0;
   transition: opacity var(--transition-base);
   display: flex;
@@ -281,15 +285,12 @@ a:hover {
   padding: 1rem;
   gap: 0.5rem;
   pointer-events: none;
-  z-index: 2;
-}
-
-.modern-card:hover .overlay {
-  pointer-events: auto;
+  z-index: 10;
 }
 
 .modern-card:hover .overlay {
   opacity: 1;
+  pointer-events: auto;
 }
 
 .card-content {
@@ -305,6 +306,52 @@ a:hover {
   font-size: 0.875rem;
   font-weight: 500;
   margin-bottom: 0.5rem;
+}
+
+/* Fix for memory card images */
+.memory-card.modern-card .image-wrapper {
+  position: relative !important;
+  height: 200px !important;
+  overflow: hidden !important;
+}
+
+.memory-card.modern-card .memory-image {
+  position: relative !important;
+  z-index: 1 !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+  display: block !important;
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important;
+}
+
+.memory-card.modern-card .overlay {
+  z-index: 2 !important;
+}
+
+/* Ensure selection mode buttons are clickable */
+.selection-checkbox-container {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  z-index: 30;
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 8px;
+  padding: 5px;
+}
+
+.selection-checkbox {
+  position: relative;
+  z-index: 31;
+  cursor: pointer;
+  width: 20px;
+  height: 20px;
+}
+
+.memory-checkbox {
+  position: relative;
+  z-index: 20;
 }
 
 /* ===========================

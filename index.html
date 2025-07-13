@@ -33,10 +33,12 @@
     
     <script>
         // Tailwind 다크모드 설정
-        tailwind.config = {
-            darkMode: 'class',
-            theme: {
-                extend: {}
+        if (typeof tailwind !== 'undefined') {
+            tailwind.config = {
+                darkMode: 'class',
+                theme: {
+                    extend: {}
+                }
             }
         }
     </script>
