@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="ko" class="scroll-smooth">
+<html lang="ko" data-theme="light">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>포토북 만들기 - 민호민아 성장앨범</title>
+    <title>통계 대시보드 - 민호민아 성장앨범</title>
     
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -30,19 +30,22 @@
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     
-    <!-- jsPDF & html2canvas -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <!-- Supabase 클라이언트 -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     
     <!-- Custom CSS -->
-    <link rel="stylesheet" href="css/main.css">
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/navigation.css">
+
+    <link rel="stylesheet" href="css/style-improved.css">
+    
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns"></script>
     
     <!-- AOS Animation -->
     <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
     <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
-    
-    <!-- Supabase 클라이언트 -->
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     
     <!-- 언어 시스템 -->
     <script src="js/lang/ko.js"></script>
@@ -50,118 +53,62 @@
     <script src="js/lang/en.js"></script>
     <script src="js/language.js"></script>
     
+    <!-- Custom Styles -->
+    
     <style>
-        /* 템플릿 선택 스타일 */
-        .template-option {
-            cursor: pointer;
+        /* 차트 컨테이너 스타일 */
+        .chart-container {
+            position: relative;
+            height: 300px;
+            width: 100%;
+        }
+        
+        .stat-card {
+            background: white;
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
             transition: all 0.3s ease;
         }
         
-        .template-option input[type="radio"]:checked + div {
-            border-color: #3B82F6;
-            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        .stat-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
         }
         
-        /* 미리보기 페이지 스타일 */
-        .preview-page {
-            background: white;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-            aspect-ratio: 210 / 297;
-            max-width: 400px;
-            margin: 0 auto;
-            padding: 2rem;
-            font-family: 'Noto Sans KR', sans-serif;
+        /* 다크모드 차트 카드 */
+        .dark .stat-card {
+            background: #1f2937;
         }
         
-        /* PDF 생성 중 오버레이 */
-        .pdf-overlay {
-            position: fixed;
-            inset: 0;
-            background: rgba(0, 0, 0, 0.8);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 9999;
+        /* 통계 숫자 애니메이션 */
+        @keyframes countUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
         }
         
-        .pdf-progress {
-            background: white;
-            padding: 2rem;
-            border-radius: 1rem;
-            text-align: center;
-            min-width: 300px;
+        .stat-number {
+            animation: countUp 0.6s ease-out;
         }
         
-        .progress-ring {
-            width: 80px;
-            height: 80px;
-            margin: 0 auto 1rem;
+        /* 로딩 스켈레톤 */
+        .skeleton {
+            background: linear-gradient(90deg, #f3f4f6 25%, #e5e7eb 50%, #f3f4f6 75%);
+            background-size: 200% 100%;
+            animation: loading 1.5s infinite;
         }
         
-        .progress-ring-circle {
-            stroke: #3B82F6;
-            stroke-width: 4;
-            fill: none;
-            stroke-dasharray: 251.2;
-            stroke-dashoffset: 251.2;
-            transform: rotate(-90deg);
-            transform-origin: center;
-            transition: stroke-dashoffset 0.3s ease;
-        }
-        
-        /* 템플릿 미리보기 이미지 */
-        .template-preview {
-            width: 100%;
-            height: 150px;
-            background-size: cover;
-            background-position: center;
-            border-radius: 0.5rem;
-            margin-bottom: 0.5rem;
-        }
-        
-        .template-classic {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        }
-        
-        .template-modern {
-            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-        }
-        
-        .template-minimal {
-            background: linear-gradient(135deg, #e0e0e0 0%, #f5f5f5 100%);
-        }
-        /* 다크모드 전환 애니메이션 */
-        * {
-            transition-property: background-color, border-color, color, fill, stroke;
-            transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
-            transition-duration: 150ms;
-        }
-        
-        /* 히어로 섹션 스타일 통일 */
-        .hero-section {
-            background: 
-                radial-gradient(circle at 10% 10%, rgba(255, 182, 193, 0.8) 0%, rgba(255, 192, 203, 0.5) 25%, transparent 50%),
-                radial-gradient(circle at 90% 90%, rgba(135, 206, 235, 0.8) 0%, rgba(135, 206, 235, 0.5) 25%, transparent 50%),
-                linear-gradient(135deg, #ffe0e6 0%, #fff5f7 50%, #e6f3ff 100%);
-            color: #333;
-            padding: 40px 0;
-            text-align: center;
-            position: relative;
-            overflow: hidden;
-        }
-        
-        .dark .hero-section {
-            background: 
-                radial-gradient(circle at 10% 10%, rgba(147, 51, 234, 0.3) 0%, rgba(147, 51, 234, 0.1) 25%, transparent 50%),
-                radial-gradient(circle at 90% 90%, rgba(59, 130, 246, 0.3) 0%, rgba(59, 130, 246, 0.1) 25%, transparent 50%),
-                linear-gradient(135deg, #1e293b 0%, #334155 50%, #1e293b 100%);
-            color: #f1f5f9;
+        @keyframes loading {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
         }
     </style>
+    
+
     <script src="js/navigation-responsive.js"></script>
 </head>
-<body class="bg-gray-50 dark:bg-gray-900 transition-colors duration-300">
-    <!-- 헤더 -->
+<body class="bg-gray-50 dark:bg-gray-900 transition-colors duration-200">
+    <!-- 헤더 영역 -->
         <!-- 헤더 영역 -->
     <header class="fixed top-0 left-0 right-0 z-50 backdrop-blur-lg bg-white/90 dark:bg-gray-900/90 shadow-md transition-transform duration-300">
         <div class="container mx-auto px-4 py-3">
@@ -332,168 +279,156 @@
     <!-- 모바일 메뉴 오버레이 -->
     <div id="menuOverlay" class="menu-overlay md:hidden"></div>
     <!-- 메인 컨텐츠 -->
-    <main class="min-h-screen pt-16">
-        <!-- 히어로 섹션 -->
-        <section class="hero-section">
-            <div class="container mx-auto px-4 py-12 text-center">
-                <h1 class="text-4xl md:text-5xl font-bold text-gray-800 dark:text-white mb-4">
-                    <span class="text-gradient" data-lang="photobook_title">포토북 만들기</span>
-                </h1>
-                <p class="text-lg text-gray-600 dark:text-gray-300 max-w-2xl mx-auto" data-lang="photobook_subtitle">
-                    소중한 추억들을 아름다운 책으로 만들어보세요
-                </p>
-            </div>
-        </section>
+    <main class="container mx-auto px-4 py-8 pt-32">
+        <!-- 페이지 타이틀 -->
+        <div class="mb-8" data-aos="fade-down">
+            <h1 class="text-4xl font-bold text-gray-800 dark:text-white mb-2">
+                <i class="fas fa-chart-bar mr-3 text-purple-500"></i><span data-lang="statistics_title">통계 대시보드</span>
+            </h1>
+            <p class="text-gray-600 dark:text-gray-400" data-lang="statistics_subtitle">민호와 민아의 성장 여정을 숫자로 만나보세요</p>
+        </div>
 
-        <!-- 포토북 생성 컨테이너 -->
-        <div id="photobookCreator" class="container mx-auto px-4 py-8 max-w-6xl">
-            <!-- 포토북 설정 -->
-            <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-8 mb-8" data-aos="fade-up">
-                <h2 class="text-2xl font-bold mb-6 text-gray-800 dark:text-white">
-                    <i class="fas fa-cog mr-2 text-blue-500"></i><span data-lang="photobook_settings">포토북 설정</span>
-                </h2>
-                
-                <!-- 템플릿 선택 -->
-                <div class="mb-8">
-                    <h3 class="text-lg font-semibold mb-4 text-gray-700 dark:text-gray-300" data-lang="template_selection">템플릿 선택</h3>
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                        <label class="template-option">
-                            <input type="radio" name="template" value="classic" class="hidden peer" checked>
-                            <div class="border-2 border-gray-300 peer-checked:border-blue-500 rounded-lg p-4 transition hover:shadow-lg">
-                                <div class="template-preview template-classic"></div>
-                                <p class="text-center font-medium text-gray-800 dark:text-white" data-lang="photobook_template_classic">클래식</p>
-                                <p class="text-center text-sm text-gray-600 dark:text-gray-400" data-lang="photobook_template_classic_desc">전통적이고 우아한 스타일</p>
-                            </div>
-                        </label>
-                        <label class="template-option">
-                            <input type="radio" name="template" value="modern" class="hidden peer">
-                            <div class="border-2 border-gray-300 peer-checked:border-blue-500 rounded-lg p-4 transition hover:shadow-lg">
-                                <div class="template-preview template-modern"></div>
-                                <p class="text-center font-medium text-gray-800 dark:text-white" data-lang="photobook_template_modern">모던</p>
-                                <p class="text-center text-sm text-gray-600 dark:text-gray-400" data-lang="photobook_template_modern_desc">현대적이고 화려한 스타일</p>
-                            </div>
-                        </label>
-                        <label class="template-option">
-                            <input type="radio" name="template" value="minimal" class="hidden peer">
-                            <div class="border-2 border-gray-300 peer-checked:border-blue-500 rounded-lg p-4 transition hover:shadow-lg">
-                                <div class="template-preview template-minimal"></div>
-                                <p class="text-center font-medium text-gray-800 dark:text-white" data-lang="photobook_template_minimal">미니멀</p>
-                                <p class="text-center text-sm text-gray-600 dark:text-gray-400" data-lang="photobook_template_minimal_desc">깔끔하고 심플한 스타일</p>
-                            </div>
-                        </label>
+        <!-- 요약 통계 카드 -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+            <!-- 총 추억 수 -->
+            <div class="stat-card" data-aos="fade-up" data-aos-delay="100">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-gray-500 dark:text-gray-400 text-sm" data-lang="stats_total_memories">총 추억</p>
+                        <p class="text-3xl font-bold text-gray-800 dark:text-white stat-number" id="totalMemories">0</p>
                     </div>
-                </div>
-
-                <!-- 기간 선택 -->
-                <div class="mb-8">
-                    <h3 class="text-lg font-semibold mb-4 text-gray-700 dark:text-gray-300" data-lang="period_to_include">포함할 기간</h3>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-sm font-medium mb-2 text-gray-600 dark:text-gray-400" data-lang="start_date">시작일</label>
-                            <input type="date" id="photobookStartDate" 
-                                   class="w-full px-4 py-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium mb-2 text-gray-600 dark:text-gray-400" data-lang="end_date">종료일</label>
-                            <input type="date" id="photobookEndDate" 
-                                   class="w-full px-4 py-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                        </div>
+                    <div class="w-12 h-12 bg-blue-100 dark:bg-blue-900 rounded-lg flex items-center justify-center">
+                        <i class="fas fa-camera text-blue-600 dark:text-blue-400"></i>
                     </div>
-                </div>
-
-                <!-- 옵션 설정 -->
-                <div class="mb-8">
-                    <h3 class="text-lg font-semibold mb-4 text-gray-700 dark:text-gray-300" data-lang="options">옵션</h3>
-                    <div class="space-y-3">
-                        <label class="flex items-center cursor-pointer group">
-                            <input type="checkbox" id="includeTitle" checked 
-                                   class="mr-3 w-5 h-5 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500">
-                            <span class="text-gray-700 dark:text-gray-300 group-hover:text-blue-600 transition" data-lang="include_cover_page">표지 페이지 포함</span>
-                        </label>
-                        <label class="flex items-center cursor-pointer group">
-                            <input type="checkbox" id="includeStats" checked 
-                                   class="mr-3 w-5 h-5 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500">
-                            <span class="text-gray-700 dark:text-gray-300 group-hover:text-blue-600 transition" data-lang="include_stats_page">통계 페이지 포함</span>
-                        </label>
-                        <label class="flex items-center cursor-pointer group">
-                            <input type="checkbox" id="includeIndex" 
-                                   class="mr-3 w-5 h-5 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500">
-                            <span class="text-gray-700 dark:text-gray-300 group-hover:text-blue-600 transition" data-lang="include_index_page">목차 페이지 포함</span>
-                        </label>
-                        <label class="flex items-center cursor-pointer group">
-                            <input type="checkbox" id="includeTimeline" 
-                                   class="mr-3 w-5 h-5 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500">
-                            <span class="text-gray-700 dark:text-gray-300 group-hover:text-blue-600 transition" data-lang="include_timeline">타임라인 포함</span>
-                        </label>
-                    </div>
-                </div>
-
-                <!-- 인물 선택 -->
-                <div class="mb-8">
-                    <h3 class="text-lg font-semibold mb-4 text-gray-700 dark:text-gray-300" data-lang="people_to_include">포함할 인물</h3>
-                    <div class="flex flex-wrap gap-3">
-                        <label class="inline-flex items-center cursor-pointer whitespace-nowrap">
-                            <input type="radio" name="personFilter" value="all" checked 
-                                   class="mr-2 text-blue-600">
-                            <span class="text-gray-700 dark:text-gray-300" data-lang="all">전체</span>
-                        </label>
-                        <label class="inline-flex items-center cursor-pointer whitespace-nowrap">
-                            <input type="radio" name="personFilter" value="minho" 
-                                   class="mr-2 text-blue-600">
-                            <span class="text-gray-700 dark:text-gray-300" data-lang="minho_only">민호만</span>
-                        </label>
-                        <label class="inline-flex items-center cursor-pointer whitespace-nowrap">
-                            <input type="radio" name="personFilter" value="mina" 
-                                   class="mr-2 text-blue-600">
-                            <span class="text-gray-700 dark:text-gray-300" data-lang="mina_only">민아만</span>
-                        </label>
-                        <label class="inline-flex items-center cursor-pointer whitespace-nowrap">
-                            <input type="radio" name="personFilter" value="both" 
-                                   class="mr-2 text-blue-600">
-                            <span class="text-gray-700 dark:text-gray-300" data-lang="minho_mina_together">민호민아 함께</span>
-                        </label>
-                    </div>
-                </div>
-
-                <!-- 생성 버튼 -->
-                <div class="flex justify-center gap-4">
-                    <button onclick="photobookCreator.previewPDF()" 
-                            class="px-8 py-3 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-white rounded-lg font-semibold hover:shadow-lg transition flex items-center gap-2">
-                        <i class="fas fa-eye"></i>
-                        <span data-lang="preview">미리보기</span>
-                    </button>
-                    <button onclick="photobookCreator.generatePDF()" 
-                            class="px-8 py-3 bg-gradient-to-r from-pink-500 to-blue-500 text-white rounded-lg font-semibold hover:shadow-lg transition flex items-center gap-2">
-                        <i class="fas fa-download"></i>
-                        <span data-lang="generate_photobook">포토북 생성하기</span>
-                    </button>
                 </div>
             </div>
 
-            <!-- 미리보기 영역 -->
-            <div id="pdfPreview" class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-8 hidden" data-aos="fade-up">
-                <h3 class="text-xl font-bold mb-6 text-gray-800 dark:text-white">
-                    <i class="fas fa-book-open mr-2 text-purple-500"></i><span data-lang="photobook_preview">포토북 미리보기</span>
-                </h3>
-                <div id="previewPages" class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <!-- 동적으로 생성될 페이지 미리보기 -->
+            <!-- 이번 달 추억 -->
+            <div class="stat-card" data-aos="fade-up" data-aos-delay="200">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-gray-500 dark:text-gray-400 text-sm" data-lang="stats_monthly_memories">이번 달</p>
+                        <p class="text-3xl font-bold text-gray-800 dark:text-white stat-number" id="monthlyMemories">0</p>
+                    </div>
+                    <div class="w-12 h-12 bg-green-100 dark:bg-green-900 rounded-lg flex items-center justify-center">
+                        <i class="fas fa-calendar-check text-green-600 dark:text-green-400"></i>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 총 사진 수 -->
+            <div class="stat-card" data-aos="fade-up" data-aos-delay="300">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-gray-500 dark:text-gray-400 text-sm" data-lang="stats_total_photos">총 사진</p>
+                        <p class="text-3xl font-bold text-gray-800 dark:text-white stat-number" id="totalPhotos">0</p>
+                    </div>
+                    <div class="w-12 h-12 bg-purple-100 dark:bg-purple-900 rounded-lg flex items-center justify-center">
+                        <i class="fas fa-image text-purple-600 dark:text-purple-400"></i>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 총 동영상 수 -->
+            <div class="stat-card" data-aos="fade-up" data-aos-delay="400">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-gray-500 dark:text-gray-400 text-sm" data-lang="stats_total_videos">총 동영상</p>
+                        <p class="text-3xl font-bold text-gray-800 dark:text-white stat-number" id="totalVideos">0</p>
+                    </div>
+                    <div class="w-12 h-12 bg-red-100 dark:bg-red-900 rounded-lg flex items-center justify-center">
+                        <i class="fas fa-video text-red-600 dark:text-red-400"></i>
+                    </div>
                 </div>
             </div>
         </div>
 
-        <!-- PDF 생성 중 오버레이 -->
-        <div id="pdfOverlay" class="pdf-overlay hidden">
-            <div class="pdf-progress">
-                <svg class="progress-ring">
-                    <circle class="progress-ring-circle" 
-                            cx="40" cy="40" r="40"></circle>
-                </svg>
-                <h3 class="text-xl font-bold mb-2" data-lang="creating_photobook">포토북 생성 중...</h3>
-                <p class="text-gray-600" id="progressText" data-lang="preparing">준비 중...</p>
-                <div class="mt-4">
-                    <div class="w-full bg-gray-200 rounded-full h-2">
-                        <div id="progressBar" class="bg-blue-500 h-2 rounded-full transition-all duration-300" style="width: 0%"></div>
-                    </div>
+        <!-- 차트 섹션 -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <!-- 월별 추억 트렌드 -->
+            <div class="stat-card" data-aos="fade-up">
+                <h3 class="text-xl font-bold text-gray-800 dark:text-white mb-4">
+                    <i class="fas fa-chart-line mr-2 text-blue-500"></i><span data-lang="chart_monthly_trend">월별 추억 트렌드</span>
+                </h3>
+                <div class="chart-container">
+                    <canvas id="monthlyTrendChart"></canvas>
+                </div>
+            </div>
+
+            <!-- 인물별 추억 분포 -->
+            <div class="stat-card" data-aos="fade-up" data-aos-delay="100">
+                <h3 class="text-xl font-bold text-gray-800 dark:text-white mb-4">
+                    <i class="fas fa-user-friends mr-2 text-green-500"></i><span data-lang="chart_person_distribution">인물별 추억 분포</span>
+                </h3>
+                <div class="chart-container">
+                    <canvas id="personDistributionChart"></canvas>
+                </div>
+            </div>
+
+            <!-- 연도별 성장 기록 -->
+            <div class="stat-card" data-aos="fade-up">
+                <h3 class="text-xl font-bold text-gray-800 dark:text-white mb-4">
+                    <i class="fas fa-calendar-alt mr-2 text-purple-500"></i><span data-lang="chart_yearly_memories">연도별 추억 수</span>
+                </h3>
+                <div class="chart-container">
+                    <canvas id="yearlyChart"></canvas>
+                </div>
+            </div>
+
+            <!-- 태그별 통계 -->
+            <div class="stat-card" data-aos="fade-up" data-aos-delay="100">
+                <h3 class="text-xl font-bold text-gray-800 dark:text-white mb-4">
+                    <i class="fas fa-tags mr-2 text-orange-500"></i><span data-lang="top_10_tags">인기 태그 TOP 10</span>
+                </h3>
+                <div class="chart-container">
+                    <canvas id="tagChart"></canvas>
+                </div>
+            </div>
+
+            <!-- 시간대별 활동 -->
+            <div class="stat-card" data-aos="fade-up">
+                <h3 class="text-xl font-bold text-gray-800 dark:text-white mb-4">
+                    <i class="fas fa-clock mr-2 text-indigo-500"></i><span data-lang="chart_weekday_memories">요일별 추억 등록</span>
+                </h3>
+                <div class="chart-container">
+                    <canvas id="weekdayChart"></canvas>
+                </div>
+            </div>
+
+            <!-- 미디어 타입 분포 -->
+            <div class="stat-card" data-aos="fade-up" data-aos-delay="100">
+                <h3 class="text-xl font-bold text-gray-800 dark:text-white mb-4">
+                    <i class="fas fa-photo-video mr-2 text-pink-500"></i><span data-lang="chart_media_type">미디어 타입 분포</span>
+                </h3>
+                <div class="chart-container">
+                    <canvas id="mediaTypeChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- 추가 통계 정보 -->
+        <div class="mt-8 stat-card" data-aos="fade-up">
+            <h3 class="text-xl font-bold text-gray-800 dark:text-white mb-6">
+                <i class="fas fa-info-circle mr-2 text-blue-500"></i><span data-lang="additional_stats">추가 통계 정보</span>
+            </h3>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <!-- 가장 활발한 달 -->
+                <div class="text-center">
+                    <p class="text-gray-500 dark:text-gray-400 mb-2" data-lang="most_active_month">가장 활발한 달</p>
+                    <p class="text-2xl font-bold text-gray-800 dark:text-white" id="mostActiveMonth">-</p>
+                </div>
+                
+                <!-- 평균 월별 추억 수 -->
+                <div class="text-center">
+                    <p class="text-gray-500 dark:text-gray-400 mb-2" data-lang="avg_monthly_memories">평균 월별 추억</p>
+                    <p class="text-2xl font-bold text-gray-800 dark:text-white" id="avgMonthlyMemories">0</p>
+                </div>
+                
+                <!-- 가장 많이 사용된 태그 -->
+                <div class="text-center">
+                    <p class="text-gray-500 dark:text-gray-400 mb-2" data-lang="most_popular_tag">가장 인기 있는 태그</p>
+                    <p class="text-2xl font-bold text-gray-800 dark:text-white" id="mostPopularTag">-</p>
                 </div>
             </div>
         </div>
@@ -502,24 +437,25 @@
     <!-- 푸터 -->
     <footer class="bg-gray-100 dark:bg-gray-800 py-8 mt-16">
         <div class="container mx-auto px-4 text-center text-gray-600 dark:text-gray-400">
-            <p>&copy; 2025 민호민아 성장앨범. All rights reserved.</p>
-            <p class="mt-2">Made with <i class="fas fa-heart text-red-500"></i> for 민호 & 민아</p>
+            <p>&copy; 2025 <span data-lang="site_title">민호민아 성장앨범</span>. <span data-lang="footer_rights">All rights reserved.</span></p>
+            <p class="mt-2">
+                <span data-lang="footer_made_with">Made with</span> 
+                <i class="fas fa-heart text-red-500 animate-pulse"></i> 
+                <span data-lang="footer_for">for</span> 
+                <span data-lang="footer_minho_mina">민호 & 민아</span>
+            </p>
         </div>
     </footer>
 
-    <!-- JavaScript -->
+    <!-- Supabase & Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="js/supabase.js"></script>
     <script src="js/auth.js"></script>
-    <script src="js/main.js"></script>
-    <script src="js/photobook-creator.js"></script>
+    <script src="js/statistics.js"></script>
     <script src="js/notification-system.js" defer></script>
+    
+    <!-- Dark Mode Toggle -->
     <script>
-        // AOS 초기화
-        AOS.init({
-            duration: 800,
-            once: true
-        });
-        
         // getTranslation 함수 추가
         function getTranslation(key) {
             const currentLang = localStorage.getItem('language') || 'ko';
@@ -626,7 +562,7 @@
             }
         }
         
-        // 다크모드 토글 기능
+        // 다크모드 토글
         const themeToggle = document.getElementById('themeToggle');
         const sunIcon = document.getElementById('sunIcon');
         const moonIcon = document.getElementById('moonIcon');
@@ -655,6 +591,18 @@
             sunIcon.style.display = 'block';
             moonIcon.style.display = 'none';
         }
+        
+        // AOS 초기화
+        AOS.init({
+            duration: 800,
+            once: true
+        });
+        
+        // 언어 시스템 초기화
+        document.addEventListener('DOMContentLoaded', () => {
+            initializeLanguage();
+        });
+
     </script>
 
     <!-- 인증 모달 -->
@@ -710,18 +658,6 @@
             </div>
         </div>
     </div>
-    
-    <!-- 푸터 -->
-    <footer class="bg-gray-100 dark:bg-gray-800 py-8 mt-16">
-        <div class="container mx-auto px-4 text-center text-gray-600 dark:text-gray-400">
-            <p>&copy; 2025 <span data-lang="site_title">민호민아 성장앨범</span>. <span data-lang="footer_rights">All rights reserved.</span></p>
-            <p class="mt-2">
-                <span data-lang="footer_made_with">Made with</span> 
-                <i class="fas fa-heart text-red-500 animate-pulse"></i> 
-                <span data-lang="footer_for">for</span> 
-                <span data-lang="footer_minho_mina">민호 & 민아</span>
-            </p>
-        </div>
-    </footer>
+
 </body>
 </html>

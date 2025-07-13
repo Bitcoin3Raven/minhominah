@@ -1,167 +1,55 @@
 <!DOCTYPE html>
-<html lang="ko" class="scroll-smooth">
+<html lang="ko" data-theme="light">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>포토북 만들기 - 민호민아 성장앨범</title>
+    <title>성장 기록 - 민호민아 성장앨범</title>
     
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
-        // Tailwind 다크모드 설정
         tailwind.config = {
             darkMode: 'class',
             theme: {
-                extend: {}
+                extend: {
+                    colors: {
+                        primary: '#FF6B6B',
+                        secondary: '#4ECDC4'
+                    }
+                }
             }
         }
     </script>
     
-    <!-- 다크모드 초기화 스크립트 -->
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <!-- Custom Styles -->
+    <link rel="stylesheet" href="css/style-improved.css">
+    
+    <!-- Dark Mode Initialization -->
     <script>
-        // 페이지 로드 전 다크모드 설정
-        if (localStorage.getItem('theme') === 'dark' || (!localStorage.getItem('theme') && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+        // 다크모드 초기화
+        const savedTheme = localStorage.getItem('theme') || 'light';
+        document.documentElement.setAttribute('data-theme', savedTheme);
+        if (savedTheme === 'dark') {
             document.documentElement.classList.add('dark');
-        } else {
-            document.documentElement.classList.remove('dark');
         }
     </script>
-    
-    <!-- Font Awesome -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    
-    <!-- jsPDF & html2canvas -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-    
-    <!-- Custom CSS -->
-    <link rel="stylesheet" href="css/main.css">
-    
-    <!-- AOS Animation -->
-    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
-    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
-    
-    <!-- Supabase 클라이언트 -->
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     
     <!-- 언어 시스템 -->
     <script src="js/lang/ko.js"></script>
     <script src="js/lang/th.js"></script>
     <script src="js/lang/en.js"></script>
     <script src="js/language.js"></script>
-    
-    <style>
-        /* 템플릿 선택 스타일 */
-        .template-option {
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-        
-        .template-option input[type="radio"]:checked + div {
-            border-color: #3B82F6;
-            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
-        }
-        
-        /* 미리보기 페이지 스타일 */
-        .preview-page {
-            background: white;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-            aspect-ratio: 210 / 297;
-            max-width: 400px;
-            margin: 0 auto;
-            padding: 2rem;
-            font-family: 'Noto Sans KR', sans-serif;
-        }
-        
-        /* PDF 생성 중 오버레이 */
-        .pdf-overlay {
-            position: fixed;
-            inset: 0;
-            background: rgba(0, 0, 0, 0.8);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 9999;
-        }
-        
-        .pdf-progress {
-            background: white;
-            padding: 2rem;
-            border-radius: 1rem;
-            text-align: center;
-            min-width: 300px;
-        }
-        
-        .progress-ring {
-            width: 80px;
-            height: 80px;
-            margin: 0 auto 1rem;
-        }
-        
-        .progress-ring-circle {
-            stroke: #3B82F6;
-            stroke-width: 4;
-            fill: none;
-            stroke-dasharray: 251.2;
-            stroke-dashoffset: 251.2;
-            transform: rotate(-90deg);
-            transform-origin: center;
-            transition: stroke-dashoffset 0.3s ease;
-        }
-        
-        /* 템플릿 미리보기 이미지 */
-        .template-preview {
-            width: 100%;
-            height: 150px;
-            background-size: cover;
-            background-position: center;
-            border-radius: 0.5rem;
-            margin-bottom: 0.5rem;
-        }
-        
-        .template-classic {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        }
-        
-        .template-modern {
-            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-        }
-        
-        .template-minimal {
-            background: linear-gradient(135deg, #e0e0e0 0%, #f5f5f5 100%);
-        }
-        /* 다크모드 전환 애니메이션 */
-        * {
-            transition-property: background-color, border-color, color, fill, stroke;
-            transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
-            transition-duration: 150ms;
-        }
-        
-        /* 히어로 섹션 스타일 통일 */
-        .hero-section {
-            background: 
-                radial-gradient(circle at 10% 10%, rgba(255, 182, 193, 0.8) 0%, rgba(255, 192, 203, 0.5) 25%, transparent 50%),
-                radial-gradient(circle at 90% 90%, rgba(135, 206, 235, 0.8) 0%, rgba(135, 206, 235, 0.5) 25%, transparent 50%),
-                linear-gradient(135deg, #ffe0e6 0%, #fff5f7 50%, #e6f3ff 100%);
-            color: #333;
-            padding: 40px 0;
-            text-align: center;
-            position: relative;
-            overflow: hidden;
-        }
-        
-        .dark .hero-section {
-            background: 
-                radial-gradient(circle at 10% 10%, rgba(147, 51, 234, 0.3) 0%, rgba(147, 51, 234, 0.1) 25%, transparent 50%),
-                radial-gradient(circle at 90% 90%, rgba(59, 130, 246, 0.3) 0%, rgba(59, 130, 246, 0.1) 25%, transparent 50%),
-                linear-gradient(135deg, #1e293b 0%, #334155 50%, #1e293b 100%);
-            color: #f1f5f9;
-        }
-    </style>
     <script src="js/navigation-responsive.js"></script>
+    <link rel="stylesheet" href="css/navigation.css">
 </head>
-<body class="bg-gray-50 dark:bg-gray-900 transition-colors duration-300">
-    <!-- 헤더 -->
+<body class="bg-gray-50 dark:bg-gray-900 min-h-screen">
+    <!-- Header -->
         <!-- 헤더 영역 -->
     <header class="fixed top-0 left-0 right-0 z-50 backdrop-blur-lg bg-white/90 dark:bg-gray-900/90 shadow-md transition-transform duration-300">
         <div class="container mx-auto px-4 py-3">
@@ -331,195 +219,171 @@
     
     <!-- 모바일 메뉴 오버레이 -->
     <div id="menuOverlay" class="menu-overlay md:hidden"></div>
-    <!-- 메인 컨텐츠 -->
-    <main class="min-h-screen pt-16">
-        <!-- 히어로 섹션 -->
-        <section class="hero-section">
-            <div class="container mx-auto px-4 py-12 text-center">
-                <h1 class="text-4xl md:text-5xl font-bold text-gray-800 dark:text-white mb-4">
-                    <span class="text-gradient" data-lang="photobook_title">포토북 만들기</span>
-                </h1>
-                <p class="text-lg text-gray-600 dark:text-gray-300 max-w-2xl mx-auto" data-lang="photobook_subtitle">
-                    소중한 추억들을 아름다운 책으로 만들어보세요
-                </p>
+    <!-- Hero Section -->
+    <section class="relative overflow-hidden py-12 mt-16">
+        <div class="absolute inset-0 bg-gradient-to-br from-pink-400/20 via-purple-400/20 to-blue-400/20 dark:from-pink-600/20 dark:via-purple-600/20 dark:to-blue-600/20"></div>
+        <div class="container mx-auto px-4 relative">
+            <h1 class="text-4xl md:text-5xl font-bold text-center bg-gradient-to-r from-pink-500 to-blue-500 bg-clip-text text-transparent" data-lang="growth_title">
+                성장 기록
+            </h1>
+            <p class="text-center text-lg text-gray-600 dark:text-gray-300 mt-4" data-lang="growth_subtitle">
+                민호와 민아의 성장 과정을 그래프로 확인해보세요
+            </p>
+        </div>
+    </section>
+
+    <!-- Main Content -->
+    <main class="container mx-auto px-4 pb-20">
+        <!-- Person Selector -->
+        <div class="flex justify-center mb-8 mt-6">
+            <div class="inline-flex rounded-full bg-white dark:bg-gray-800 shadow-lg p-1">
+                <button onclick="selectPerson('민호')" id="btn-민호" class="person-btn px-6 py-2 rounded-full font-medium transition-all duration-200 text-gray-700 dark:text-gray-300">
+                    <i class="fas fa-boy mr-2"></i>민호
+                </button>
+                <button onclick="selectPerson('민아')" id="btn-민아" class="person-btn px-6 py-2 rounded-full font-medium transition-all duration-200 text-gray-700 dark:text-gray-300">
+                    <i class="fas fa-girl mr-2"></i>민아
+                </button>
             </div>
-        </section>
+        </div>
 
-        <!-- 포토북 생성 컨테이너 -->
-        <div id="photobookCreator" class="container mx-auto px-4 py-8 max-w-6xl">
-            <!-- 포토북 설정 -->
-            <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-8 mb-8" data-aos="fade-up">
-                <h2 class="text-2xl font-bold mb-6 text-gray-800 dark:text-white">
-                    <i class="fas fa-cog mr-2 text-blue-500"></i><span data-lang="photobook_settings">포토북 설정</span>
-                </h2>
-                
-                <!-- 템플릿 선택 -->
-                <div class="mb-8">
-                    <h3 class="text-lg font-semibold mb-4 text-gray-700 dark:text-gray-300" data-lang="template_selection">템플릿 선택</h3>
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                        <label class="template-option">
-                            <input type="radio" name="template" value="classic" class="hidden peer" checked>
-                            <div class="border-2 border-gray-300 peer-checked:border-blue-500 rounded-lg p-4 transition hover:shadow-lg">
-                                <div class="template-preview template-classic"></div>
-                                <p class="text-center font-medium text-gray-800 dark:text-white" data-lang="photobook_template_classic">클래식</p>
-                                <p class="text-center text-sm text-gray-600 dark:text-gray-400" data-lang="photobook_template_classic_desc">전통적이고 우아한 스타일</p>
-                            </div>
-                        </label>
-                        <label class="template-option">
-                            <input type="radio" name="template" value="modern" class="hidden peer">
-                            <div class="border-2 border-gray-300 peer-checked:border-blue-500 rounded-lg p-4 transition hover:shadow-lg">
-                                <div class="template-preview template-modern"></div>
-                                <p class="text-center font-medium text-gray-800 dark:text-white" data-lang="photobook_template_modern">모던</p>
-                                <p class="text-center text-sm text-gray-600 dark:text-gray-400" data-lang="photobook_template_modern_desc">현대적이고 화려한 스타일</p>
-                            </div>
-                        </label>
-                        <label class="template-option">
-                            <input type="radio" name="template" value="minimal" class="hidden peer">
-                            <div class="border-2 border-gray-300 peer-checked:border-blue-500 rounded-lg p-4 transition hover:shadow-lg">
-                                <div class="template-preview template-minimal"></div>
-                                <p class="text-center font-medium text-gray-800 dark:text-white" data-lang="photobook_template_minimal">미니멀</p>
-                                <p class="text-center text-sm text-gray-600 dark:text-gray-400" data-lang="photobook_template_minimal_desc">깔끔하고 심플한 스타일</p>
-                            </div>
-                        </label>
-                    </div>
-                </div>
+        <!-- Add Record Button -->
+        <div class="flex justify-end mb-6">
+            <button onclick="showAddRecordModal()" class="px-6 py-3 bg-gradient-to-r from-green-500 to-emerald-500 text-white rounded-full font-medium hover:shadow-lg transform hover:scale-105 transition-all duration-200">
+                <i class="fas fa-plus-circle mr-2"></i><span data-lang="growth_add_record">기록 추가</span>
+            </button>
+        </div>
 
-                <!-- 기간 선택 -->
-                <div class="mb-8">
-                    <h3 class="text-lg font-semibold mb-4 text-gray-700 dark:text-gray-300" data-lang="period_to_include">포함할 기간</h3>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-sm font-medium mb-2 text-gray-600 dark:text-gray-400" data-lang="start_date">시작일</label>
-                            <input type="date" id="photobookStartDate" 
-                                   class="w-full px-4 py-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium mb-2 text-gray-600 dark:text-gray-400" data-lang="end_date">종료일</label>
-                            <input type="date" id="photobookEndDate" 
-                                   class="w-full px-4 py-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                        </div>
-                    </div>
-                </div>
-
-                <!-- 옵션 설정 -->
-                <div class="mb-8">
-                    <h3 class="text-lg font-semibold mb-4 text-gray-700 dark:text-gray-300" data-lang="options">옵션</h3>
-                    <div class="space-y-3">
-                        <label class="flex items-center cursor-pointer group">
-                            <input type="checkbox" id="includeTitle" checked 
-                                   class="mr-3 w-5 h-5 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500">
-                            <span class="text-gray-700 dark:text-gray-300 group-hover:text-blue-600 transition" data-lang="include_cover_page">표지 페이지 포함</span>
-                        </label>
-                        <label class="flex items-center cursor-pointer group">
-                            <input type="checkbox" id="includeStats" checked 
-                                   class="mr-3 w-5 h-5 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500">
-                            <span class="text-gray-700 dark:text-gray-300 group-hover:text-blue-600 transition" data-lang="include_stats_page">통계 페이지 포함</span>
-                        </label>
-                        <label class="flex items-center cursor-pointer group">
-                            <input type="checkbox" id="includeIndex" 
-                                   class="mr-3 w-5 h-5 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500">
-                            <span class="text-gray-700 dark:text-gray-300 group-hover:text-blue-600 transition" data-lang="include_index_page">목차 페이지 포함</span>
-                        </label>
-                        <label class="flex items-center cursor-pointer group">
-                            <input type="checkbox" id="includeTimeline" 
-                                   class="mr-3 w-5 h-5 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500">
-                            <span class="text-gray-700 dark:text-gray-300 group-hover:text-blue-600 transition" data-lang="include_timeline">타임라인 포함</span>
-                        </label>
-                    </div>
-                </div>
-
-                <!-- 인물 선택 -->
-                <div class="mb-8">
-                    <h3 class="text-lg font-semibold mb-4 text-gray-700 dark:text-gray-300" data-lang="people_to_include">포함할 인물</h3>
-                    <div class="flex flex-wrap gap-3">
-                        <label class="inline-flex items-center cursor-pointer whitespace-nowrap">
-                            <input type="radio" name="personFilter" value="all" checked 
-                                   class="mr-2 text-blue-600">
-                            <span class="text-gray-700 dark:text-gray-300" data-lang="all">전체</span>
-                        </label>
-                        <label class="inline-flex items-center cursor-pointer whitespace-nowrap">
-                            <input type="radio" name="personFilter" value="minho" 
-                                   class="mr-2 text-blue-600">
-                            <span class="text-gray-700 dark:text-gray-300" data-lang="minho_only">민호만</span>
-                        </label>
-                        <label class="inline-flex items-center cursor-pointer whitespace-nowrap">
-                            <input type="radio" name="personFilter" value="mina" 
-                                   class="mr-2 text-blue-600">
-                            <span class="text-gray-700 dark:text-gray-300" data-lang="mina_only">민아만</span>
-                        </label>
-                        <label class="inline-flex items-center cursor-pointer whitespace-nowrap">
-                            <input type="radio" name="personFilter" value="both" 
-                                   class="mr-2 text-blue-600">
-                            <span class="text-gray-700 dark:text-gray-300" data-lang="minho_mina_together">민호민아 함께</span>
-                        </label>
-                    </div>
-                </div>
-
-                <!-- 생성 버튼 -->
-                <div class="flex justify-center gap-4">
-                    <button onclick="photobookCreator.previewPDF()" 
-                            class="px-8 py-3 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-white rounded-lg font-semibold hover:shadow-lg transition flex items-center gap-2">
-                        <i class="fas fa-eye"></i>
-                        <span data-lang="preview">미리보기</span>
-                    </button>
-                    <button onclick="photobookCreator.generatePDF()" 
-                            class="px-8 py-3 bg-gradient-to-r from-pink-500 to-blue-500 text-white rounded-lg font-semibold hover:shadow-lg transition flex items-center gap-2">
-                        <i class="fas fa-download"></i>
-                        <span data-lang="generate_photobook">포토북 생성하기</span>
-                    </button>
-                </div>
-            </div>
-
-            <!-- 미리보기 영역 -->
-            <div id="pdfPreview" class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-8 hidden" data-aos="fade-up">
-                <h3 class="text-xl font-bold mb-6 text-gray-800 dark:text-white">
-                    <i class="fas fa-book-open mr-2 text-purple-500"></i><span data-lang="photobook_preview">포토북 미리보기</span>
+        <!-- Charts Container -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <!-- Height Chart -->
+            <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-6 transition-all duration-300 hover:shadow-2xl">
+                <h3 class="text-xl font-bold text-gray-800 dark:text-white mb-4">
+                    <i class="fas fa-ruler-vertical mr-2 text-blue-500"></i><span data-lang="growth_height_chart">키 성장 기록</span>
                 </h3>
-                <div id="previewPages" class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <!-- 동적으로 생성될 페이지 미리보기 -->
+                <div class="relative h-80">
+                    <canvas id="heightChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Weight Chart -->
+            <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-6 transition-all duration-300 hover:shadow-2xl">
+                <h3 class="text-xl font-bold text-gray-800 dark:text-white mb-4">
+                    <i class="fas fa-weight mr-2 text-green-500"></i><span data-lang="growth_weight_chart">몸무게 성장 기록</span>
+                </h3>
+                <div class="relative h-80">
+                    <canvas id="weightChart"></canvas>
                 </div>
             </div>
         </div>
 
-        <!-- PDF 생성 중 오버레이 -->
-        <div id="pdfOverlay" class="pdf-overlay hidden">
-            <div class="pdf-progress">
-                <svg class="progress-ring">
-                    <circle class="progress-ring-circle" 
-                            cx="40" cy="40" r="40"></circle>
-                </svg>
-                <h3 class="text-xl font-bold mb-2" data-lang="creating_photobook">포토북 생성 중...</h3>
-                <p class="text-gray-600" id="progressText" data-lang="preparing">준비 중...</p>
-                <div class="mt-4">
-                    <div class="w-full bg-gray-200 rounded-full h-2">
-                        <div id="progressBar" class="bg-blue-500 h-2 rounded-full transition-all duration-300" style="width: 0%"></div>
-                    </div>
+        <!-- Statistics Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mt-8">
+            <!-- Current Stats -->
+            <div class="bg-gradient-to-br from-purple-500 to-pink-500 rounded-2xl p-6 text-white">
+                <h4 class="text-lg font-semibold mb-2" data-lang="growth_current_status">현재 상태</h4>
+                <div id="currentStats">
+                    <p class="text-2xl font-bold" data-lang="growth_select_person">선택해주세요</p>
                 </div>
+            </div>
+
+            <!-- Growth Rate -->
+            <div class="bg-gradient-to-br from-blue-500 to-cyan-500 rounded-2xl p-6 text-white">
+                <h4 class="text-lg font-semibold mb-2" data-lang="growth_recent_rate">최근 성장률</h4>
+                <div id="growthRate">
+                    <p class="text-2xl font-bold">-</p>
+                </div>
+            </div>
+
+            <!-- Last Update -->
+            <div class="bg-gradient-to-br from-green-500 to-emerald-500 rounded-2xl p-6 text-white">
+                <h4 class="text-lg font-semibold mb-2" data-lang="growth_last_record">마지막 기록</h4>
+                <div id="lastUpdate">
+                    <p class="text-2xl font-bold">-</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Records Table -->
+        <div class="mt-8 bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-6">
+            <h3 class="text-xl font-bold text-gray-800 dark:text-white mb-4">
+                <i class="fas fa-list mr-2 text-purple-500"></i><span data-lang="growth_records_history">성장 기록 내역</span>
+            </h3>
+            <div class="overflow-x-auto">
+                <table class="w-full">
+                    <thead>
+                        <tr class="border-b dark:border-gray-700">
+                            <th class="text-left py-3 px-4 text-gray-700 dark:text-gray-300" data-lang="growth_date">날짜</th>
+                            <th class="text-left py-3 px-4 text-gray-700 dark:text-gray-300" data-lang="growth_age">나이</th>
+                            <th class="text-left py-3 px-4 text-gray-700 dark:text-gray-300"><span data-lang="growth_height">키</span> (cm)</th>
+                            <th class="text-left py-3 px-4 text-gray-700 dark:text-gray-300"><span data-lang="growth_weight">몸무게</span> (kg)</th>
+                            <th class="text-left py-3 px-4 text-gray-700 dark:text-gray-300" data-lang="growth_memo">메모</th>
+                            <th class="text-center py-3 px-4 text-gray-700 dark:text-gray-300" data-lang="growth_actions">작업</th>
+                        </tr>
+                    </thead>
+                    <tbody id="recordsTableBody">
+                        <!-- Records will be inserted here -->
+                    </tbody>
+                </table>
             </div>
         </div>
     </main>
 
-    <!-- 푸터 -->
-    <footer class="bg-gray-100 dark:bg-gray-800 py-8 mt-16">
-        <div class="container mx-auto px-4 text-center text-gray-600 dark:text-gray-400">
-            <p>&copy; 2025 민호민아 성장앨범. All rights reserved.</p>
-            <p class="mt-2">Made with <i class="fas fa-heart text-red-500"></i> for 민호 & 민아</p>
+    <!-- Add Record Modal -->
+    <div id="addRecordModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 hidden">
+        <div class="flex items-center justify-center min-h-screen p-4">
+            <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl p-6 w-full max-w-md">
+                <h3 class="text-2xl font-bold text-gray-800 dark:text-white mb-4" data-lang="growth_add_record_title">
+                    성장 기록 추가
+                </h3>
+                <form id="addRecordForm">
+                    <div class="mb-4">
+                        <label class="block text-gray-700 dark:text-gray-300 mb-2" data-lang="growth_person">인물</label>
+                        <select id="recordPerson" class="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-800 dark:text-white" required>
+                            <option value="" data-lang="growth_select">선택하세요</option>
+                            <option value="민호">민호</option>
+                            <option value="민아">민아</option>
+                        </select>
+                    </div>
+                    <div class="mb-4">
+                        <label class="block text-gray-700 dark:text-gray-300 mb-2" data-lang="growth_date">날짜</label>
+                        <input type="date" id="recordDate" class="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-800 dark:text-white" required>
+                    </div>
+                    <div class="grid grid-cols-2 gap-4 mb-4">
+                        <div>
+                            <label class="block text-gray-700 dark:text-gray-300 mb-2"><span data-lang="growth_height">키</span> (cm)</label>
+                            <input type="number" id="recordHeight" step="0.1" class="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-800 dark:text-white" required>
+                        </div>
+                        <div>
+                            <label class="block text-gray-700 dark:text-gray-300 mb-2"><span data-lang="growth_weight">몸무게</span> (kg)</label>
+                            <input type="number" id="recordWeight" step="0.1" class="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-800 dark:text-white" required>
+                        </div>
+                    </div>
+                    <div class="mb-6">
+                        <label class="block text-gray-700 dark:text-gray-300 mb-2" data-lang="growth_memo_optional">메모 (선택)</label>
+                        <textarea id="recordNotes" rows="3" class="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-800 dark:text-white resize-none"></textarea>
+                    </div>
+                    <div class="flex gap-3">
+                        <button type="submit" class="flex-1 py-3 bg-gradient-to-r from-green-500 to-emerald-500 text-white rounded-lg font-medium hover:shadow-lg transition-all duration-200">
+                            <i class="fas fa-save mr-2"></i><span data-lang="growth_save">저장</span>
+                        </button>
+                        <button type="button" onclick="hideAddRecordModal()" class="flex-1 py-3 bg-gray-500 text-white rounded-lg font-medium hover:bg-gray-600 transition-all duration-200" data-lang="growth_cancel">
+                            취소
+                        </button>
+                    </div>
+                </form>
+            </div>
         </div>
-    </footer>
+    </div>
 
-    <!-- JavaScript -->
+    <!-- Supabase & Main Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="js/supabase.js"></script>
     <script src="js/auth.js"></script>
-    <script src="js/main.js"></script>
-    <script src="js/photobook-creator.js"></script>
+    <script src="js/growth-charts.js"></script>
     <script src="js/notification-system.js" defer></script>
+    
+    <!-- Dark Mode Toggle -->
     <script>
-        // AOS 초기화
-        AOS.init({
-            duration: 800,
-            once: true
-        });
-        
         // getTranslation 함수 추가
         function getTranslation(key) {
             const currentLang = localStorage.getItem('language') || 'ko';
@@ -626,35 +490,38 @@
             }
         }
         
-        // 다크모드 토글 기능
+        // 다크모드 토글 스크립트
         const themeToggle = document.getElementById('themeToggle');
         const sunIcon = document.getElementById('sunIcon');
         const moonIcon = document.getElementById('moonIcon');
-        
-        themeToggle.addEventListener('click', () => {
-            const isDark = document.documentElement.classList.contains('dark');
-            
-            if (isDark) {
-                document.documentElement.classList.remove('dark');
-                localStorage.setItem('theme', 'light');
-                sunIcon.style.display = 'block';
-                moonIcon.style.display = 'none';
-            } else {
-                document.documentElement.classList.add('dark');
-                localStorage.setItem('theme', 'dark');
-                sunIcon.style.display = 'none';
-                moonIcon.style.display = 'block';
-            }
-        });
-        
-        // 초기 아이콘 설정
-        if (document.documentElement.classList.contains('dark')) {
+
+        // 초기 아이콘 상태 설정
+        const initialTheme = document.documentElement.getAttribute('data-theme');
+        if (initialTheme === 'dark') {
             sunIcon.style.display = 'none';
             moonIcon.style.display = 'block';
         } else {
             sunIcon.style.display = 'block';
             moonIcon.style.display = 'none';
         }
+
+        themeToggle.addEventListener('click', () => {
+            const currentTheme = document.documentElement.getAttribute('data-theme');
+            const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+            
+            document.documentElement.setAttribute('data-theme', newTheme);
+            localStorage.setItem('theme', newTheme);
+            
+            if (newTheme === 'dark') {
+                document.documentElement.classList.add('dark');
+                sunIcon.style.display = 'none';
+                moonIcon.style.display = 'block';
+            } else {
+                document.documentElement.classList.remove('dark');
+                sunIcon.style.display = 'block';
+                moonIcon.style.display = 'none';
+            }
+        });
     </script>
 
     <!-- 인증 모달 -->
@@ -710,7 +577,7 @@
             </div>
         </div>
     </div>
-    
+
     <!-- 푸터 -->
     <footer class="bg-gray-100 dark:bg-gray-800 py-8 mt-16">
         <div class="container mx-auto px-4 text-center text-gray-600 dark:text-gray-400">

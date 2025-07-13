@@ -3,7 +3,7 @@ const CACHE_NAME = 'minhominah-v1';
 const urlsToCache = [
     '/',
     '/index.html',
-    '/css/style.css',
+    '/css/main.css',
     '/js/supabase.js',
     '/js/notification-system.js'
 ];

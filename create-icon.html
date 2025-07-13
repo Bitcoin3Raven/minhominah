@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Icon Generator</title>
+</head>
+<body>
+    <canvas id="canvas" width="144" height="144"></canvas>
+    <script>
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        
+        // 배경 색상
+        ctx.fillStyle = '#FF6B6B';
+        ctx.fillRect(0, 0, 144, 144);
+        
+        // 하트 그리기
+        ctx.fillStyle = '#FFFFFF';
+        ctx.font = '80px Arial';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText('❤️', 72, 72);
+        
+        // PNG로 다운로드
+        canvas.toBlob(function(blob) {
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'icon-144x144.png';
+            a.textContent = 'Download icon-144x144.png';
+            document.body.appendChild(a);
+        });
+    </script>
+    <p>Open this file in a browser and click the download link to get the icon.</p>
+</body>
+</html>
