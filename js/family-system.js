@@ -458,21 +458,33 @@ class FamilySystem {
     }
 
     showLoadingState() {
-        document.getElementById('loadingState').classList.remove('hidden');
-        document.getElementById('noFamilyState').classList.add('hidden');
-        document.getElementById('familyState').classList.add('hidden');
+        const loadingState = document.getElementById('loadingState');
+        const noFamilyState = document.getElementById('noFamilyState');
+        const familyState = document.getElementById('familyState');
+        
+        if (loadingState) loadingState.classList.remove('hidden');
+        if (noFamilyState) noFamilyState.classList.add('hidden');
+        if (familyState) familyState.classList.add('hidden');
     }
 
     showNoFamilyState() {
-        document.getElementById('loadingState').classList.add('hidden');
-        document.getElementById('noFamilyState').classList.remove('hidden');
-        document.getElementById('familyState').classList.add('hidden');
+        const loadingState = document.getElementById('loadingState');
+        const noFamilyState = document.getElementById('noFamilyState');
+        const familyState = document.getElementById('familyState');
+        
+        if (loadingState) loadingState.classList.add('hidden');
+        if (noFamilyState) noFamilyState.classList.remove('hidden');
+        if (familyState) familyState.classList.add('hidden');
     }
 
     showFamilyState() {
-        document.getElementById('loadingState').classList.add('hidden');
-        document.getElementById('noFamilyState').classList.add('hidden');
-        document.getElementById('familyState').classList.remove('hidden');
+        const loadingState = document.getElementById('loadingState');
+        const noFamilyState = document.getElementById('noFamilyState');
+        const familyState = document.getElementById('familyState');
+        
+        if (loadingState) loadingState.classList.add('hidden');
+        if (noFamilyState) noFamilyState.classList.add('hidden');
+        if (familyState) familyState.classList.remove('hidden');
     }
 
     showSuccess(message) {
