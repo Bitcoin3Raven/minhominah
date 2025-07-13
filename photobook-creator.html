@@ -75,10 +75,18 @@
             position: fixed;
             inset: 0;
             background: rgba(0, 0, 0, 0.8);
-            display: flex;
+            display: none !important;
             align-items: center;
             justify-content: center;
             z-index: 9999;
+        }
+        
+        .pdf-overlay.show {
+            display: flex !important;
+        }
+        
+        .pdf-overlay.hidden {
+            display: none !important;
         }
         
         .pdf-progress {
@@ -340,7 +348,7 @@
         </section>
 
         <!-- 포토북 생성 컨테이너 -->
-        <div id="photobookCreator" class="container mx-auto px-4 py-8 max-w-6xl">
+        <div id="photobookCreatorContainer" class="container mx-auto px-4 py-8 max-w-6xl">
             <!-- 포토북 설정 -->
             <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-8 mb-8" data-aos="fade-up">
                 <h2 class="text-2xl font-bold mb-6 text-gray-800 dark:text-white">
@@ -476,7 +484,7 @@
         </div>
 
         <!-- PDF 생성 중 오버레이 -->
-        <div id="pdfOverlay" class="pdf-overlay hidden">
+        <div id="pdfOverlay" class="pdf-overlay hidden" style="display: none !important;">
             <div class="pdf-progress">
                 <svg class="progress-ring">
                     <circle class="progress-ring-circle" 
@@ -717,5 +725,39 @@
             </p>
         </div>
     </footer>
+    
+    <script>
+        // 페이지 로드 즉시 오버레이 숨기기
+        (function() {
+            const overlay = document.getElementById('pdfOverlay');
+            if (overlay) {
+                overlay.classList.add('hidden');
+                overlay.classList.remove('show');
+                overlay.style.display = 'none !important';
+                overlay.style.setProperty('display', 'none', 'important');
+            }
+        })();
+        
+        // 페이지 로드 시 오버레이가 표시되는 문제 해결
+        document.addEventListener('DOMContentLoaded', function() {
+            const overlay = document.getElementById('pdfOverlay');
+            if (overlay) {
+                overlay.classList.add('hidden');
+                overlay.classList.remove('show');
+                overlay.style.display = 'none';
+                console.log('PDF 오버레이 숨김 처리 완료');
+            }
+        });
+        
+        // 만약 photobookCreator가 초기화되지 않았다면 수동 초기화
+        setTimeout(function() {
+            if (window.photobookCreator && typeof window.photobookCreator.init === 'function') {
+                if (!window.photobookCreator.memories || window.photobookCreator.memories.length === 0) {
+                    console.log('포토북 생성기 재초기화');
+                    window.photobookCreator.init();
+                }
+            }
+        }, 1000);
+    </script>
 </body>
 </html>

@@ -17,6 +17,59 @@ const photobookCreator = {
         this.setupEventListeners();
         this.setDefaultDates();
         this.loadMemories();
+        
+        // 샘플 데이터 추가 버튼 (디버깅용)
+        this.addSampleDataButton();
+    },
+    
+    // 샘플 데이터 추가 버튼 (디버깅용)
+    addSampleDataButton() {
+        const container = document.getElementById('photobookCreatorContainer');
+        if (container && this.memories.length === 0) {
+            const button = document.createElement('button');
+            button.className = 'px-4 py-2 bg-yellow-500 text-white rounded-lg mb-4';
+            button.textContent = '샘플 데이터 추가 (테스트용)';
+            button.onclick = () => this.addSampleData();
+            container.insertBefore(button, container.firstChild);
+        }
+    },
+    
+    // 샘플 데이터 추가
+    addSampleData() {
+        const sampleMemories = [
+            {
+                id: Date.now() + 1,
+                title: 'First Day of School',
+                description: 'Minho started kindergarten today! He was so excited and made new friends.',
+                date: '2024-03-01',
+                people: ['민호'],
+                tags: ['school', 'milestone'],
+                images: []
+            },
+            {
+                id: Date.now() + 2,
+                title: 'Birthday Party',
+                description: 'Mina celebrated her 3rd birthday with family and friends.',
+                date: '2024-06-15',
+                people: ['민아'],
+                tags: ['birthday', 'celebration'],
+                images: []
+            },
+            {
+                id: Date.now() + 3,
+                title: 'Family Picnic',
+                description: 'A wonderful day at the park with both kids.',
+                date: '2024-07-20',
+                people: ['민호', '민아'],
+                tags: ['family', 'outdoor'],
+                images: []
+            }
+        ];
+        
+        localStorage.setItem('memories', JSON.stringify(sampleMemories));
+        this.memories = sampleMemories;
+        alert('샘플 데이터가 추가되었습니다. 페이지를 새로고침하세요.');
+        location.reload();
     },
 
     // 이벤트 리스너 설정
@@ -77,9 +130,13 @@ const photobookCreator = {
     async loadMemories() {
         try {
             const memoriesData = localStorage.getItem('memories');
+            console.log('localStorage에서 추억 데이터 로드 시도...');
             if (memoriesData) {
                 this.memories = JSON.parse(memoriesData);
                 console.log(`${this.memories.length}개의 추억을 로드했습니다.`);
+            } else {
+                console.log('localStorage에 추억 데이터가 없습니다.');
+                this.memories = [];
             }
         } catch (error) {
             console.error('추억 로드 오류:', error);
@@ -397,7 +454,10 @@ const photobookCreator = {
 
     // PDF 생성
     async generatePDF() {
+        console.log('포토북 생성 시작...');
+        
         const filtered = this.getFilteredMemories();
+        console.log('필터링된 추억 수:', filtered.length);
         
         if (filtered.length === 0) {
             alert('선택한 기간에 추억이 없습니다.');
@@ -411,8 +471,14 @@ const photobookCreator = {
         const progressCircle = document.querySelector('.progress-ring-circle');
         
         overlay.classList.remove('hidden');
+        overlay.classList.add('show');
         
         try {
+            // jsPDF 확인
+            if (!window.jspdf) {
+                throw new Error('jsPDF 라이브러리가 로드되지 않았습니다.');
+            }
+            
             // jsPDF 인스턴스 생성
             const { jsPDF } = window.jspdf;
             const pdf = new jsPDF({
@@ -482,13 +548,16 @@ const photobookCreator = {
             // 완료 후 오버레이 숨기기
             setTimeout(() => {
                 overlay.classList.add('hidden');
+                overlay.classList.remove('show');
                 alert('포토북이 생성되었습니다!');
             }, 1000);
 
         } catch (error) {
             console.error('PDF 생성 오류:', error);
-            alert('PDF 생성 중 오류가 발생했습니다.');
+            console.error('오류 상세:', error.message, error.stack);
+            alert('PDF 생성 중 오류가 발생했습니다.\n\n' + error.message);
             overlay.classList.add('hidden');
+            overlay.classList.remove('show');
         }
     },
 
@@ -496,27 +565,35 @@ const photobookCreator = {
     async addTitlePageToPDF(pdf, memories) {
         const template = this.getTemplateStyles();
         
-        // 배경색
-        pdf.setFillColor(...this.hexToRgb(template.accentColor));
-        pdf.rect(0, 0, 210, 297, 'F');
-        
-        // 제목
-        pdf.setTextColor(...this.hexToRgb('#ffffff'));
-        pdf.setFontSize(36);
-        pdf.text('민호민아 성장앨범', 105, 100, { align: 'center' });
-        
-        // 부제목
-        pdf.setFontSize(20);
-        pdf.text('소중한 추억들', 105, 120, { align: 'center' });
-        
-        // 기간
-        pdf.setFontSize(14);
-        pdf.text(`${this.options.startDate} ~ ${this.options.endDate}`, 105, 150, { align: 'center' });
-        pdf.text(`총 ${memories.length}개의 추억`, 105, 160, { align: 'center' });
-        
-        // 하트 아이콘 (텍스트로 대체)
-        pdf.setFontSize(48);
-        pdf.text('♥', 105, 200, { align: 'center' });
+        try {
+            // 배경색
+            pdf.setFillColor(...this.hexToRgb(template.accentColor));
+            pdf.rect(0, 0, 210, 297, 'F');
+            
+            // 제목
+            pdf.setTextColor(...this.hexToRgb('#ffffff'));
+            pdf.setFontSize(36);
+            
+            // 한글 폰트 문제 회피를 위해 영문으로 대체하거나 이미지 사용
+            // 임시로 영문 사용
+            pdf.text('MinhoMina Growth Album', 105, 100, { align: 'center' });
+            
+            // 부제목
+            pdf.setFontSize(20);
+            pdf.text('Precious Memories', 105, 120, { align: 'center' });
+            
+            // 기간
+            pdf.setFontSize(14);
+            pdf.text(`${this.options.startDate} ~ ${this.options.endDate}`, 105, 150, { align: 'center' });
+            pdf.text(`Total ${memories.length} memories`, 105, 160, { align: 'center' });
+            
+            // 하트 아이콘 (텍스트로 대체)
+            pdf.setFontSize(48);
+            pdf.text('♥', 105, 200, { align: 'center' });
+        } catch (error) {
+            console.error('표지 페이지 추가 오류:', error);
+            throw error;
+        }
     },
 
     // PDF에 통계 페이지 추가
@@ -527,7 +604,7 @@ const photobookCreator = {
         // 제목
         pdf.setTextColor(...this.hexToRgb(template.titleColor));
         pdf.setFontSize(24);
-        pdf.text('추억 통계', 20, 30);
+        pdf.text('Memory Statistics', 20, 30);
         
         // 통계 내용
         pdf.setFontSize(12);
@@ -536,20 +613,20 @@ const photobookCreator = {
         let yPos = 60;
         const lineHeight = 15;
         
-        pdf.text(`총 추억 수: ${stats.totalMemories}개`, 20, yPos);
+        pdf.text(`Total memories: ${stats.totalMemories}`, 20, yPos);
         yPos += lineHeight;
         
-        pdf.text(`민호 등장: ${stats.minhoCount}회`, 20, yPos);
+        pdf.text(`Minho appears: ${stats.minhoCount} times`, 20, yPos);
         yPos += lineHeight;
         
-        pdf.text(`민아 등장: ${stats.minaCount}회`, 20, yPos);
+        pdf.text(`Mina appears: ${stats.minaCount} times`, 20, yPos);
         yPos += lineHeight;
         
-        pdf.text(`함께 등장: ${stats.togetherCount}회`, 20, yPos);
+        pdf.text(`Together: ${stats.togetherCount} times`, 20, yPos);
         yPos += lineHeight;
         
         if (stats.topTag) {
-            pdf.text(`가장 많은 태그: ${stats.topTag}`, 20, yPos);
+            pdf.text(`Most used tag: ${stats.topTag}`, 20, yPos);
         }
     },
 
@@ -561,7 +638,7 @@ const photobookCreator = {
         // 제목
         pdf.setTextColor(...this.hexToRgb(template.titleColor));
         pdf.setFontSize(24);
-        pdf.text('목차', 20, 30);
+        pdf.text('Index', 20, 30);
         
         // 목차 내용
         pdf.setFontSize(12);
@@ -571,7 +648,9 @@ const photobookCreator = {
         const lineHeight = 10;
         
         Object.entries(monthGroups).forEach(([month, items]) => {
-            pdf.text(`${month} - ${items.length}개의 추억`, 20, yPos);
+            // 월 정보를 영문으로 변환
+            const monthStr = month.replace(/년/, '').replace(/월/, '');
+            pdf.text(`${monthStr} - ${items.length} memories`, 20, yPos);
             yPos += lineHeight;
             
             if (yPos > 270) {
@@ -588,7 +667,7 @@ const photobookCreator = {
         // 제목
         pdf.setTextColor(...this.hexToRgb(template.titleColor));
         pdf.setFontSize(24);
-        pdf.text('성장 타임라인', 20, 30);
+        pdf.text('Growth Timeline', 20, 30);
         
         // 타임라인 그리기
         pdf.setDrawColor(...this.hexToRgb(template.accentColor));
@@ -606,7 +685,9 @@ const photobookCreator = {
             // 텍스트
             pdf.setFontSize(10);
             pdf.setTextColor(...this.hexToRgb(template.textColor));
-            pdf.text(`${this.formatDateKorean(memory.date)} - ${memory.title}`, 40, yPos + 1);
+            // 날짜를 영문으로 표시
+            const dateStr = new Date(memory.date).toLocaleDateString('en-US');
+            pdf.text(`${dateStr} - ${memory.title || 'Memory'}`, 40, yPos + 1);
             
             yPos += step;
         });
@@ -624,7 +705,8 @@ const photobookCreator = {
         // 날짜
         pdf.setFontSize(12);
         pdf.setTextColor(...this.hexToRgb(template.subtitleColor));
-        pdf.text(this.formatDateKorean(memory.date), 20, 40);
+        const dateStr = new Date(memory.date).toLocaleDateString('en-US');
+        pdf.text(dateStr, 20, 40);
         
         let yPos = 50;
         
@@ -671,7 +753,14 @@ const photobookCreator = {
     }
 };
 
+// window 객체에 할당
+window.photobookCreator = photobookCreator;
+
 // 페이지 로드 시 초기화
 document.addEventListener('DOMContentLoaded', () => {
-    photobookCreator.init();
+    // photobookCreatorContainer가 있는 페이지에서만 실행
+    if (document.getElementById('photobookCreatorContainer')) {
+        console.log('포토북 생성기 초기화 중...');
+        window.photobookCreator.init();
+    }
 });
