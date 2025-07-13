@@ -42,6 +42,9 @@
     <script src="js/supabase.js"></script>
     <script src="js/auth.js"></script>
     <script src="js/performance-config.js"></script>
+    <script src="js/permissions.js"></script>
+    <script src="js/memory-actions.js"></script>
+    <script src="js/bulk-actions.js"></script>
     <script src="js/comment-system.js" defer></script>
     <script src="js/share-system.js" defer></script>
     <script src="js/notification-system.js" defer></script>
@@ -812,6 +815,43 @@
                 padding-right: 1rem;
             }
         }
+        
+        /* 버튼 스타일 추가 */
+        .btn {
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-weight: 500;
+            transition: all 0.2s;
+            cursor: pointer;
+            border: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .btn-secondary {
+            background: #f3f4f6;
+            color: #4b5563;
+            border: 1px solid #e5e7eb;
+        }
+        
+        .btn-secondary:hover {
+            background: #e5e7eb;
+            color: #374151;
+            transform: translateY(-1px);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .dark .btn-secondary {
+            background: #374151;
+            color: #d1d5db;
+            border-color: #4b5563;
+        }
+        
+        .dark .btn-secondary:hover {
+            background: #4b5563;
+            color: white;
+        }
     </style>
     
     <!-- 언어 시스템 -->
@@ -820,6 +860,7 @@
     <script src="js/lang/en.js"></script>
     <script src="js/language.js"></script>
     <script src="js/navigation-responsive.js"></script>
+    <script src="js/family-system.js"></script>
 </head>
 <body>
     <!-- 헤더 영역 -->
@@ -1082,6 +1123,10 @@
             <div class="flex items-center justify-between mb-4">
                 <h3 class="text-lg font-semibold text-gray-800" data-lang="filter_title">추억 필터</h3>
                 <div class="flex gap-2">
+                    <button id="selectionModeBtn" onclick="bulkActions.toggleSelectionMode()" class="btn btn-secondary flex items-center gap-2">
+                        <i class="fas fa-check-square"></i>
+                        <span>선택 모드</span>
+                    </button>
                     <button onclick="startSlideshow()" class="btn btn-secondary flex items-center gap-2">
                         <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
                             <polygon points="5 3 19 12 5 21 5 3"></polygon>
@@ -2137,6 +2182,7 @@
             
             // 필터링
             let filteredMemories = allMemories;
+            window.filteredMemories = filteredMemories; // 전역 변수로 저장
             
             // 1. 인물 필터
             if (currentFilter !== 'all') {
@@ -2260,6 +2306,9 @@
                 return;
             }
             
+            // 필터링된 결과를 전역 변수에 업데이트
+            window.filteredMemories = filteredMemories;
+            
             // 레이아웃에 따라 다르게 표시
             if (currentLayout === 'timeline') {
                 // 날짜별로 정렬 (타임라인은 시간순)
@@ -2278,6 +2327,15 @@
             if (typeof AOS !== 'undefined') {
                 AOS.refresh();
             }
+            
+            // 삭제 버튼 추가 (권한이 있는 경우)
+            setTimeout(() => {
+                document.querySelectorAll('.memory-card').forEach((card, index) => {
+                    if (filteredMemories[index]) {
+                        memoryActions.addDeleteButton(card, filteredMemories[index]);
+                    }
+                });
+            }, 100);
             
             // 이미지 로드 완료
         }
@@ -2669,6 +2727,16 @@
                     <div class="flex items-center justify-between">
                         <h2 id="modalTitle" class="text-2xl font-bold text-gray-900 dark:text-white"></h2>
                         <div class="flex items-center gap-3">
+                            <!-- 수정 버튼 -->
+                            <button id="editMemoryBtn" onclick="editMemoryFromModal()" 
+                                    class="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition duration-200 text-sm hidden">
+                                <i class="fas fa-edit mr-2"></i>수정
+                            </button>
+                            <!-- 삭제 버튼 -->
+                            <button id="deleteMemoryBtn" onclick="deleteMemoryFromModal()" 
+                                    class="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition duration-200 text-sm hidden">
+                                <i class="fas fa-trash mr-2"></i>삭제
+                            </button>
                             <!-- 공유 버튼 -->
                             <button id="shareMemoryBtn" onclick="shareMemory()" 
                                     class="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition duration-200 text-sm">
@@ -2758,6 +2826,22 @@
 
             // 제목 설정
             document.getElementById('modalTitle').textContent = memory.title;
+            
+            // 수정 버튼 표시 여부 결정
+            const editBtn = document.getElementById('editMemoryBtn');
+            if (memoryPermissions.canEdit(memory)) {
+                editBtn.classList.remove('hidden');
+            } else {
+                editBtn.classList.add('hidden');
+            }
+            
+            // 삭제 버튼 표시 여부 결정
+            const deleteBtn = document.getElementById('deleteMemoryBtn');
+            if (memoryPermissions.canDelete(memory)) {
+                deleteBtn.classList.remove('hidden');
+            } else {
+                deleteBtn.classList.add('hidden');
+            }
 
             // 미디어 표시
             const mediaSection = document.getElementById('modalMediaSection');
@@ -2836,6 +2920,40 @@
             }
         }
 
+        function editMemoryFromModal() {
+            if (!currentMemoryId) return;
+            
+            const memory = allMemories.find(m => m.id === currentMemoryId);
+            if (!memory) return;
+            
+            // 상세 모달 닫기
+            closeMemoryModal();
+            
+            // 수정 모달 열기
+            memoryActions.editMemory(memory);
+        }
+        
+        function deleteMemoryFromModal() {
+            if (!currentMemoryId) return;
+            
+            const memory = allMemories.find(m => m.id === currentMemoryId);
+            if (!memory) return;
+            
+            // 메모리 카드 엘리먼트 찾기
+            const memoryCards = document.querySelectorAll('.memory-card');
+            let targetCard = null;
+            
+            memoryCards.forEach(card => {
+                const parentItem = card.closest('.memory-item');
+                if (parentItem && parentItem.querySelector(`[onclick*="${currentMemoryId}"]`)) {
+                    targetCard = parentItem;
+                }
+            });
+            
+            // 삭제 실행
+            memoryActions.deleteMemory(currentMemoryId, targetCard);
+        }
+        
         function closeMemoryModal() {
             const modal = document.getElementById('memoryDetailModal');
             modal.classList.add('hidden');
