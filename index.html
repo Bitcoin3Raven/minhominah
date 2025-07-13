@@ -10,9 +10,6 @@
     <meta name="theme-color" content="#3B82F6">
     <!-- <link rel="apple-touch-icon" href="/assets/images/icon-192x192.png"> -->
     
-    <!-- Tailwind CSS -->
-    <link rel="stylesheet" href="css/tailwind.css">
-
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     
@@ -26,8 +23,19 @@
     <!-- 프로젝트 스타일 및 스크립트 -->
     <link rel="stylesheet" href="css/style.css">
     <link rel="stylesheet" href="css/navigation.css">
-
     <link rel="stylesheet" href="css/style-improved.css">
+    
+    <!-- Tailwind CSS (마지막에 로드하여 우선순위 확보) -->
+    <link rel="stylesheet" href="css/tailwind.css">
+    <script>
+        // Tailwind 다크모드 설정
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {}
+            }
+        }
+    </script>
     <script src="js/supabase.js"></script>
     <script src="js/auth.js"></script>
     <script src="js/performance-config.js"></script>
