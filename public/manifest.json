@@ -1,0 +1,32 @@
+{
+  "name": "민호민아 성장앨범",
+  "short_name": "민호민아",
+  "description": "민호와 민아의 소중한 성장 이야기를 기록하는 디지털 앨범",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#3B82F6",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/assets/images/logo.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "/assets/images/screenshot1.png",
+      "sizes": "1280x720",
+      "type": "image/png"
+    },
+    {
+      "src": "/assets/images/screenshot2.png",
+      "sizes": "1280x720",
+      "type": "image/png"
+    }
+  ],
+  "categories": ["lifestyle", "photo", "kids"],
+  "lang": "ko-KR"
+}
