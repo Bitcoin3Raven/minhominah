@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>활동 로그 - 민호민아 성장앨범</title>
+    
+    <!-- CSS -->
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/photo-manager.css">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <!-- 네비게이션 -->
+    <nav class="navbar">
+        <div class="container navbar-content">
+            <a href="index.html" class="navbar-brand">
+                <i class="fas fa-baby"></i>
+                <span data-translate="site_title">민호민아 성장앨범</span>
+            </a>
+            
+            <div class="navbar-menu">
+                <a href="index.html" class="nav-link">
+                    <i class="fas fa-home"></i>
+                    <span data-translate="nav_home">홈</span>
+                </a>
+                <a href="trash.html" class="nav-link">
+                    <i class="fas fa-trash"></i>
+                    <span data-translate="nav_trash">휴지통</span>
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 메인 컨텐츠 -->
+    <main class="main-content">
+        <div class="container">
+            <!-- 페이지 헤더 -->
+            <div class="page-header">
+                <div>
+                    <h1 class="page-title">
+                        <i class="fas fa-history"></i>
+                        <span data-translate="activity_log_title">활동 로그</span>
+                    </h1>
+                    <p class="page-subtitle" data-translate="activity_log_subtitle">
+                        모든 활동 내역을 확인하고 관리하세요
+                    </p>
+                </div>
+                
+                <div class="header-actions">
+                    <button id="export-logs-btn" class="btn btn-secondary">
+                        <i class="fas fa-download"></i>
+                        <span data-translate="export_logs">로그 내보내기</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- 활동 로그 필터 -->
+            <div class="log-filters">
+                <div class="filter-group">
+                    <label data-translate="filter_action">활동:</label>
+                    <select id="log-action-filter" class="form-control">
+                        <option value="all" data-translate="filter_all">전체</option>
+                        <option value="create" data-translate="action_create">생성</option>
+                        <option value="update" data-translate="action_update">수정</option>
+                        <option value="delete" data-translate="action_delete">삭제</option>
+                        <option value="restore" data-translate="action_restore">복원</option>
+                        <option value="bulk_action" data-translate="action_bulk">대량 작업</option>
+                        <option value="share" data-translate="action_share">공유</option>
+                        <option value="download" data-translate="action_download">다운로드</option>
+                    </select>
+                </div>
+                
+                <div class="filter-group">
+                    <label data-translate="filter_resource">리소스:</label>
+                    <select id="log-resource-filter" class="form-control">
+                        <option value="all" data-translate="filter_all">전체</option>
+                        <option value="memory" data-translate="resource_memory">추억</option>
+                        <option value="media_file" data-translate="resource_media">미디어</option>
+                        <option value="tag" data-translate="resource_tag">태그</option>
+                        <option value="comment" data-translate="resource_comment">댓글</option>
+                    </select>
+                </div>
+
+                <div class="filter-group">
+                    <label data-translate="filter_period">기간:</label>
+                    <select id="log-period-filter" class="form-control">
+                        <option value="today" data-translate="period_today">오늘</option>
+                        <option value="week" data-translate="period_week">이번 주</option>
+                        <option value="month" data-translate="period_month">이번 달</option>
+                        <option value="all" data-translate="period_all">전체</option>
+                    </select>
+                </div>
+
+                <div class="filter-group">
+                    <input type="text" id="log-search" class="form-control" 
+                           placeholder="검색..." data-translate-placeholder="search_placeholder">
+                </div>
+            </div>
+
+            <!-- 활동 통계 -->
+            <div class="activity-stats">
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-calendar-day"></i>
+                    </div>
+                    <div class="stat-content">
+                        <div class="stat-value" id="today-activities">0</div>
+                        <div class="stat-label" data-translate="today_activities">오늘 활동</div>
+                    </div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-chart-line"></i>
+                    </div>
+                    <div class="stat-content">
+                        <div class="stat-value" id="week-activities">0</div>
+                        <div class="stat-label" data-translate="week_activities">이번 주 활동</div>
+                    </div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <div class="stat-content">
+                        <div class="stat-value" id="active-users">0</div>
+                        <div class="stat-label" data-translate="active_users">활성 사용자</div>
+                    </div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-images"></i>
+                    </div>
+                    <div class="stat-content">
+                        <div class="stat-value" id="total-uploads">0</div>
+                        <div class="stat-label" data-translate="total_uploads">총 업로드</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 활동 로그 테이블 -->
+            <div class="log-table-container">
+                <table class="log-table">
+                    <thead>
+                        <tr>
+                            <th data-translate="log_time">시간</th>
+                            <th data-translate="log_user">사용자</th>
+                            <th data-translate="log_action">활동</th>
+                            <th data-translate="log_resource">리소스</th>
+                            <th data-translate="log_details">상세 내용</th>
+                        </tr>
+                    </thead>
+                    <tbody id="log-table-body">
+                        <!-- 동적으로 로드됨 -->
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- 로딩 스피너 -->
+            <div id="loading-spinner" class="loading-spinner" style="display: none;">
+                <div class="spinner"></div>
+            </div>
+
+            <!-- 더 보기 버튼 -->
+            <div class="load-more-container">
+                <button id="load-more-btn" class="btn btn-secondary" style="display: none;">
+                    <span data-translate="load_more">더 보기</span>
+                </button>
+            </div>
+        </div>
+    </main>
+
+    <!-- 푸터 -->
+    <footer class="footer">
+        <div class="container">
+            <p data-translate="footer_copyright">© 2025 민호민아 성장앨범. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <!-- JavaScript -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="js/config.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/lang/languages.js"></script>
+    <script src="js/activity-log.js"></script>
+    
+    <script>
+        // 페이지 초기화
+        document.addEventListener('DOMContentLoaded', async () => {
+            // 인증 확인 (부모만 접근 가능)
+            const { data: { user } } = await supabase.auth.getUser();
+            if (!user) {
+                window.location.href = 'index.html';
+                return;
+            }
+
+            // 권한 확인
+            const { data: profile } = await supabase
+                .from('profiles')
+                .select('role')
+                .eq('id', user.id)
+                .single();
+
+            if (!profile || profile.role !== 'parent') {
+                alert(window.translations[currentLang].msg_no_permission);
+                window.location.href = 'index.html';
+                return;
+            }
+
+            // 언어 설정
+            updateLanguage();
+            
+            // 활동 로그 로드
+            activityLogger.loadLogs();
+            activityLogger.loadStats();
+            
+            // 이벤트 리스너 설정
+            document.getElementById('export-logs-btn').addEventListener('click', () => {
+                activityLogger.exportLogs();
+            });
+            
+            document.getElementById('log-action-filter').addEventListener('change', () => {
+                activityLogger.loadLogs();
+            });
+            
+            document.getElementById('log-resource-filter').addEventListener('change', () => {
+                activityLogger.loadLogs();
+            });
+            
+            document.getElementById('log-period-filter').addEventListener('change', () => {
+                activityLogger.loadLogs();
+            });
+            
+            document.getElementById('log-search').addEventListener('input', (e) => {
+                activityLogger.searchLogs(e.target.value);
+            });
+            
+            document.getElementById('load-more-btn').addEventListener('click', () => {
+                activityLogger.loadMore();
+            });
+        });
+    </script>
+</body>
+</html>

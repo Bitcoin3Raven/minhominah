@@ -1,0 +1,126 @@
+/* AOS 애니메이션 완전 비활성화 및 이미지 가시성 보장 */
+/* 이 파일은 AOS 라이브러리로 인한 모든 문제를 완전히 차단합니다 */
+
+/* 1. AOS 애니메이션 전체 비활성화 */
+[data-aos] {
+    opacity: 1 !important;
+    pointer-events: auto !important;
+    transform: none !important;
+    transition: none !important;
+}
+
+/* 2. AOS 상태 클래스 무효화 */
+.aos-init,
+.aos-animate {
+    opacity: 1 !important;
+    transform: none !important;
+}
+
+/* 3. 모든 AOS 애니메이션 타입 비활성화 */
+[data-aos="fade"],
+[data-aos="fade-up"],
+[data-aos="fade-down"],
+[data-aos="fade-left"],
+[data-aos="fade-right"],
+[data-aos="fade-up-right"],
+[data-aos="fade-up-left"],
+[data-aos="fade-down-right"],
+[data-aos="fade-down-left"],
+[data-aos="flip-left"],
+[data-aos="flip-right"],
+[data-aos="flip-up"],
+[data-aos="flip-down"],
+[data-aos="zoom-in"],
+[data-aos="zoom-in-up"],
+[data-aos="zoom-in-down"],
+[data-aos="zoom-in-left"],
+[data-aos="zoom-in-right"],
+[data-aos="zoom-out"],
+[data-aos="zoom-out-up"],
+[data-aos="zoom-out-down"],
+[data-aos="zoom-out-left"],
+[data-aos="zoom-out-right"] {
+    opacity: 1 !important;
+    transform: translate(0) scale(1) !important;
+    transition: none !important;
+}
+
+/* 4. 이미지 강제 표시 */
+img {
+    opacity: 1 !important;
+    visibility: visible !important;
+    display: block !important;
+    transform: none !important;
+    filter: none !important;
+    transition: none !important;
+}
+
+/* 5. 메모리 카드 관련 요소 강제 표시 */
+.memory-card,
+.memory-item,
+.image-wrapper,
+.memory-image,
+.gallery-grid > *,
+.masonry-layout > *,
+.timeline-layout > * {
+    opacity: 1 !important;
+    visibility: visible !important;
+    transform: none !important;
+}
+
+/* 6. 갤러리 아이템 보장 */
+.bg-white.dark\:bg-gray-800,
+.overflow-hidden,
+.rounded-lg,
+.shadow-lg {
+    opacity: 1 !important;
+    visibility: visible !important;
+}
+
+/* 7. 애니메이션 트랜지션 제거 */
+* {
+    -webkit-animation-duration: 0s !important;
+    animation-duration: 0s !important;
+    -webkit-animation-delay: 0s !important;
+    animation-delay: 0s !important;
+}
+
+/* 8. Transform 3D 문제 해결 */
+.aos-init *,
+.aos-animate * {
+    -webkit-transform: none !important;
+    -ms-transform: none !important;
+    transform: none !important;
+}
+
+/* 9. 로딩 상태 이미지도 표시 */
+img[loading="lazy"] {
+    opacity: 1 !important;
+    visibility: visible !important;
+}
+
+/* 10. 백그라운드 이미지 요소도 보장 */
+[style*="background-image"] {
+    opacity: 1 !important;
+    visibility: visible !important;
+}
+
+/* 11. 모바일 디바이스를 위한 추가 보장 */
+@media (max-width: 768px) {
+    [data-aos],
+    img,
+    .memory-card {
+        opacity: 1 !important;
+        visibility: visible !important;
+        transform: none !important;
+        -webkit-transform: none !important;
+    }
+}
+
+/* 12. 프린트 시에도 모든 이미지 표시 */
+@media print {
+    * {
+        opacity: 1 !important;
+        visibility: visible !important;
+    }
+}

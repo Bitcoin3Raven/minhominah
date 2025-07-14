@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>휴지통 - 민호민아 성장앨범</title>
+    
+    <!-- CSS -->
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/photo-manager.css">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <!-- 네비게이션 -->
+    <nav class="navbar">
+        <div class="container navbar-content">
+            <a href="index.html" class="navbar-brand">
+                <i class="fas fa-baby"></i>
+                <span data-translate="site_title">민호민아 성장앨범</span>
+            </a>
+            
+            <div class="navbar-menu">
+                <a href="index.html" class="nav-link">
+                    <i class="fas fa-home"></i>
+                    <span data-translate="nav_home">홈</span>
+                </a>
+                <a href="activity-log.html" class="nav-link">
+                    <i class="fas fa-history"></i>
+                    <span data-translate="nav_activity_log">활동 로그</span>
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 메인 컨텐츠 -->
+    <main class="main-content">
+        <div class="container">
+            <!-- 페이지 헤더 -->
+            <div class="page-header">
+                <div>
+                    <h1 class="page-title">
+                        <i class="fas fa-trash"></i>
+                        <span data-translate="trash_title">휴지통</span>
+                    </h1>
+                    <p class="page-subtitle" data-translate="trash_subtitle">
+                        삭제된 항목은 30일 동안 보관됩니다
+                    </p>
+                </div>
+                
+                <div class="header-actions">
+                    <button id="empty-trash-btn" class="btn btn-danger">
+                        <i class="fas fa-trash-alt"></i>
+                        <span data-translate="empty_trash">휴지통 비우기</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- 휴지통 필터 -->
+            <div class="trash-filters">
+                <div class="filter-group">
+                    <label data-translate="filter_type">유형:</label>
+                    <select id="trash-type-filter" class="form-control">
+                        <option value="all" data-translate="filter_all">전체</option>
+                        <option value="memory" data-translate="filter_memories">추억</option>
+                        <option value="media_file" data-translate="filter_media">미디어</option>
+                    </select>
+                </div>
+                
+                <div class="filter-group">
+                    <label data-translate="filter_date">삭제일:</label>
+                    <select id="trash-date-filter" class="form-control">
+                        <option value="all" data-translate="filter_all_dates">전체 기간</option>
+                        <option value="today" data-translate="filter_today">오늘</option>
+                        <option value="week" data-translate="filter_this_week">이번 주</option>
+                        <option value="month" data-translate="filter_this_month">이번 달</option>
+                    </select>
+                </div>
+
+                <div class="filter-group">
+                    <input type="text" id="trash-search" class="form-control" 
+                           placeholder="검색..." data-translate-placeholder="search_placeholder">
+                </div>
+            </div>
+
+            <!-- 휴지통 정보 -->
+            <div class="trash-info">
+                <div class="info-card">
+                    <i class="fas fa-info-circle"></i>
+                    <span data-translate="trash_info">
+                        휴지통의 항목은 30일 후 자동으로 영구 삭제됩니다. 
+                        필요한 항목은 복원하여 다시 사용할 수 있습니다.
+                    </span>
+                </div>
+            </div>
+
+            <!-- 휴지통 항목 목록 -->
+            <div id="trash-items" class="trash-grid">
+                <!-- 동적으로 로드됨 -->
+            </div>
+
+            <!-- 로딩 스피너 -->
+            <div id="loading-spinner" class="loading-spinner" style="display: none;">
+                <div class="spinner"></div>
+            </div>
+
+            <!-- 빈 상태 -->
+            <div id="empty-state" class="empty-state" style="display: none;">
+                <i class="fas fa-trash-alt"></i>
+                <h3 data-translate="trash_empty">휴지통이 비어있습니다</h3>
+                <p data-translate="trash_empty_desc">삭제된 항목이 없습니다</p>
+            </div>
+        </div>
+    </main>
+
+    <!-- 푸터 -->
+    <footer class="footer">
+        <div class="container">
+            <p data-translate="footer_copyright">© 2025 민호민아 성장앨범. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <!-- 복원 확인 모달 -->
+    <div id="restore-modal" class="modal-overlay" style="display: none;">
+        <div class="modal-content">
+            <h3 data-translate="restore_confirm_title">항목 복원</h3>
+            <p data-translate="restore_confirm_message">선택한 항목을 복원하시겠습니까?</p>
+            <div class="modal-buttons">
+                <button class="btn-secondary" onclick="closeRestoreModal()">
+                    <span data-translate="btn_cancel">취소</span>
+                </button>
+                <button class="btn-primary" onclick="confirmRestore()">
+                    <span data-translate="btn_restore">복원</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="js/config.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/lang/languages.js"></script>
+    <script src="js/trash-manager.js"></script>
+    
+    <script>
+        // 페이지 초기화
+        document.addEventListener('DOMContentLoaded', async () => {
+            // 인증 확인
+            const { data: { user } } = await supabase.auth.getUser();
+            if (!user) {
+                window.location.href = 'index.html';
+                return;
+            }
+
+            // 언어 설정
+            updateLanguage();
+            
+            // 휴지통 항목 로드
+            trashManager.loadTrashItems();
+            
+            // 이벤트 리스너 설정
+            document.getElementById('empty-trash-btn').addEventListener('click', () => {
+                trashManager.emptyTrash();
+            });
+            
+            document.getElementById('trash-type-filter').addEventListener('change', () => {
+                trashManager.loadTrashItems();
+            });
+            
+            document.getElementById('trash-date-filter').addEventListener('change', () => {
+                trashManager.loadTrashItems();
+            });
+            
+            document.getElementById('trash-search').addEventListener('input', (e) => {
+                trashManager.searchTrash(e.target.value);
+            });
+        });
+
+        // 복원 모달 함수들
+        function closeRestoreModal() {
+            document.getElementById('restore-modal').style.display = 'none';
+        }
+
+        function confirmRestore() {
+            trashManager.confirmRestore();
+            closeRestoreModal();
+        }
+    </script>
+</body>
+</html>
