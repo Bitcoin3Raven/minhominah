@@ -1,0 +1,1191 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>추억 추가 - 민호민아 성장 앨범</title>
+    
+<!-- Tailwind CSS -->
+    <link rel="stylesheet" href="css/tailwind.css">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    
+    <!-- Supabase 클라이언트 -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <!-- AOS (Animate On Scroll) -->
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+    
+    <!-- 프로젝트 스타일 및 스크립트 -->
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/navigation.css">
+
+    <link rel="stylesheet" href="css/style-improved.css">
+    
+    <!-- Tailwind CSS (마지막에 로드하여 우선순위 확보) -->
+    <link rel="stylesheet" href="css/tailwind.css">
+    <script src="js/supabase.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/tag-system.js"></script>
+    <script src="js/tag-system-fix.js" defer></script>
+    <script src="js/notification-system.js" defer></script>
+    <script src="js/image-optimizer.js"></script>
+    <script src="js/add-memory-fix.js" defer></script>
+    
+    <!-- 다크모드 초기화 스크립트 -->
+    <script>
+        // 페이지 로드 전 다크모드 설정
+        if (localStorage.getItem('theme') === 'dark' || (!localStorage.getItem('theme') && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.add('dark');
+        } else {
+            document.documentElement.classList.remove('dark');
+        }
+    </script>
+    
+    <style>
+        /* 히어로 섹션 스타일 */
+        .hero-section {
+            background: 
+                radial-gradient(circle at 10% 10%, rgba(255, 182, 193, 0.8) 0%, rgba(255, 192, 203, 0.5) 25%, transparent 50%),
+                radial-gradient(circle at 90% 90%, rgba(135, 206, 235, 0.8) 0%, rgba(135, 206, 235, 0.5) 25%, transparent 50%),
+                linear-gradient(135deg, #ffe0e6 0%, #fff5f7 50%, #e6f3ff 100%);
+        }
+        
+        /* 다크모드 히어로 섹션 */
+        .dark .hero-section {
+            background: 
+                radial-gradient(circle at 10% 10%, rgba(219, 39, 119, 0.3) 0%, rgba(219, 39, 119, 0.1) 25%, transparent 50%),
+                radial-gradient(circle at 90% 90%, rgba(59, 130, 246, 0.3) 0%, rgba(59, 130, 246, 0.1) 25%, transparent 50%),
+                linear-gradient(135deg, #374151 0%, #1f2937 50%, #111827 100%);
+        }
+        
+        /* 추가 스타일 */
+        .upload-area {
+            border: 2px dashed var(--gray-300);
+            border-radius: var(--radius-xl);
+            padding: 3rem;
+            text-align: center;
+            transition: all var(--transition-base);
+            background: var(--gray-50);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .upload-area:hover {
+            border-color: var(--secondary-400);
+            background: var(--secondary-50);
+        }
+        
+        .upload-area.dragging {
+            border-color: var(--secondary-500);
+            background: var(--secondary-100);
+        }
+        
+        .image-preview-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+        
+        .image-preview-item {
+            position: relative;
+            aspect-ratio: 1;
+            border-radius: var(--radius-lg);
+            overflow: hidden;
+            background: var(--gray-100);
+        }
+        
+        .image-preview-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .remove-image {
+            position: absolute;
+            top: 0.5rem;
+            right: 0.5rem;
+            width: 2rem;
+            height: 2rem;
+            background: rgba(239, 68, 68, 0.9);
+            color: white;
+            border-radius: var(--radius-full);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all var(--transition-base);
+        }
+        
+        .remove-image:hover {
+            background: rgba(220, 38, 38, 1);
+            transform: scale(1.1);
+        }
+        
+        .form-input {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border: 1px solid var(--gray-300);
+            border-radius: var(--radius-lg);
+            font-size: 1rem;
+            transition: all var(--transition-base);
+            background: white;
+        }
+        
+        .form-input:focus {
+            outline: none;
+            border-color: var(--secondary-500);
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+        
+        .form-textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+        
+        .checkbox-container {
+            display: flex;
+            gap: 2rem;
+        }
+        
+        .checkbox-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            cursor: pointer;
+            padding: 0.75rem 1.5rem;
+            border: 2px solid var(--gray-300);
+            border-radius: var(--radius-full);
+            transition: all var(--transition-base);
+        }
+        
+        .checkbox-item:hover {
+            border-color: var(--secondary-300);
+            background: var(--secondary-50);
+        }
+        
+        .checkbox-item.selected {
+            border-color: var(--secondary-500);
+            background: var(--secondary-500);
+            color: white;
+        }
+        
+        .checkbox-item input[type="checkbox"] {
+            display: none;
+        }
+        
+        .progress-bar {
+            width: 100%;
+            height: 4px;
+            background: var(--gray-200);
+            border-radius: var(--radius-full);
+            overflow: hidden;
+            margin-top: 1rem;
+        }
+        
+        .progress-bar-fill {
+            height: 100%;
+            background: var(--secondary-500);
+            transition: width 0.3s ease;
+        }
+    </style>
+    
+    <!-- Dark Mode Initialization -->
+    <script>
+        // 다크모드 초기화
+        const savedTheme = localStorage.getItem('theme') || 'light';
+        document.documentElement.setAttribute('data-theme', savedTheme);
+        if (savedTheme === 'dark') {
+            document.documentElement.classList.add('dark');
+        }
+    </script>
+    
+    <!-- 언어 시스템 -->
+    <script src="js/lang/ko.js"></script>
+    <script src="js/lang/th.js"></script>
+    <script src="js/lang/en.js"></script>
+    <script src="js/language.js"></script>
+    <script src="js/navigation-responsive.js"></script>
+</head>
+<body class="bg-gray-50 dark:bg-gray-900 min-h-screen">
+    <!-- 헤더 영역 -->
+        <!-- 헤더 영역 -->
+    <header class="fixed top-0 left-0 right-0 z-50 backdrop-blur-lg bg-white/90 dark:bg-gray-900/90 shadow-md transition-transform duration-300">
+        <div class="container mx-auto px-4 py-4">
+            <div class="flex justify-between items-center">
+                <!-- 로고 -->
+                <div class="flex items-center">
+                    <a href="/" class="flex items-center hover:opacity-80 transition-opacity">
+                        <img src="assets/images/logo.png" alt="민호민아 성장앨범" class="h-10 w-auto dark:brightness-90" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+                        <span class="text-lg font-bold bg-gradient-to-r from-pink-500 to-blue-500 bg-clip-text text-transparent" style="display:none;" data-lang="site_title">민호민아</span>
+                    </a>
+                </div>
+                
+                <!-- 데스크톱 네비게이션 -->
+                <nav class="hidden md:flex items-center space-x-1 lg:space-x-4">
+                    <a href="/" class="nav-item">
+                        <i class="fas fa-home"></i>
+                        <span data-lang="nav_home">홈</span>
+                    </a>
+                    
+                    <!-- 주요 메뉴 드롭다운 -->
+                    <div class="relative" data-dropdown-trigger="mainDropdown">
+                        <button class="nav-item flex items-center">
+                            <i class="fas fa-th"></i>
+                            <span data-lang="nav_main_menu">주요 메뉴</span>
+                            <i class="fas fa-chevron-down ml-1 text-xs"></i>
+                        </button>
+                        <div id="mainDropdown" class="dropdown-menu">
+                            <a href="add-memory.html" class="dropdown-item">
+                                <i class="fas fa-plus-circle text-green-500"></i>
+                                <span data-lang="nav_add_memory">추억 추가</span>
+                            </a>
+                            <a href="growth.html" class="dropdown-item">
+                                <i class="fas fa-chart-line text-blue-500"></i>
+                                <span data-lang="nav_growth">성장 기록</span>
+                            </a>
+                            <a href="statistics.html" class="dropdown-item">
+                                <i class="fas fa-chart-bar text-purple-500"></i>
+                                <span data-lang="nav_statistics">통계</span>
+                            </a>
+                            <a href="photobook-creator.html" class="dropdown-item">
+                                <i class="fas fa-book text-orange-500"></i>
+                                <span data-lang="nav_photobook">포토북 만들기</span>
+                            </a>
+                        </div>
+                    </div>
+                    
+                    <!-- 기족 메뉴 드롭다운 -->
+                    <div class="relative" data-dropdown-trigger="familyDropdown">
+                        <button class="nav-item flex items-center">
+                            <i class="fas fa-users"></i>
+                            <span data-lang="nav_family">가족</span>
+                            <i class="fas fa-chevron-down ml-1 text-xs"></i>
+                        </button>
+                        <div id="familyDropdown" class="dropdown-menu">
+                            <a href="family-settings.html" class="dropdown-item">
+                                <i class="fas fa-cog text-gray-500"></i>
+                                <span data-lang="nav_family_settings">가족 설정</span>
+                            </a>
+                            <a href="share.html" class="dropdown-item">
+                                <i class="fas fa-share-alt text-blue-500"></i>
+                                <span data-lang="nav_share">공유</span>
+                            </a>
+                            <a href="backup.html" class="dropdown-item">
+                                <i class="fas fa-database text-green-500"></i>
+                                <span data-lang="nav_backup">백업</span>
+                            </a>
+                        </div>
+                    </div>
+                    
+                    <!-- 추억 추가 버튼 -->
+                    <a href="add-memory.html" class="px-4 py-2 bg-gradient-to-r from-pink-500 to-blue-500 text-white rounded-lg font-medium hover:shadow-lg transition-all hover:scale-105">
+                        <i class="fas fa-plus-circle mr-2"></i>
+                        <span data-lang="nav_add_memory">추억 추가</span>
+                    </a>
+                    
+                    <!-- 로그인 버튼 -->
+                    <button id="authButton" onclick="showLoginForm()" class="nav-item">
+                        <i class="fas fa-user"></i>
+                        <span data-lang="auth_login">로그인</span>
+                    </button>
+                    
+                    <!-- 다크모드 토글 -->
+                    <button id="themeToggle" class="w-10 h-10 rounded-full bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 transition-all flex items-center justify-center">
+                        <svg id="sunIcon" class="w-5 h-5 text-yellow-500" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z"></path>
+                        </svg>
+                        <svg id="moonIcon" class="w-5 h-5 text-purple-400" fill="currentColor" viewBox="0 0 20 20" style="display: none;">
+                            <path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"></path>
+                        </svg>
+                    </button>
+                </nav>
+                
+                <!-- 모바일 메뉴 버튼 -->
+                <button id="menuToggle" class="md:hidden p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+                    </svg>
+                </button>
+            </div>
+        </div>
+
+    </header>
+    
+    <!-- 모바일 메뉴 -->
+    <div id="mobileMenu" class="mobile-menu md:hidden">
+        <div class="px-4 py-6 space-y-2">
+            <a href="/" class="mobile-menu-item ">
+                <i class="fas fa-home"></i>
+                <span data-lang="nav_home">홈</span>
+            </a>
+            <a href="add-memory.html" class="mobile-menu-item">
+                <i class="fas fa-plus-circle"></i>
+                <span data-lang="nav_add_memory">추억 추가</span>
+            </a>
+            <a href="growth.html" class="mobile-menu-item">
+                <i class="fas fa-chart-line"></i>
+                <span data-lang="nav_growth">성장 기록</span>
+            </a>
+            <a href="statistics.html" class="mobile-menu-item">
+                <i class="fas fa-chart-bar"></i>
+                <span data-lang="nav_statistics">통계</span>
+            </a>
+            <a href="photobook-creator.html" class="mobile-menu-item">
+                <i class="fas fa-book"></i>
+                <span data-lang="nav_photobook">포토북 만들기</span>
+            </a>
+            <a href="family-settings.html" class="mobile-menu-item">
+                <i class="fas fa-users"></i>
+                <span data-lang="nav_family_settings">가족 설정</span>
+            </a>
+            <a href="share.html" class="mobile-menu-item">
+                <i class="fas fa-share-alt"></i>
+                <span data-lang="nav_share">공유</span>
+            </a>
+            <a href="backup.html" class="mobile-menu-item">
+                <i class="fas fa-database"></i>
+                <span data-lang="nav_backup">백업</span>
+            </a>
+            
+            <div class="pt-4 border-t border-gray-200 dark:border-gray-700 space-y-2">
+                <div class="text-sm text-gray-500 dark:text-gray-400 px-3 mb-2" data-lang="language">언어</div>
+                <div class="grid grid-cols-3 gap-2 px-3">
+                    <button onclick="changeLanguage('ko')" class="lang-btn">
+                        <span class="block text-lg">🇰🇷</span>
+                        <span class="block text-xs mt-1">한국어</span>
+                    </button>
+                    <button onclick="changeLanguage('th')" class="lang-btn">
+                        <span class="block text-lg">🇹🇭</span>
+                        <span class="block text-xs mt-1">ไทย</span>
+                    </button>
+                    <button onclick="changeLanguage('en')" class="lang-btn">
+                        <span class="block text-lg">🇺🇸</span>
+                        <span class="block text-xs mt-1">English</span>
+                    </button>
+                </div>
+            </div>
+            
+            <button onclick="showLoginForm()" class="mobile-menu-item w-full">
+                <i class="fas fa-user"></i>
+                <span data-lang="auth_login">로그인</span>
+            </button>
+        </div>
+    </div>
+    
+    <!-- 모바일 메뉴 오버레이 -->
+    <div id="menuOverlay" class="menu-overlay md:hidden"></div>
+    <!-- 히어로 섹션 -->
+    <section class="hero-section relative overflow-hidden mt-16 flex items-center justify-center" style="min-height: 40vh;">
+        <div class="bg-pattern"></div>
+        <div class="floating-shapes">
+            <div class="shape shape-1"></div>
+            <div class="shape shape-2"></div>
+            <div class="shape shape-3"></div>
+            <div class="shape shape-4"></div>
+            <div class="shape shape-5"></div>
+        </div>
+        
+        <!-- 앨범으로 돌아가기 버튼 - 절대 위치로 상단에 배치 -->
+        <div class="absolute top-8 left-4 z-20">
+            <a href="/" class="btn btn-secondary dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600 flex items-center gap-2">
+                <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="15 18 9 12 15 6"></polyline>
+                </svg>
+                <span data-lang="add_memory_back">앨범으로 돌아가기</span>
+            </a>
+        </div>
+        
+        <!-- 중앙 텍스트 -->
+        <div class="relative z-10 container mx-auto px-4 text-center">
+            <h1 class="text-4xl md:text-5xl font-bold text-gray-800 dark:text-white mb-4 animate-fade-in">
+                <span data-lang="add_memory_title">새로운</span> <span class="text-gradient" data-lang="add_memory_title_highlight">추억 만들기</span>
+            </h1>
+            <p class="text-lg text-gray-600 dark:text-gray-300 animate-slide-up" data-lang="add_memory_subtitle">
+                소중한 순간을 기록하고 공유해보세요
+            </p>
+        </div>
+    </section>
+    
+    <div class="container mx-auto px-4 py-8">
+        <!-- 인증 체크 섹션 -->
+        <div id="authCheck" class="glass-card rounded-2xl p-8 mb-8" data-aos="fade-up">
+            <h2 class="text-2xl font-bold mb-4" data-lang="add_memory_login_required">로그인이 필요합니다</h2>
+            <p class="text-gray-600 mb-6" data-lang="add_memory_login_desc">추억을 추가하려면 먼저 로그인해주세요.</p>
+            <div class="grid md:grid-cols-2 gap-4 max-w-md">
+                <input type="email" id="quickLoginEmail" placeholder="이메일" class="form-input" data-lang-placeholder="add_memory_email">
+                <input type="password" id="quickLoginPassword" placeholder="비밀번호" class="form-input" data-lang-placeholder="add_memory_password">
+            </div>
+            <button class="btn btn-primary mt-4" onclick="login()">
+                <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" class="mr-2">
+                    <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"></path>
+                    <polyline points="10 17 15 12 10 7"></polyline>
+                    <line x1="15" y1="12" x2="3" y2="12"></line>
+                </svg>
+                <span data-lang="add_memory_login_btn">로그인</span>
+            </button>
+        </div>
+        
+        <!-- 추억 추가 폼 -->
+        <div id="addMemoryForm" style="display: none;">
+            <!-- 알림 메시지 -->
+            <div class="glass-card rounded-2xl p-6 mb-8 bg-green-50 border-2 border-green-200" id="successMessage" style="display: none;" data-aos="fade-down">
+                <div class="flex items-center gap-3">
+                    <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" class="text-green-600">
+                        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                        <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                    </svg>
+                    <p class="text-green-800 font-medium" data-lang="add_memory_success">추억이 성공적으로 추가되었습니다!</p>
+                </div>
+            </div>
+            
+            <div class="glass-card rounded-2xl p-6 mb-8 bg-red-50 border-2 border-red-200" id="errorMessage" style="display: none;" data-aos="fade-down">
+                <div class="flex items-center gap-3">
+                    <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" class="text-red-600">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <line x1="12" y1="8" x2="12" y2="12"></line>
+                        <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                    </svg>
+                    <p class="text-red-800 font-medium" id="errorText"></p>
+                </div>
+            </div>
+            
+            <form id="memoryForm" onsubmit="submitMemory(event)">
+                <!-- 기본 정보 섹션 -->
+                <div class="glass-card rounded-2xl p-8 mb-8" data-aos="fade-up">
+                    <h2 class="text-2xl font-bold mb-6" data-lang="add_memory_basic_info">기본 정보</h2>
+                    <div class="grid md:grid-cols-2 gap-6">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2" data-lang="add_memory_title_label">제목 *</label>
+                            <input type="text" id="title" required placeholder="예: 민호 첫 생일" class="form-input" data-lang-placeholder="add_memory_title_placeholder">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2" data-lang="add_memory_date_label">날짜 *</label>
+                            <input type="date" id="memoryDate" required class="form-input">
+                        </div>
+                    </div>
+                    
+                    <div class="mt-6">
+                        <label class="block text-sm font-medium text-gray-700 mb-2" data-lang="add_memory_who">누구의 추억인가요? *</label>
+                        <p class="text-sm text-gray-500 mb-3" data-lang="add_memory_who_desc">민호만, 민아만, 또는 둘 다 선택할 수 있습니다</p>
+                        <div class="checkbox-container">
+                            <label class="checkbox-item" id="minhoLabel">
+                                <input type="checkbox" id="forMinho">
+                                <span class="emoji">👦</span>
+                                <span>민호</span>
+                            </label>
+                            <label class="checkbox-item" id="minaLabel">
+                                <input type="checkbox" id="forMina">
+                                <span class="emoji">👧</span>
+                                <span>민아</span>
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <div class="grid md:grid-cols-2 gap-6 mt-6">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">장소</label>
+                            <input type="text" id="location" placeholder="예: 우리집, 놀이공원" class="form-input">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">설명</label>
+                            <textarea id="description" placeholder="이 날의 특별한 순간을 기록해보세요" class="form-input form-textarea"></textarea>
+                        </div>
+                    </div>
+                    
+                    <!-- 태그 선택 -->
+                    <div class="mt-6">
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2" data-lang="add_memory_tags_label">
+                            태그 추가 🏷️
+                        </label>
+                        <div id="tagContainer">
+                            <!-- 태그 시스템이 여기에 렌더링됩니다 -->
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 사진 업로드 섹션 -->
+                <div class="glass-card rounded-2xl p-8 mb-8" data-aos="fade-up" data-aos-delay="100">
+                    <h2 class="text-2xl font-bold mb-6">사진 추가</h2>
+                    <div class="upload-area" id="uploadArea">
+                        <input type="file" id="imageInput" multiple accept="image/*,video/*" style="display: none;">
+                        <svg width="48" height="48" fill="none" stroke="currentColor" stroke-width="2" class="mx-auto mb-4 text-gray-400">
+                            <path d="M21 15v-4a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v14c0 1.1.9 2 2 2h14a2 2 0 0 0 2-2v-4"></path>
+                            <polyline points="16 17 21 12 16 7"></polyline>
+                            <line x1="21" y1="12" x2="9" y2="12"></line>
+                        </svg>
+                        <p class="text-lg font-medium text-gray-700 mb-2" data-lang="add_memory_drag_drop">사진을 드래그하거나 클릭하여 업로드</p>
+                        <p class="text-sm text-gray-500" data-lang="add_memory_file_types">JPG, PNG, GIF, MP4 (최대 50MB)</p>
+                        
+                        <div class="progress-bar" id="uploadProgress" style="display: none;">
+                            <div class="progress-bar-fill" id="progressFill"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="image-preview-grid" id="imagePreview"></div>
+                </div>
+                
+                <!-- 제출 버튼 -->
+                <div class="flex justify-center gap-4">
+                    <button type="button" onclick="window.location.href='/'" class="btn btn-secondary" data-lang="btn_cancel">
+                        취소
+                    </button>
+                    <button type="submit" class="btn btn-primary flex items-center gap-2">
+                        <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>
+                            <polyline points="17 21 17 13 7 13 7 21"></polyline>
+                            <polyline points="7 3 7 8 15 8"></polyline>
+                        </svg>
+                        <span data-lang="add_memory_submit">추억 저장하기</span>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <script>
+        // 첫 번째 initTheme 함수 제거 (중복)
+        
+        // currentUser는 auth.js에서 이미 선언되어 있음
+        let selectedFiles = [];
+        let peopleData = {};
+        
+        // getTranslation 함수 추가
+        function getTranslation(key) {
+            const currentLang = localStorage.getItem('language') || 'ko';
+            
+            if (currentLang === 'ko' && typeof ko !== 'undefined') {
+                return ko[key] || key;
+            } else if (currentLang === 'en' && typeof en !== 'undefined') {
+                return en[key] || key;
+            } else if (currentLang === 'th' && typeof th !== 'undefined') {
+                return th[key] || key;
+            }
+            
+            return key;
+        }
+        
+        // 인증 모달 함수들
+        function showAuthModal() {
+            document.getElementById('authModal').classList.remove('hidden');
+        }
+        
+        function closeAuthModal() {
+            document.getElementById('authModal').classList.add('hidden');
+        }
+        
+        function showLoginForm() {
+            const title = document.getElementById('authModalTitle');
+            title.setAttribute('data-lang', 'auth_login');
+            title.textContent = getTranslation('auth_login');
+            
+            document.getElementById('loginForm').classList.remove('hidden');
+            document.getElementById('signupForm').classList.add('hidden');
+            showAuthModal();
+        }
+        
+        function showSignupForm() {
+            const title = document.getElementById('authModalTitle');
+            title.setAttribute('data-lang', 'auth_signup');
+            title.textContent = getTranslation('auth_signup');
+            
+            document.getElementById('loginForm').classList.add('hidden');
+            document.getElementById('signupForm').classList.remove('hidden');
+        }
+        
+        async function handleLogin() {
+            const email = document.getElementById('modalLoginEmail').value;
+            const password = document.getElementById('modalLoginPassword').value;
+            
+            if (!email || !password) {
+                alert(getTranslation('auth_fill_all_fields'));
+                return;
+            }
+            
+            try {
+                const { data, error } = await supabaseClient.auth.signInWithPassword({
+                    email: email,
+                    password: password
+                });
+                
+                if (error) throw error;
+                
+                // 이메일 인증 여부 확인
+                if (data.user && !data.user.email_confirmed_at) {
+                    alert(getTranslation('auth_login_success') + '\n\n' + getTranslation('auth_email_not_verified'));
+                } else {
+                    alert(getTranslation('auth_login_success'));
+                }
+                
+                closeAuthModal();
+                window.location.reload();
+            } catch (error) {
+                console.error('로그인 오류:', error);
+                alert(getTranslation('auth_login_error') + ': ' + error.message);
+            }
+        }
+        
+        async function handleSignup() {
+            const name = document.getElementById('signupName').value;
+            const email = document.getElementById('signupEmail').value;
+            const password = document.getElementById('signupPassword').value;
+            
+            if (!name || !email || !password) {
+                alert(getTranslation('auth_fill_all_fields'));
+                return;
+            }
+            
+            try {
+                const { data, error } = await supabaseClient.auth.signUp({
+                    email: email,
+                    password: password,
+                    options: {
+                        data: {
+                            name: name
+                        }
+                    }
+                });
+                
+                if (error) throw error;
+                
+                alert(getTranslation('auth_signup_success') + '\n\n' + getTranslation('auth_check_email'));
+                showLoginForm();
+            } catch (error) {
+                console.error('회원가입 오류:', error);
+                alert(getTranslation('auth_signup_error') + ': ' + error.message);
+            }
+        }
+        
+        // 페이지 로드시 초기화
+        window.addEventListener('DOMContentLoaded', async function() {
+            // 다크모드 초기화
+            initTheme();
+            
+            // AOS 초기화
+            AOS.init({
+                duration: 800,
+                easing: 'ease-in-out',
+                once: true,
+                offset: 100
+            });
+            
+            // 인증 상태 확인
+            const { data: { user } } = await supabaseClient.auth.getUser();
+            if (user) {
+                currentUser = user;
+                document.getElementById('authCheck').style.display = 'none';
+                document.getElementById('addMemoryForm').style.display = 'block';
+                loadPeople();
+            }
+            
+            // 체크박스 스타일 업데이트
+            document.getElementById('forMinho').addEventListener('change', function() {
+                document.getElementById('minhoLabel').classList.toggle('selected', this.checked);
+            });
+            
+            document.getElementById('forMina').addEventListener('change', function() {
+                document.getElementById('minaLabel').classList.toggle('selected', this.checked);
+            });
+            
+            // 업로드 영역 설정
+            setupUploadArea();
+            
+            // 태그 시스템 초기화
+            tagSystem = new SmartTagSystem();
+        });
+        
+        // 로그인
+        async function login() {
+            const email = document.getElementById('quickLoginEmail').value;
+            const password = document.getElementById('quickLoginPassword').value;
+            
+            try {
+                const { data, error } = await supabaseClient.auth.signInWithPassword({
+                    email: email,
+                    password: password
+                });
+                
+                if (error) throw error;
+                
+                currentUser = data.user;
+                document.getElementById('authCheck').style.display = 'none';
+                document.getElementById('addMemoryForm').style.display = 'block';
+                loadPeople();
+            } catch (error) {
+                alert('로그인 실패: ' + error.message);
+            }
+        }
+        
+        // 사람 정보 로드
+        async function loadPeople() {
+            try {
+                const { data, error } = await supabaseClient
+                    .from('people')
+                    .select('*');
+                
+                if (error) throw error;
+                
+                data.forEach(person => {
+                    peopleData[person.name.toLowerCase()] = person.id;
+                });
+            } catch (error) {
+                console.error('Error loading people:', error);
+            }
+        }
+        
+        // 업로드 영역 설정
+        function setupUploadArea() {
+            const uploadArea = document.getElementById('uploadArea');
+            const imageInput = document.getElementById('imageInput');
+            
+            // 클릭시 파일 선택
+            uploadArea.addEventListener('click', () => imageInput.click());
+            
+            // 드래그 앤 드롭
+            uploadArea.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                uploadArea.classList.add('dragging');
+            });
+            
+            uploadArea.addEventListener('dragleave', () => {
+                uploadArea.classList.remove('dragging');
+            });
+            
+            uploadArea.addEventListener('drop', (e) => {
+                e.preventDefault();
+                uploadArea.classList.remove('dragging');
+                handleFiles(e.dataTransfer.files);
+            });
+            
+            // 파일 선택시
+            imageInput.addEventListener('change', (e) => {
+                handleFiles(e.target.files);
+            });
+        }
+        
+        // 파일 처리 (이미지 최적화 포함)
+        async function handleFiles(files) {
+            const imagePreview = document.getElementById('imagePreview');
+            const validFiles = [];
+            
+            // 파일 유효성 검사
+            Array.from(files).forEach(file => {
+                if (file.size > 50 * 1024 * 1024) {
+                    alert('파일 크기는 50MB 이하여야 합니다.');
+                    return;
+                }
+                
+                if (!file.type.startsWith('image/')) {
+                    alert(`${file.name}은(는) 이미지 파일이 아닙니다.`);
+                    return;
+                }
+                
+                validFiles.push(file);
+            });
+            
+            if (validFiles.length === 0) return;
+            
+            // 이미지 최적화
+            const optimizedFiles = await optimizeMemoryImages(validFiles);
+            
+            // 최적화된 파일 추가 및 미리보기 생성
+            for (const file of optimizedFiles) {
+                selectedFiles.push(file);
+                
+                // 미리보기 생성
+                const base64 = await window.imageOptimizer.toBase64(file);
+                const metadata = await window.imageOptimizer.extractMetadata(file);
+                
+                const previewItem = document.createElement('div');
+                previewItem.className = 'image-preview-item relative';
+                previewItem.innerHTML = `
+                    <img src="${base64}" alt="${file.name}">
+                    <button class="remove-image" onclick="removeFile(${selectedFiles.length - 1})">
+                        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="3">
+                            <line x1="4" y1="4" x2="12" y2="12"></line>
+                            <line x1="12" y1="4" x2="4" y2="12"></line>
+                        </svg>
+                    </button>
+                    <div class="absolute bottom-0 left-0 right-0 bg-black bg-opacity-50 text-white text-xs p-1">
+                        ${metadata ? `${metadata.width}x${metadata.height} • ${window.imageOptimizer.formatFileSize(file.size)}` : file.name}
+                    </div>
+                `;
+                imagePreview.appendChild(previewItem);
+            }
+        }
+        
+        // 파일 제거
+        function removeFile(index) {
+            selectedFiles.splice(index, 1);
+            updateImagePreview();
+        }
+        
+        // 이미지 미리보기 업데이트
+        function updateImagePreview() {
+            const imagePreview = document.getElementById('imagePreview');
+            imagePreview.innerHTML = '';
+            
+            selectedFiles.forEach((file, index) => {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    const previewItem = document.createElement('div');
+                    previewItem.className = 'image-preview-item';
+                    previewItem.innerHTML = `
+                        <img src="${e.target.result}" alt="${file.name}">
+                        <button class="remove-image" onclick="removeFile(${index})">
+                            <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="3">
+                                <line x1="4" y1="4" x2="12" y2="12"></line>
+                                <line x1="12" y1="4" x2="4" y2="12"></line>
+                            </svg>
+                        </button>
+                    `;
+                    imagePreview.appendChild(previewItem);
+                };
+                reader.readAsDataURL(file);
+            });
+        }
+        
+        // 추억 저장
+        async function submitMemory(event) {
+            event.preventDefault();
+            
+            const title = document.getElementById('title').value;
+            const memoryDate = document.getElementById('memoryDate').value;
+            const forMinho = document.getElementById('forMinho').checked;
+            const forMina = document.getElementById('forMina').checked;
+            const location = document.getElementById('location').value;
+            const description = document.getElementById('description').value;
+            
+            if (!forMinho && !forMina) {
+                showError('최소 한 명은 선택해야 합니다.');
+                return;
+            }
+            
+            try {
+                // 현재 사용자 정보 디버깅
+                console.log('현재 사용자:', currentUser);
+                console.log('사용자 ID:', currentUser.id);
+                
+                // 1. 추억 데이터 저장
+                const { data: memoryData, error: memoryError } = await supabaseClient
+                    .from('memories')
+                    .insert({
+                        title: title,
+                        memory_date: memoryDate,
+                        location: location || null,
+                        description: description || null,
+                        created_by: currentUser.id
+                    })
+                    .select()
+                    .single();
+                
+                if (memoryError) {
+                    console.error('메모리 저장 오류 상세:', memoryError);
+                    throw memoryError;
+                }
+                
+                // 2. 사람 연결
+                const peopleConnections = [];
+                if (forMinho && peopleData['민호']) {
+                    peopleConnections.push({
+                        memory_id: memoryData.id,
+                        person_id: peopleData['민호']
+                    });
+                }
+                if (forMina && peopleData['민아']) {
+                    peopleConnections.push({
+                        memory_id: memoryData.id,
+                        person_id: peopleData['민아']
+                    });
+                }
+                
+                if (peopleConnections.length > 0) {
+                    const { error: peopleError } = await supabaseClient
+                        .from('memory_people')
+                        .insert(peopleConnections);
+                    
+                    if (peopleError) throw peopleError;
+                }
+                
+                // 3. 이미지 업로드
+                if (selectedFiles.length > 0) {
+                    await uploadImages(memoryData.id);
+                }
+                
+                // 4. 태그 저장
+                const selectedTags = tagSystem.getSelectedTags();
+                if (selectedTags.length > 0) {
+                    for (const tagName of selectedTags) {
+                        // 태그가 이미 존재하는지 확인
+                        let { data: existingTag } = await supabaseClient
+                            .from('tags')
+                            .select('id')
+                            .eq('name', tagName)
+                            .single();
+                        
+                        let tagId;
+                        if (!existingTag) {
+                            // 태그가 없으면 생성
+                            const { data: newTag } = await supabaseClient
+                                .from('tags')
+                                .insert({
+                                    name: tagName,
+                                    color: tagSystem.generateTagColor()
+                                })
+                                .select('id')
+                                .single();
+                            tagId = newTag.id;
+                        } else {
+                            tagId = existingTag.id;
+                        }
+                        
+                        // 추억과 태그 연결
+                        await supabaseClient
+                            .from('memory_tags')
+                            .insert({
+                                memory_id: memoryData.id,
+                                tag_id: tagId
+                            });
+                    }
+                }
+                
+                showSuccess();
+                
+                // 가족 구성원들에게 알림 생성
+                try {
+                    // 현재 사용자의 프로필 정보 가져오기
+                    const { data: currentProfile } = await supabaseClient
+                        .from('profiles')
+                        .select('full_name')
+                        .eq('id', currentUser.id)
+                        .single();
+                    
+                    const creatorName = currentProfile?.full_name || '누군가';
+                    
+                    // 가족 구성원 목록 가져오기 (본인 제외)
+                    const { data: familyMembers } = await supabaseClient
+                        .from('family_members')
+                        .select('user_id')
+                        .eq('status', 'active')
+                        .neq('user_id', currentUser.id);
+                    
+                    if (familyMembers && familyMembers.length > 0) {
+                        // 각 가족 구성원에게 알림 생성
+                        const notifications = familyMembers.map(member => ({
+                            user_id: member.user_id,
+                            type: 'memory_added',
+                            title: `${creatorName}님이 새 추억을 추가했습니다`,
+                            message: title,
+                            related_item_id: memoryData.id,
+                            related_item_type: 'memory',
+                            icon: 'image'
+                        }));
+                        
+                        // 알림 일괄 생성
+                        await supabaseClient
+                            .from('notifications')
+                            .insert(notifications);
+                    }
+                } catch (notifError) {
+                    console.error('알림 생성 실패:', notifError);
+                    // 알림 생성 실패는 무시하고 계속 진행
+                }
+                
+                // 3초 후 메인 페이지로 이동
+                setTimeout(() => {
+                    window.location.href = '/';
+                }, 3000);
+                
+            } catch (error) {
+                showError('추억 저장 실패: ' + error.message);
+            }
+        }
+        
+        // 이미지 업로드
+        async function uploadImages(memoryId) {
+            const uploadProgress = document.getElementById('uploadProgress');
+            const progressFill = document.getElementById('progressFill');
+            uploadProgress.style.display = 'block';
+            
+            for (let i = 0; i < selectedFiles.length; i++) {
+                const file = selectedFiles[i];
+                // 파일명 안전하게 처리 (특수문자 제거, 공백을 언더스코어로 변경)
+                const safeFileName = file.name.replace(/[^a-zA-Z0-9.-]/g, '_');
+                // 현재 사용자 ID 가져오기
+                const { data: { user } } = await supabaseClient.auth.getUser();
+                const fileName = `memories/${user.id}/${Date.now()}-${safeFileName}`;
+                
+                // 진행률 업데이트
+                progressFill.style.width = `${((i + 1) / selectedFiles.length) * 100}%`;
+                
+                // Storage에 업로드
+                const { data: uploadData, error: uploadError } = await supabaseClient.storage
+                    .from('media')
+                    .upload(fileName, file);
+                
+                if (uploadError) throw uploadError;
+                
+                // DB에 파일 정보 저장
+                const { error: dbError } = await supabaseClient
+                    .from('media_files')
+                    .insert({
+                        memory_id: memoryId,
+                        file_path: fileName,
+                        file_type: file.type.startsWith('image/') ? 'image' : 'video',
+                        file_size: file.size
+                    });
+                
+                if (dbError) throw dbError;
+            }
+            
+            uploadProgress.style.display = 'none';
+        }
+        
+        // 성공 메시지 표시
+        function showSuccess() {
+            document.getElementById('successMessage').style.display = 'block';
+            document.getElementById('errorMessage').style.display = 'none';
+            document.getElementById('memoryForm').reset();
+            selectedFiles = [];
+            updateImagePreview();
+        }
+        
+        // 에러 메시지 표시
+        function showError(message) {
+            document.getElementById('errorText').textContent = message;
+            document.getElementById('errorMessage').style.display = 'block';
+            document.getElementById('successMessage').style.display = 'none';
+        }
+        
+        // 다크모드 토글 기능
+        function initTheme() {
+            const themeToggle = document.getElementById('themeToggle');
+            const htmlElement = document.documentElement;
+            const sunIcon = document.getElementById('sunIcon');
+            const moonIcon = document.getElementById('moonIcon');
+            
+            // 저장된 테마 불러오기
+            const savedTheme = localStorage.getItem('theme') || 'light';
+            if (savedTheme === 'dark') {
+                htmlElement.classList.add('dark');
+            } else {
+                htmlElement.classList.remove('dark');
+            }
+            updateThemeIcon(savedTheme);
+            
+            // 테마 토글 이벤트
+            themeToggle.addEventListener('click', () => {
+                const isDark = htmlElement.classList.contains('dark');
+                const newTheme = isDark ? 'light' : 'dark';
+                
+                if (newTheme === 'dark') {
+                    htmlElement.classList.add('dark');
+                } else {
+                    htmlElement.classList.remove('dark');
+                }
+                
+                localStorage.setItem('theme', newTheme);
+                updateThemeIcon(newTheme);
+            });
+            
+            function updateThemeIcon(theme) {
+                if (theme === 'dark') {
+                    sunIcon.style.display = 'none';
+                    moonIcon.style.display = 'block';
+                } else {
+                    sunIcon.style.display = 'block';
+                    moonIcon.style.display = 'none';
+                }
+            }
+        }
+        
+        // 페이지 로드시 초기화
+        window.addEventListener('DOMContentLoaded', async () => {
+            // 인증 상태 확인
+            const user = await checkAuthStatus();
+            if (user) {
+                currentUser = user;
+                document.getElementById('authCheck').style.display = 'none';
+                document.getElementById('addMemoryForm').style.display = 'block';
+                loadPeople();
+            }
+            
+            initTheme();
+            AOS.init();
+            // 언어 시스템 초기화
+            if (typeof initializeLanguage === 'function') {
+                initializeLanguage();
+            }
+        });
+    </script>
+
+    <!-- 인증 모달 -->
+    <div id="authModal" class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center z-50">
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-md w-full mx-4">
+            <div class="p-6">
+                <div class="flex justify-between items-center mb-4">
+                    <h2 id="authModalTitle" class="text-2xl font-bold text-gray-800 dark:text-gray-200" data-lang="auth_login">로그인</h2>
+                    <button onclick="closeAuthModal()" class="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
+                    </button>
+                </div>
+                
+                <!-- 로그인 폼 -->
+                <div id="loginForm" class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2" data-lang="auth_email">이메일</label>
+                        <input type="email" id="modalLoginEmail" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white" placeholder="이메일을 입력하세요" data-lang-placeholder="auth_email_placeholder">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2" data-lang="auth_password">비밀번호</label>
+                        <input type="password" id="modalLoginPassword" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white" placeholder="비밀번호를 입력하세요" data-lang-placeholder="auth_password_placeholder">
+                    </div>
+                    <button onclick="handleLogin()" class="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 transition duration-300" data-lang="auth_login">로그인</button>
+                    <p class="text-center text-sm text-gray-600 dark:text-gray-400">
+                        <span data-lang="auth_no_account">계정이 없으신가요?</span> 
+                        <a href="#" onclick="showSignupForm()" class="text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300" data-lang="auth_signup">회원가입</a>
+                    </p>
+                </div>
+                
+                <!-- 회원가입 폼 -->
+                <div id="signupForm" class="space-y-4 hidden">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2" data-lang="auth_name">이름</label>
+                        <input type="text" id="signupName" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white" placeholder="이름을 입력하세요" data-lang-placeholder="auth_name_placeholder">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">이메일</label>
+                        <input type="email" id="signupEmail" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white" placeholder="이메일을 입력하세요">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">비밀번호</label>
+                        <input type="password" id="signupPassword" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white" placeholder="비밀번호를 입력하세요">
+                    </div>
+                    <button onclick="handleSignup()" class="w-full bg-green-600 text-white py-2 px-4 rounded-md hover:bg-green-700 transition duration-300" data-lang="auth_signup">회원가입</button>
+                    <p class="text-center text-sm text-gray-600 dark:text-gray-400">
+                        <span data-lang="auth_have_account">이미 계정이 있으신가요?</span> 
+                        <a href="#" onclick="showLoginForm()" class="text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300" data-lang="auth_login">로그인</a>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 푸터 -->
+    <footer class="bg-gray-100 dark:bg-gray-800 py-8 mt-16">
+        <div class="container mx-auto px-4 text-center text-gray-600 dark:text-gray-400">
+            <p>&copy; 2025 <span data-lang="site_title">민호민아 성장앨범</span>. <span data-lang="footer_rights">All rights reserved.</span></p>
+            <p class="mt-2">
+                <span data-lang="footer_made_with">Made with</span> 
+                <i class="fas fa-heart text-red-500 animate-pulse"></i> 
+                <span data-lang="footer_for">for</span> 
+                <span data-lang="footer_minho_mina">민호 & 민아</span>
+            </p>
+        </div>
+    </footer>
+</body>
+</html>
