@@ -105,8 +105,6 @@ export const en = {
   hero_view_memories: "Browse Memories",
   hero_add_memory: "Add Memory",
   stat_total_memories: "Total Memories",
-  stat_videos: "Videos",
-  stat_milestones: "Milestones",
   section_our_children: "Our Children",
   child_minho_title: "Minho",
   child_minho_desc: "Our reliable firstborn, Minho's growth story",

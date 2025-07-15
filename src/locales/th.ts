@@ -105,8 +105,6 @@ export const th = {
   hero_view_memories: "ดูความทรงจำ",
   hero_add_memory: "เพิ่มความทรงจำ",
   stat_total_memories: "ความทรงจำทั้งหมด",
-  stat_videos: "วิดีโอ",
-  stat_milestones: "วันสำคัญ",
   section_our_children: "ลูกๆ ของเรา",
   child_minho_title: "มินโฮ",
   child_minho_desc: "ลูกคนโตที่น่าเชื่อถือ เรื่องราวการเติบโตของมินโฮ",

@@ -195,3 +195,7 @@
   - 영어: "1 year old", "2 years old", "3 years old"...
   - 태국어: "1 ปี", "2 ปี", "3 ปี"...
   - useLanguage 훅의 language 값을 사용하여 현재 언어 감지
+- **레거시 파일 정리 실패 및 복구**
+  - 레거시 CSS/JS 파일들을 삭제했으나 페이지가 깨짐
+  - git revert로 파일들 복구
+  - 프로덕션 배포 시 CSS 로드 문제 발생

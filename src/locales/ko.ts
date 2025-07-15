@@ -105,8 +105,6 @@ export const ko = {
   hero_view_memories: "추억 둘러보기", 
   hero_add_memory: "추억 추가하기",
   stat_total_memories: "전체 추억",
-  stat_videos: "동영상",
-  stat_milestones: "기념일",
   section_our_children: "우리 아이들",
   child_minho_title: "민호",
   child_minho_desc: "우리 집의 든든한 첫째, 민호의 성장 이야기",
