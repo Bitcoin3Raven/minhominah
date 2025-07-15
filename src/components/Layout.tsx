@@ -202,7 +202,7 @@ const Layout = ({ children }: LayoutProps) => {
                     >
                       {filterMenuItems(familyMenuItems).length === 0 ? (
                         <div className="px-4 py-3 text-sm text-gray-500 dark:text-gray-400">
-                          {t('nav_no_items')}
+                          No items
                         </div>
                       ) : (
                         filterMenuItems(familyMenuItems).map((item) => (

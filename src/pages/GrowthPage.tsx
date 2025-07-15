@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 import { useAuth } from '../contexts/AuthContext';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '../lib/supabase';
-import { FiRuler, FiTarget, FiCalendar, FiTrendingUp, FiPlus, FiTrash2, FiUser } from 'react-icons/fi';
+import { FiTarget, FiCalendar, FiTrendingUp, FiPlus, FiTrash2, FiUser, FiActivity } from 'react-icons/fi';
 import { useLegacyStyles } from '../hooks/useLegacyStyles';
 import { Line } from 'react-chartjs-2';
 import {

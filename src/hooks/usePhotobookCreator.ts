@@ -18,7 +18,8 @@ interface PhotobookSettings {
 interface MediaFile {
   id: string;
   file_path: string;
-  file_type: string;
+  file_type: 'image' | 'video';
+  thumbnail_path: string | null;
 }
 
 interface Person {
@@ -32,9 +33,9 @@ interface Tag {
 }
 
 interface ExtendedMemory extends Memory {
-  media_files?: MediaFile[];
-  memory_people?: { person_id: string; people: Person }[];
-  memory_tags?: { tag_id: string; tags: Tag }[];
+  media_files: MediaFile[];
+  memory_people: { person_id: string; people: Person }[];
+  memory_tags: { tag_id: string; tags: Tag }[];
 }
 
 export const usePhotobookCreator = () => {
