@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Create Avatar Images</title>
+</head>
+<body>
+    <h1>민호와 민아 아바타 이미지 생성</h1>
+    <p>아래 캔버스를 우클릭하여 이미지로 저장하세요:</p>
+    
+    <h2>민호 아바타 (minho-avatar.png)</h2>
+    <canvas id="minho" width="128" height="128"></canvas>
+    
+    <h2>민아 아바타 (mina-avatar.png)</h2>
+    <canvas id="mina" width="128" height="128"></canvas>
+    
+    <script>
+        // 민호 아바타 (파란색 계열)
+        const minhoCanvas = document.getElementById('minho');
+        const minhoCtx = minhoCanvas.getContext('2d');
+        
+        // 배경 원
+        minhoCtx.fillStyle = '#3B82F6';
+        minhoCtx.beginPath();
+        minhoCtx.arc(64, 64, 64, 0, Math.PI * 2);
+        minhoCtx.fill();
+        
+        // 얼굴
+        minhoCtx.fillStyle = '#FDB5A6';
+        minhoCtx.beginPath();
+        minhoCtx.arc(64, 60, 35, 0, Math.PI * 2);
+        minhoCtx.fill();
+        
+        // 머리
+        minhoCtx.fillStyle = '#2C1810';
+        minhoCtx.beginPath();
+        minhoCtx.arc(64, 45, 35, Math.PI, 0, false);
+        minhoCtx.fill();
+        
+        // 눈
+        minhoCtx.fillStyle = '#000';
+        minhoCtx.beginPath();
+        minhoCtx.arc(52, 60, 3, 0, Math.PI * 2);
+        minhoCtx.arc(76, 60, 3, 0, Math.PI * 2);
+        minhoCtx.fill();
+        
+        // 웃는 입
+        minhoCtx.strokeStyle = '#000';
+        minhoCtx.lineWidth = 2;
+        minhoCtx.beginPath();
+        minhoCtx.arc(64, 65, 10, 0, Math.PI, false);
+        minhoCtx.stroke();
+        
+        // 민아 아바타 (분홍색 계열)
+        const minaCanvas = document.getElementById('mina');
+        const minaCtx = minaCanvas.getContext('2d');
+        
+        // 배경 원
+        minaCtx.fillStyle = '#EC4899';
+        minaCtx.beginPath();
+        minaCtx.arc(64, 64, 64, 0, Math.PI * 2);
+        minaCtx.fill();
+        
+        // 얼굴
+        minaCtx.fillStyle = '#FDB5A6';
+        minaCtx.beginPath();
+        minaCtx.arc(64, 60, 35, 0, Math.PI * 2);
+        minaCtx.fill();
+        
+        // 머리 (긴 머리)
+        minaCtx.fillStyle = '#2C1810';
+        minaCtx.beginPath();
+        minaCtx.arc(64, 45, 35, Math.PI, 0, false);
+        minaCtx.fill();
+        minaCtx.fillRect(29, 45, 70, 30);
+        
+        // 머리 장식 (리본)
+        minaCtx.fillStyle = '#FF69B4';
+        minaCtx.beginPath();
+        minaCtx.moveTo(40, 30);
+        minaCtx.lineTo(50, 35);
+        minaCtx.lineTo(50, 25);
+        minaCtx.closePath();
+        minaCtx.fill();
+        minaCtx.beginPath();
+        minaCtx.moveTo(88, 30);
+        minaCtx.lineTo(78, 35);
+        minaCtx.lineTo(78, 25);
+        minaCtx.closePath();
+        minaCtx.fill();
+        
+        // 눈
+        minaCtx.fillStyle = '#000';
+        minaCtx.beginPath();
+        minaCtx.arc(52, 60, 3, 0, Math.PI * 2);
+        minaCtx.arc(76, 60, 3, 0, Math.PI * 2);
+        minaCtx.fill();
+        
+        // 웃는 입
+        minaCtx.strokeStyle = '#000';
+        minaCtx.lineWidth = 2;
+        minaCtx.beginPath();
+        minaCtx.arc(64, 65, 10, 0, Math.PI, false);
+        minaCtx.stroke();
+    </script>
+</body>
+</html>

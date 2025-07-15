@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 144 144">
+  <!-- 배경 -->
+  <rect width="144" height="144" fill="#FF6B6B" rx="20"/>
+  
+  <!-- 민호민아 이니셜 M -->
+  <text x="72" y="85" font-family="Arial, sans-serif" font-size="72" font-weight="bold" text-anchor="middle" fill="white">M</text>
+  
+  <!-- 하트 -->
+  <path d="M72 110 C66 104, 54 92, 54 82 C54 76, 58 72, 64 72 C68 72, 70 74, 72 76 C74 74, 76 72, 80 72 C86 72, 90 76, 90 82 C90 92, 78 104, 72 110Z" fill="white" opacity="0.8"/>
+</svg>
