@@ -70,7 +70,7 @@ const MemoriesPage = () => {
   const loadMoreRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
   const { user } = useAuth();
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const queryClient = useQueryClient();
   
   const [selectedPerson, setSelectedPerson] = useState<string>(personParam || 'all');
@@ -430,7 +430,20 @@ const MemoriesPage = () => {
               const minhoAge = calculateAge(BIRTH_DATES['민호'], today);
               const minaAge = calculateAge(BIRTH_DATES['민아'], today);
               
-              let ageText = `${age}${t('memories.age')}`;
+              // 언어별 나이 표시 형식 설정
+              let ageText = '';
+              
+              if (language === 'en') {
+                // 영어: 1 year old, 2 years old
+                ageText = age === 1 ? `${age} year old` : `${age} years old`;
+              } else if (language === 'th') {
+                // 태국어: 1 ปี, 2 ปี
+                ageText = `${age} ปี`;
+              } else {
+                // 한국어: 1세, 2세
+                ageText = `${age}세`;
+              }
+              
               let emoji = '';
               let isMinhoAge = age === minhoAge;
               let isMinaAge = age === minaAge;

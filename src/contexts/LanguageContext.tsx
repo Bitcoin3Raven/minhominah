@@ -4,7 +4,7 @@ import { translations, Language, TranslationKey } from '../locales';
 interface LanguageContextType {
   language: Language;
   setLanguage: (lang: Language) => void;
-  t: (key: TranslationKey) => string;
+  t: (key: string) => string;
 }
 
 const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
@@ -33,8 +33,20 @@ export const LanguageProvider: React.FC<LanguageProviderProps> = ({ children }) 
     document.documentElement.lang = lang;
   };
 
-  const t = (key: TranslationKey): string => {
-    return translations[language][key] || key;
+  const t = (key: string): string => {
+    // 중첩된 키 처리 (예: 'memories.title')
+    const keys = key.split('.');
+    let value: any = translations[language];
+    
+    for (const k of keys) {
+      if (value && typeof value === 'object' && k in value) {
+        value = value[k];
+      } else {
+        return key; // 키를 찾을 수 없으면 원래 키 반환
+      }
+    }
+    
+    return typeof value === 'string' ? value : key;
   };
 
   useEffect(() => {

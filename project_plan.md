@@ -33,18 +33,19 @@
 - [x] CSS 애니메이션 추가 (slideIn)
 
 ## 진행 중인 작업
-### 🔄 번역 시스템 전체 페이지 적용 (2025-01-17)
-- [ ] 모든 페이지에 번역 시스템 적용
+### ✅ 번역 시스템 전체 페이지 적용 (2025-01-17) - 완료
+- [x] 모든 페이지에 번역 시스템 적용
   - [x] HomePage (index) - 완료
   - [x] UploadPage - 완료
-  - [x] MemoriesPage - 완료
+  - [x] MemoriesPage - 완료 (버그 수정 포함)
   - [x] GrowthPage - 완료
   - [x] StatisticsPage - 완료 (2025-01-17)
   - [x] AlbumsPage - 완료 (2025-01-17)
   - [x] PhotobookCreatorPage - 완료 (2025-01-17)
-  - [ ] ActivityLogPage
-  - [ ] TrashPage
-  - [x] Backup (완료)
+  - [x] ActivityLogPage - 완료 (2025-01-17)
+  - [x] TrashPage - 완료 (2025-01-17)
+  - [x] ProfilePage - 완료 (2025-01-17)
+  - [x] Backup - 완료 (2025-01-17)
 
 ### ✅ 백업 페이지 마이그레이션 (2025-01-17) - 완료
 - [x] backup.html을 React 컴포넌트로 마이그레이션
@@ -179,3 +180,18 @@
   - HomePage ✓ (이미 적용되어 있었음)
 - 한국어, 영어, 태국어 3개 언어 지원
 - 모든 UI 텍스트가 다국어 지원됨
+
+### 2025-01-17 (오늘)
+- **번역 시스템 버그 수정**
+  - MemoriesPage에서 언어 변환이 작동하지 않던 문제 해결
+  - 번역 파일들의 memories 섹션을 플랫 구조에서 중첩 객체 구조로 변경
+  - ko.ts, en.ts, th.ts 파일의 memories 관련 키들을 객체 형태로 재구성
+  - 예: `memories_title` → `memories: { title: ... }`
+  - LanguageContext의 t 함수가 중첩된 키(예: 'memories.title')를 처리하도록 개선
+  - 이제 MemoriesPage에서 한국어/영어/태국어 전환이 정상 작동함
+- **나이 표시 형식 개선**
+  - MemoriesPage의 나이별 필터에서 언어별로 다른 형식 적용
+  - 한국어: "1세", "2세", "3세"...
+  - 영어: "1 year old", "2 years old", "3 years old"...
+  - 태국어: "1 ปี", "2 ปี", "3 ปี"...
+  - useLanguage 훅의 language 값을 사용하여 현재 언어 감지
