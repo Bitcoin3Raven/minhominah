@@ -9,6 +9,7 @@ import { useLegacyStyles } from '../hooks/useLegacyStyles';
 import PWAInstallPrompt from './PWAInstallPrompt';
 import { LanguageSelector } from './LanguageSelector';
 import { useLanguage } from '../contexts/LanguageContext';
+import { useDarkMode } from '../contexts/DarkModeContext';
 
 interface LayoutProps {
   children: ReactNode;
@@ -18,8 +19,8 @@ const Layout = ({ children }: LayoutProps) => {
   const location = useLocation();
   const { user, signOut } = useAuth();
   const { t } = useLanguage();
+  const { darkMode, toggleDarkMode } = useDarkMode();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [darkMode, setDarkMode] = useState(false);
   const [mainDropdownOpen, setMainDropdownOpen] = useState(false);
   const [familyDropdownOpen, setFamilyDropdownOpen] = useState(false);
   const legacyStyles = useLegacyStyles();
@@ -51,16 +52,7 @@ const Layout = ({ children }: LayoutProps) => {
   });
 
   useEffect(() => {
-    // 다크모드 초기화
-    const theme = localStorage.getItem('theme');
-    if (theme === 'dark' || (!theme && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-      setDarkMode(true);
-      document.documentElement.classList.add('dark');
-    }
-  }, []);
-  
-  // 드롭다운 외부 클릭 감지
-  useEffect(() => {
+    // 드롭다운 외부 클릭 감지
     const handleClickOutside = (event: MouseEvent) => {
       const target = event.target as HTMLElement;
       if (!target.closest('[data-dropdown="main"]')) {
@@ -74,17 +66,6 @@ const Layout = ({ children }: LayoutProps) => {
     document.addEventListener('click', handleClickOutside);
     return () => document.removeEventListener('click', handleClickOutside);
   }, []);
-
-  const toggleDarkMode = () => {
-    setDarkMode(!darkMode);
-    if (darkMode) {
-      document.documentElement.classList.remove('dark');
-      localStorage.setItem('theme', 'light');
-    } else {
-      document.documentElement.classList.add('dark');
-      localStorage.setItem('theme', 'dark');
-    }
-  };
 
   // 메뉴 구조 정의
   const mainMenuItems = [

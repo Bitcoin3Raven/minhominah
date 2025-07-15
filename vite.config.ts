@@ -14,8 +14,12 @@ export default defineConfig({
     port: 3000,
     open: true,
     fs: {
-      deny: ['**/_backup/**']
+      deny: ['**/_backup/**', '**/legacy/**', '**/backup/**']
     }
+  },
+  optimizeDeps: {
+    exclude: ['legacy', '_backup'],
+    entries: ['./src/**/*.{ts,tsx,js,jsx}']
   },
   build: {
     outDir: 'dist',

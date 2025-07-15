@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { motion, AnimatePresence } from 'framer-motion';
-import { FiUsers, FiShield, FiActivity, FiTrash2, FiEdit2, FiMail } from 'react-icons/fi';
+import { FiUsers, FiShield, FiActivity, FiTrash2, FiEdit2, FiMail, FiTag, FiUserPlus } from 'react-icons/fi';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
 import { useLanguage } from '../contexts/LanguageContext';
@@ -37,7 +37,7 @@ const AdminPage = () => {
   const { user } = useAuth();
   const { t, language } = useLanguage();
   const queryClient = useQueryClient();
-  const [selectedTab, setSelectedTab] = useState<'users' | 'activity'>('users');
+  const [selectedTab, setSelectedTab] = useState<'users' | 'activity' | 'tags' | 'people'>('users');
   const [editingUserId, setEditingUserId] = useState<string | null>(null);
   const [selectedRole, setSelectedRole] = useState<string>('');
   const [editProfileModal, setEditProfileModal] = useState<{
@@ -75,12 +75,16 @@ const AdminPage = () => {
   const { data: users, isLoading: isLoadingUsers } = useQuery({
     queryKey: ['all-users'],
     queryFn: async () => {
-      // RPC 함수 사용 가능한지 시도
-      const { data: rpcData, error: rpcError } = await supabase
-        .rpc('get_users_with_email');
-      
-      if (!rpcError && rpcData) {
-        return rpcData as (Profile & { email: string })[];
+      try {
+        // RPC 함수 사용 가능한지 시도
+        const { data: rpcData, error: rpcError } = await supabase
+          .rpc('get_users_with_email');
+        
+        if (!rpcError && rpcData) {
+          return rpcData as (Profile & { email: string })[];
+        }
+      } catch (e) {
+        console.log('RPC function not available, using fallback');
       }
       
       // RPC 함수가 없으면 기존 방식 사용
@@ -100,17 +104,37 @@ const AdminPage = () => {
   const { data: activities, isLoading: isLoadingActivities } = useQuery({
     queryKey: ['activity-logs'],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from('activity_logs')
-        .select(`
-          *,
-          profiles:user_id (username, full_name)
-        `)
-        .order('created_at', { ascending: false })
-        .limit(50);
-      
-      if (error) throw error;
-      return data as ActivityLog[];
+      try {
+        // 먼저 activity_logs 가져오기
+        const { data: logs, error: logsError } = await supabase
+          .from('activity_logs')
+          .select('*')
+          .order('created_at', { ascending: false })
+          .limit(50);
+        
+        if (logsError) throw logsError;
+        
+        // 각 로그의 사용자 정보 가져오기
+        const logsWithProfiles = await Promise.all(
+          (logs || []).map(async (log) => {
+            const { data: profile } = await supabase
+              .from('profiles')
+              .select('username, full_name')
+              .eq('id', log.user_id)
+              .single();
+            
+            return {
+              ...log,
+              profiles: profile || { username: null, full_name: null }
+            };
+          })
+        );
+        
+        return logsWithProfiles as ActivityLog[];
+      } catch (error) {
+        console.error('Activity logs error:', error);
+        return [];
+      }
     },
     enabled: currentUserProfile?.role === 'parent',
   });
@@ -167,6 +191,100 @@ const AdminPage = () => {
     },
     onError: (error: any) => {
       toast.error(error.message || t('admin.profileModal.updateFailed'));
+    },
+  });
+
+  // 태그 목록 가져오기 (메모리 사용 개수 포함)
+  const { data: tags, isLoading: isLoadingTags, refetch: refetchTags } = useQuery({
+    queryKey: ['admin-tags'],
+    queryFn: async () => {
+      const { data: tagsData, error: tagsError } = await supabase
+        .from('tags')
+        .select('*')
+        .order('name');
+      
+      if (tagsError) throw tagsError;
+      
+      // 각 태그의 사용 개수 조회
+      const tagsWithCount = await Promise.all(
+        tagsData.map(async (tag) => {
+          const { count } = await supabase
+            .from('memory_tags')
+            .select('*', { count: 'exact', head: true })
+            .eq('tag_id', tag.id);
+          
+          return { ...tag, usageCount: count || 0 };
+        })
+      );
+      
+      return tagsWithCount;
+    },
+    enabled: currentUserProfile?.role === 'parent',
+  });
+
+  // 인물 목록 가져오기 (메모리 사용 개수 포함)
+  const { data: people, isLoading: isLoadingPeople, refetch: refetchPeople } = useQuery({
+    queryKey: ['admin-people'],
+    queryFn: async () => {
+      const { data: peopleData, error: peopleError } = await supabase
+        .from('people')
+        .select('*')
+        .order('name');
+      
+      if (peopleError) throw peopleError;
+      
+      // 각 인물의 사용 개수 조회
+      const peopleWithCount = await Promise.all(
+        peopleData.map(async (person) => {
+          const { count } = await supabase
+            .from('memory_people')
+            .select('*', { count: 'exact', head: true })
+            .eq('person_id', person.id);
+          
+          return { ...person, usageCount: count || 0 };
+        })
+      );
+      
+      return peopleWithCount;
+    },
+    enabled: currentUserProfile?.role === 'parent',
+  });
+
+  // 태그 삭제
+  const deleteTagMutation = useMutation({
+    mutationFn: async (tagId: string) => {
+      const { error } = await supabase
+        .from('tags')
+        .delete()
+        .eq('id', tagId);
+      
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin-tags'] });
+      toast.success(t('admin.tags.deleted'));
+    },
+    onError: (error: any) => {
+      toast.error(error.message || t('admin.tags.deleteFailed'));
+    },
+  });
+
+  // 인물 삭제
+  const deletePersonMutation = useMutation({
+    mutationFn: async (personId: string) => {
+      const { error } = await supabase
+        .from('people')
+        .delete()
+        .eq('id', personId);
+      
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin-people'] });
+      toast.success(t('admin.people.deleted'));
+    },
+    onError: (error: any) => {
+      toast.error(error.message || t('admin.people.deleteFailed'));
     },
   });
 
@@ -267,6 +385,28 @@ const AdminPage = () => {
           >
             <FiActivity className="inline-block w-5 h-5 mr-2" />
             {t('admin.activityLog')}
+          </button>
+          <button
+            onClick={() => setSelectedTab('tags')}
+            className={`py-2 px-1 border-b-2 font-medium text-sm transition-colors ${
+              selectedTab === 'tags'
+                ? 'border-blue-500 text-blue-600 dark:text-blue-400'
+                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300'
+            }`}
+          >
+            <FiTag className="inline-block w-5 h-5 mr-2" />
+            {t('admin.tagManagement')}
+          </button>
+          <button
+            onClick={() => setSelectedTab('people')}
+            className={`py-2 px-1 border-b-2 font-medium text-sm transition-colors ${
+              selectedTab === 'people'
+                ? 'border-blue-500 text-blue-600 dark:text-blue-400'
+                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300'
+            }`}
+          >
+            <FiUserPlus className="inline-block w-5 h-5 mr-2" />
+            {t('admin.peopleManagement')}
           </button>
         </nav>
       </div>
@@ -462,6 +602,158 @@ const AdminPage = () => {
                   </p>
                 </div>
               )}
+            </div>
+          )}
+        </div>
+      )}
+      
+      {/* 태그 관리 탭 */}
+      {selectedTab === 'tags' && (
+        <div>
+          {isLoadingTags ? (
+            <div className="flex justify-center items-center py-12">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+            </div>
+          ) : (
+            <div className="bg-white dark:bg-gray-800 shadow overflow-hidden rounded-lg">
+              <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                <thead className="bg-gray-50 dark:bg-gray-900">
+                  <tr>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                      {t('admin.tags.name')}
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                      {t('admin.tags.usageCount')}
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                      {t('admin.actions')}
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+                  {tags?.map((tag) => (
+                    <motion.tr
+                      key={tag.id}
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0 }}
+                    >
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="flex items-center">
+                          <FiTag className="w-4 h-4 mr-2 text-purple-500" />
+                          <span className="text-sm font-medium text-gray-900 dark:text-white">
+                            #{tag.name}
+                          </span>
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <span className="text-sm text-gray-500 dark:text-gray-400">
+                          {tag.usageCount} {t('admin.tags.memories')}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                        <button
+                          onClick={() => {
+                            if (tag.usageCount > 0) {
+                              if (window.confirm(t('admin.tags.deleteConfirmWithUsage', { count: tag.usageCount }))) {
+                                deleteTagMutation.mutate(tag.id);
+                              }
+                            } else {
+                              if (window.confirm(t('admin.tags.deleteConfirm'))) {
+                                deleteTagMutation.mutate(tag.id);
+                              }
+                            }
+                          }}
+                          disabled={deleteTagMutation.isPending}
+                          className="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                          <FiTrash2 className="w-4 h-4" />
+                        </button>
+                      </td>
+                    </motion.tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* 인물 관리 탭 */}
+      {selectedTab === 'people' && (
+        <div>
+          {isLoadingPeople ? (
+            <div className="flex justify-center items-center py-12">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+            </div>
+          ) : (
+            <div className="bg-white dark:bg-gray-800 shadow overflow-hidden rounded-lg">
+              <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                <thead className="bg-gray-50 dark:bg-gray-900">
+                  <tr>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                      {t('admin.people.name')}
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                      {t('admin.people.usageCount')}
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                      {t('admin.people.birthdate')}
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                      {t('admin.actions')}
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+                  {people?.map((person) => (
+                    <motion.tr
+                      key={person.id}
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0 }}
+                    >
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="flex items-center">
+                          <FiUserPlus className="w-4 h-4 mr-2 text-blue-500" />
+                          <span className="text-sm font-medium text-gray-900 dark:text-white">
+                            {person.name}
+                          </span>
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <span className="text-sm text-gray-500 dark:text-gray-400">
+                          {person.usageCount} {t('admin.people.memories')}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <span className="text-sm text-gray-500 dark:text-gray-400">
+                          {person.birthdate ? format(new Date(person.birthdate), 'yyyy-MM-dd') : '-'}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                        <button
+                          onClick={() => {
+                            if (person.usageCount > 0) {
+                              if (window.confirm(t('admin.people.deleteConfirmWithUsage', { count: person.usageCount }))) {
+                                deletePersonMutation.mutate(person.id);
+                              }
+                            } else {
+                              if (window.confirm(t('admin.people.deleteConfirm'))) {
+                                deletePersonMutation.mutate(person.id);
+                              }
+                            }
+                          }}
+                          disabled={deletePersonMutation.isPending}
+                          className="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                          <FiTrash2 className="w-4 h-4" />
+                        </button>
+                      </td>
+                    </motion.tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
           )}
         </div>

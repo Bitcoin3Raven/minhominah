@@ -240,7 +240,16 @@ export const en = {
     newAlbum: "New Album",
     noAlbums: "No albums yet",
     createFirst: "Create your first album!",
-    memoriesCount: " memories"
+    memoriesCount: " memories",
+    createAlbum: "Create Album",
+    albumName: "Album Name",
+    albumNamePlaceholder: "e.g., Family Trip 2024",
+    description: "Description",
+    descriptionPlaceholder: "Enter a description for this album",
+    makePublic: "Make this album public",
+    create: "Create",
+    creating: "Creating...",
+    cancel: "Cancel"
   },
   
   // 포토북 만들기 페이지
@@ -385,6 +394,27 @@ export const en = {
     },
     unknown: "Unknown",
     notSet: "Not Set",
-    ago: "ago"
+    ago: "ago",
+    tagManagement: "Tag Management",
+    peopleManagement: "People Management",
+    tags: {
+      name: "Tag Name",
+      usageCount: "Usage Count",
+      memories: " memories",
+      deleted: "Tag has been deleted.",
+      deleteFailed: "Failed to delete tag.",
+      deleteConfirm: "Are you sure you want to delete this tag?",
+      deleteConfirmWithUsage: "This tag is used in {{count}} memories. Are you sure you want to delete it?"
+    },
+    people: {
+      name: "Name",
+      usageCount: "Usage Count",
+      memories: " memories",
+      birthdate: "Birth Date",
+      deleted: "Person has been deleted.",
+      deleteFailed: "Failed to delete person.",
+      deleteConfirm: "Are you sure you want to delete this person?",
+      deleteConfirmWithUsage: "This person is tagged in {{count}} memories. Are you sure you want to delete?"
+    }
   }
 } as const;

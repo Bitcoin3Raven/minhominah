@@ -6,6 +6,7 @@ import Layout from './components/Layout';
 import PrivateRoute from './components/PrivateRoute';
 import { AuthProvider } from './contexts/AuthContext';
 import { LanguageProvider } from './contexts/LanguageContext';
+import { DarkModeProvider } from './contexts/DarkModeContext';
 
 // Lazy load pages for code splitting
 const HomePage = lazy(() => import('./pages/HomePage'));
@@ -47,10 +48,11 @@ function App() {
     <QueryClientProvider client={queryClient}>
       <Router>
         <LanguageProvider>
-          <AuthProvider>
-            <Layout>
-              <Suspense fallback={<PageLoader />}>
-                <Routes>
+          <DarkModeProvider>
+            <AuthProvider>
+              <Layout>
+                <Suspense fallback={<PageLoader />}>
+                  <Routes>
                   <Route path="/" element={<HomePage />} />
                   <Route path="/login" element={<LoginPage />} />
                   <Route path="/accept-invite" element={<AcceptInvitePage />} />
@@ -121,7 +123,8 @@ function App() {
               </Suspense>
             </Layout>
           </AuthProvider>
-        </LanguageProvider>
+        </DarkModeProvider>
+      </LanguageProvider>
       </Router>
       <ReactQueryDevtools initialIsOpen={false} />
     </QueryClientProvider>

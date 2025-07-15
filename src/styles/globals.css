@@ -9,6 +9,71 @@
 @tailwind utilities;
 
 @layer base {
+  /* CSS 변수 정의 */
+  :root {
+    /* Light mode colors */
+    --background: #f8f9fa;
+    --background-secondary: #ffffff;
+    --foreground: #333333;
+    --foreground-secondary: #666666;
+    
+    /* Card colors */
+    --card: #ffffff;
+    --card-foreground: #333333;
+    
+    /* Border colors */
+    --border: #e5e7eb;
+    --border-hover: #d1d5db;
+    
+    /* Primary gradient */
+    --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    --primary: #667eea;
+    --primary-dark: #764ba2;
+    
+    /* Pastel colors */
+    --pastel-pink: #FFC0CB;
+    --pastel-blue: #87CEEB;
+    --pastel-pink-light: rgba(255, 192, 203, 0.45);
+    --pastel-blue-light: rgba(135, 206, 250, 0.45);
+    
+    /* Shadows */
+    --shadow-sm: 0 2px 4px rgba(0,0,0,0.1);
+    --shadow-md: 0 4px 6px rgba(0,0,0,0.1);
+    --shadow-lg: 0 10px 15px rgba(0,0,0,0.1);
+  }
+  
+  .dark {
+    /* Dark mode colors */
+    --background: #1a1a1a;
+    --background-secondary: #2a2a2a;
+    --foreground: #f0f0f0;
+    --foreground-secondary: #a0a0a0;
+    
+    /* Card colors */
+    --card: #2a2a2a;
+    --card-foreground: #f0f0f0;
+    
+    /* Border colors */
+    --border: #3a3a3a;
+    --border-hover: #4a4a4a;
+    
+    /* Primary gradient (adjusted for dark mode) */
+    --primary-gradient: linear-gradient(135deg, #8b9bf0 0%, #9d6ec7 100%);
+    --primary: #8b9bf0;
+    --primary-dark: #9d6ec7;
+    
+    /* Pastel colors (adjusted for dark mode) */
+    --pastel-pink: #d87a85;
+    --pastel-blue: #6aa3c3;
+    --pastel-pink-light: rgba(216, 122, 133, 0.25);
+    --pastel-blue-light: rgba(106, 163, 195, 0.25);
+    
+    /* Shadows (softer for dark mode) */
+    --shadow-sm: 0 2px 4px rgba(0,0,0,0.3);
+    --shadow-md: 0 4px 6px rgba(0,0,0,0.3);
+    --shadow-lg: 0 10px 15px rgba(0,0,0,0.3);
+  }
+  
   body {
     font-family: 'Pretendard', 'Malgun Gothic', 'Apple SD Gothic Neo', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
       'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
@@ -25,8 +90,73 @@
   }
 }
 
+/* 다크모드 전환 애니메이션 - 선택적으로 적용 */
+html {
+  transition: background-color 0.3s ease;
+}
+
+body {
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* 주요 요소에만 트랜지션 적용 */
+.card, .btn-primary, .btn-secondary, .modal, .dropdown {
+  transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+}
+
+/* 그라데이션 텍스트는 트랜지션 제외 */
+.bg-gradient-to-r, .bg-gradient-to-br, [class*="bg-clip-text"] {
+  transition: none !important;
+}
+
 /* Custom utilities */
 @layer utilities {
+  /* 다크모드 유틸리티 클래스 */
+  .bg-background {
+    background-color: var(--background);
+  }
+  
+  .bg-background-secondary {
+    background-color: var(--background-secondary);
+  }
+  
+  .text-foreground {
+    color: var(--foreground);
+  }
+  
+  .text-foreground-secondary {
+    color: var(--foreground-secondary);
+  }
+  
+  .bg-card {
+    background-color: var(--card);
+  }
+  
+  .text-card-foreground {
+    color: var(--card-foreground);
+  }
+  
+  .border-custom {
+    border-color: var(--border);
+  }
+  
+  .bg-primary-gradient {
+    background: var(--primary-gradient);
+  }
+  
+  .shadow-custom-sm {
+    box-shadow: var(--shadow-sm);
+  }
+  
+  .shadow-custom-md {
+    box-shadow: var(--shadow-md);
+  }
+  
+  .shadow-custom-lg {
+    box-shadow: var(--shadow-lg);
+  }
+  
+  /* 애니메이션 클래스 */
   .animate-fade-in {
     animation: fadeIn 0.5s ease-in-out;
   }
@@ -87,8 +217,28 @@
   }
 }
 
+/* Gentle blob animation with reduced movement range */
+@keyframes blob-gentle {
+  0% {
+    transform: translate(0px, 0px) scale(1);
+  }
+  33% {
+    transform: translate(15px, -25px) scale(1.05);
+  }
+  66% {
+    transform: translate(-10px, 10px) scale(0.95);
+  }
+  100% {
+    transform: translate(0px, 0px) scale(1);
+  }
+}
+
 .animate-blob {
   animation: blob 7s infinite;
+}
+
+.animate-blob-gentle {
+  animation: blob-gentle 7s infinite;
 }
 
 .animation-delay-2000 {

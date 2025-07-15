@@ -615,6 +615,50 @@ const UploadPage = () => {
                 <FiUser className="inline-block w-4 h-4 mr-1 text-purple-500" />
                 {t('upload_people_label')}
               </label>
+              
+              {/* 선택된 인물 표시 영역 */}
+              {selectedPeople.length > 0 && (
+                <div className="mb-3 p-3 bg-purple-50 dark:bg-purple-900/20 rounded-lg">
+                  <div className="flex flex-wrap gap-2">
+                    <AnimatePresence>
+                      {selectedPeople.map(personId => {
+                        const person = people?.find(p => p.id === personId);
+                        if (!person) return null;
+                        
+                        return (
+                          <motion.div
+                            key={personId}
+                            initial={{ opacity: 0, scale: 0.8 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            exit={{ opacity: 0, scale: 0.8 }}
+                            className={`inline-flex items-center gap-1 px-3 py-1.5 rounded-full text-sm font-medium ${
+                              person.name === '민호' 
+                                ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white' 
+                                : person.name === '민아'
+                                ? 'bg-gradient-to-r from-pink-500 to-pink-600 text-white'
+                                : 'bg-gradient-to-r from-green-500 to-green-600 text-white'
+                            } shadow-md`}
+                          >
+                            {person.name}
+                            <button
+                              type="button"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setValue('people', selectedPeople.filter(id => id !== personId));
+                              }}
+                              className="ml-1 hover:bg-white/20 rounded-full p-0.5 transition-colors"
+                            >
+                              <FiX className="w-3 h-3" />
+                            </button>
+                          </motion.div>
+                        );
+                      })}
+                    </AnimatePresence>
+                  </div>
+                </div>
+              )}
+              
+              {/* 선택 가능한 인물 목록 */}
               <div className="flex flex-wrap gap-2">
                 <motion.button
                   type="button"
@@ -622,18 +666,15 @@ const UploadPage = () => {
                   whileTap={{ scale: 0.95 }}
                   onClick={() => {
                     const minhoId = people?.find(p => p.name === '민호')?.id;
-                    if (minhoId) {
-                      setValue('people', 
-                        selectedPeople.includes(minhoId) 
-                          ? selectedPeople.filter(id => id !== minhoId)
-                          : [...selectedPeople, minhoId]
-                      );
+                    if (minhoId && !selectedPeople.includes(minhoId)) {
+                      setValue('people', [...selectedPeople, minhoId]);
                     }
                   }}
+                  disabled={selectedPeople.includes(people?.find(p => p.name === '민호')?.id || '')}
                   className={`px-4 py-2 rounded-full transition-all ${
                     selectedPeople.includes(people?.find(p => p.name === '민호')?.id || '')
-                      ? 'bg-gradient-to-r from-purple-600 to-purple-700 text-white shadow-lg'
-                      : 'bg-gray-200 text-gray-700 hover:bg-purple-100 dark:bg-gray-700 dark:text-gray-300'
+                      ? 'bg-gray-100 text-gray-400 cursor-not-allowed dark:bg-gray-800 dark:text-gray-600'
+                      : 'bg-gray-200 text-gray-700 hover:bg-blue-100 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600'
                   }`}
                 >
                   {t('filter_minho')}
@@ -644,18 +685,15 @@ const UploadPage = () => {
                   whileTap={{ scale: 0.95 }}
                   onClick={() => {
                     const minaId = people?.find(p => p.name === '민아')?.id;
-                    if (minaId) {
-                      setValue('people', 
-                        selectedPeople.includes(minaId) 
-                          ? selectedPeople.filter(id => id !== minaId)
-                          : [...selectedPeople, minaId]
-                      );
+                    if (minaId && !selectedPeople.includes(minaId)) {
+                      setValue('people', [...selectedPeople, minaId]);
                     }
                   }}
+                  disabled={selectedPeople.includes(people?.find(p => p.name === '민아')?.id || '')}
                   className={`px-4 py-2 rounded-full transition-all ${
                     selectedPeople.includes(people?.find(p => p.name === '민아')?.id || '')
-                      ? 'bg-gradient-to-r from-pink-500 to-pink-600 text-white shadow-lg'
-                      : 'bg-gray-200 text-gray-700 hover:bg-pink-100 dark:bg-gray-700 dark:text-gray-300'
+                      ? 'bg-gray-100 text-gray-400 cursor-not-allowed dark:bg-gray-800 dark:text-gray-600'
+                      : 'bg-gray-200 text-gray-700 hover:bg-pink-100 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600'
                   }`}
                 >
                   {t('filter_mina')}
@@ -667,16 +705,15 @@ const UploadPage = () => {
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
                     onClick={() => {
-                      setValue('people', 
-                        selectedPeople.includes(person.id)
-                          ? selectedPeople.filter(id => id !== person.id)
-                          : [...selectedPeople, person.id]
-                      );
+                      if (!selectedPeople.includes(person.id)) {
+                        setValue('people', [...selectedPeople, person.id]);
+                      }
                     }}
+                    disabled={selectedPeople.includes(person.id)}
                     className={`px-4 py-2 rounded-full transition-all ${
                       selectedPeople.includes(person.id)
-                        ? 'bg-gradient-to-r from-green-500 to-green-600 text-white shadow-lg'
-                        : 'bg-gray-200 text-gray-700 hover:bg-green-100 dark:bg-gray-700 dark:text-gray-300'
+                        ? 'bg-gray-100 text-gray-400 cursor-not-allowed dark:bg-gray-800 dark:text-gray-600'
+                        : 'bg-gray-200 text-gray-700 hover:bg-green-100 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600'
                     }`}
                   >
                     {person.name}
@@ -702,6 +739,44 @@ const UploadPage = () => {
                 <FiTag className="inline-block w-4 h-4 mr-1 text-purple-500" />
                 {t('upload_tags_label')}
               </label>
+              
+              {/* 선택된 태그 표시 영역 */}
+              {selectedTags.length > 0 && (
+                <div className="mb-3 p-3 bg-purple-50 dark:bg-purple-900/20 rounded-lg">
+                  <div className="flex flex-wrap gap-2">
+                    <AnimatePresence>
+                      {selectedTags.map(tagId => {
+                        const tag = tags?.find(t => t.id === tagId);
+                        if (!tag) return null;
+                        
+                        return (
+                          <motion.div
+                            key={tagId}
+                            initial={{ opacity: 0, scale: 0.8 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            exit={{ opacity: 0, scale: 0.8 }}
+                            className="inline-flex items-center gap-1 px-3 py-1.5 rounded-full text-sm font-medium bg-gradient-to-r from-purple-500 to-purple-600 text-white shadow-md"
+                          >
+                            #{tag.name}
+                            <button
+                              type="button"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setValue('tags', selectedTags.filter(id => id !== tagId));
+                              }}
+                              className="ml-1 hover:bg-white/20 rounded-full p-0.5 transition-colors"
+                            >
+                              <FiX className="w-3 h-3" />
+                            </button>
+                          </motion.div>
+                        );
+                      })}
+                    </AnimatePresence>
+                  </div>
+                </div>
+              )}
+              
+              {/* 선택 가능한 태그 목록 */}
               <div className="flex flex-wrap gap-2">
                 {tags?.map(tag => (
                   <motion.button
@@ -710,16 +785,15 @@ const UploadPage = () => {
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
                     onClick={() => {
-                      setValue('tags',
-                        selectedTags.includes(tag.id)
-                          ? selectedTags.filter(id => id !== tag.id)
-                          : [...selectedTags, tag.id]
-                      );
+                      if (!selectedTags.includes(tag.id)) {
+                        setValue('tags', [...selectedTags, tag.id]);
+                      }
                     }}
+                    disabled={selectedTags.includes(tag.id)}
                     className={`px-3 py-1.5 rounded-full text-sm transition-all ${
                       selectedTags.includes(tag.id)
-                        ? 'bg-gradient-to-r from-purple-600 to-purple-700 text-white shadow-lg'
-                        : 'bg-gray-200 text-gray-700 hover:bg-purple-100 dark:bg-gray-700 dark:text-gray-300'
+                        ? 'bg-gray-100 text-gray-400 cursor-not-allowed dark:bg-gray-800 dark:text-gray-600'
+                        : 'bg-gray-200 text-gray-700 hover:bg-purple-100 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600'
                     }`}
                   >
                     #{tag.name}

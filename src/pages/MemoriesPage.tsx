@@ -18,7 +18,7 @@ interface Memory {
   memory_date: string;
   created_at: string;
   user_id: string;
-  created_by: string;
+  created_by: string; // 추가
   media_files: MediaFile[];
   memory_people: MemoryPerson[];
   memory_tags: MemoryTag[];
@@ -257,6 +257,7 @@ const MemoriesPage = () => {
   // 삭제 mutation
   const deleteMutation = useMutation({
     mutationFn: async (memoryId: string) => {
+      // RLS 정책이 자동으로 created_by를 확인하므로 별도 조건 불필요
       const { error } = await supabase
         .from('memories')
         .delete()
@@ -272,7 +273,7 @@ const MemoriesPage = () => {
     onError: (error: any) => {
       console.error('삭제 실패:', error);
       // 권한 관련 에러 체크
-      if (error.message?.includes('permission') || error.code === '42501') {
+      if (error.message?.includes('permission') || error.code === '42501' || error.code === '403') {
         alert(t('memories.permissionError'));
       } else {
         alert(t('memories.deleteError'));
@@ -606,8 +607,8 @@ const MemoriesPage = () => {
               transition={{ duration: 0.3, delay: index * 0.05 }}
               className="relative group"
             >
-              {/* 수정/삭제 드롭다운 - 본인 메모리만 표시 */}
-              {user?.id === memory.created_by && (
+              {/* 수정/삭제 드롭다운 - created_by로 확인 */}
+              {user?.id && memory.created_by === user.id && (
                 <div className="absolute top-2 right-2 z-10">
                   <button
                     onClick={(e) => {
@@ -754,7 +755,7 @@ const MemoriesPage = () => {
               </div>
               
               {/* 수정/삭제 버튼 - 리스트 뷰 */}
-              {user?.id === memory.created_by && (
+              {user?.id && memory.created_by === user.id && (
                 <div className="flex items-center space-x-2 ml-4">
                   <button
                     onClick={(e) => {

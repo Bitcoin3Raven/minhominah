@@ -303,12 +303,12 @@ const GrowthPage = () => {
     <div className="min-h-screen">
       {/* 히어로 섹션 */}
       <section className="relative overflow-hidden py-12 mb-8">
-        <div className="absolute inset-0 bg-gradient-to-br from-pink-400/20 via-purple-400/20 to-blue-400/20"></div>
+        <div className="absolute inset-0 bg-gradient-to-br from-pink-100 via-purple-100 to-blue-100 dark:from-pink-900/10 dark:via-purple-900/10 dark:to-blue-900/10"></div>
         <div className="relative">
-          <h1 className="text-4xl md:text-5xl font-bold text-center bg-gradient-to-r from-pink-500 to-blue-500 bg-clip-text text-transparent">
+          <h1 className="text-4xl md:text-5xl font-bold text-center bg-gradient-to-r from-pink-400 to-blue-400 bg-clip-text text-transparent">
             {t('growth.title')}
           </h1>
-          <p className="text-center text-lg text-gray-600 mt-4">
+          <p className="text-center text-lg text-gray-600 dark:text-gray-400 mt-4">
             {t('growth.subtitle')}
           </p>
         </div>
@@ -318,15 +318,15 @@ const GrowthPage = () => {
       <div className="max-w-7xl mx-auto px-4">
         {/* 인물 선택 */}
         <div className="flex justify-center mb-8">
-        <div className="inline-flex rounded-full bg-white shadow-lg p-1">
+        <div className="inline-flex rounded-full bg-white dark:bg-gray-800 shadow-lg p-1">
           {people.map((person) => (
             <button
               key={person.id}
               onClick={() => setSelectedPerson(person.id)}
               className={`px-6 py-2 rounded-full font-medium transition-all duration-200 ${
                 selectedPerson === person.id
-                  ? 'bg-gradient-to-r from-pink-500 to-purple-500 text-white'
-                  : 'text-gray-700 hover:bg-gray-100'
+                  ? 'bg-gradient-to-r from-pink-300 to-purple-300 text-white shadow-md'
+                  : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
               }`}
             >
               <FiUser className="inline-block mr-2" />
@@ -344,7 +344,7 @@ const GrowthPage = () => {
               setFormData({ ...formData, person_id: selectedPerson || '' });
               setShowAddModal(true);
             }}
-            className="px-6 py-3 bg-gradient-to-r from-green-500 to-emerald-500 text-white rounded-full font-medium hover:shadow-lg transform hover:scale-105 transition-all duration-200"
+            className="px-6 py-3 bg-gradient-to-r from-green-400 to-emerald-400 text-white rounded-full font-medium hover:shadow-lg transform hover:scale-105 transition-all duration-200 hover:from-green-500 hover:to-emerald-500"
           >
             <FiPlus className="inline-block mr-2" />
             {t('growth.addRecord')}
@@ -357,34 +357,34 @@ const GrowthPage = () => {
         <motion.div 
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="bg-gradient-to-br from-purple-500 to-pink-500 rounded-2xl p-6 text-white"
+          className="bg-gradient-to-br from-purple-200 via-purple-100 to-pink-100 dark:from-purple-900/30 dark:via-purple-800/20 dark:to-pink-900/20 rounded-2xl p-6 shadow-lg"
         >
-          <h4 className="text-lg font-semibold mb-2">{t('growth.currentStatus')}</h4>
-          <p className="text-sm opacity-90">{stats.current.age}</p>
-          <p className="text-xl font-bold">{t('growth.height')}: {stats.current.height}</p>
-          <p className="text-xl font-bold">{t('growth.weight')}: {stats.current.weight}</p>
+          <h4 className="text-lg font-semibold mb-2 text-purple-800 dark:text-purple-200">{t('growth.currentStatus')}</h4>
+          <p className="text-sm text-purple-600 dark:text-purple-300">{stats.current.age}</p>
+          <p className="text-xl font-bold text-purple-900 dark:text-purple-100">{t('growth.height')}: {stats.current.height}</p>
+          <p className="text-xl font-bold text-purple-900 dark:text-purple-100">{t('growth.weight')}: {stats.current.weight}</p>
         </motion.div>
 
         <motion.div 
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
-          className="bg-gradient-to-br from-blue-500 to-cyan-500 rounded-2xl p-6 text-white"
+          className="bg-gradient-to-br from-blue-200 via-blue-100 to-cyan-100 dark:from-blue-900/30 dark:via-blue-800/20 dark:to-cyan-900/20 rounded-2xl p-6 shadow-lg"
         >
-          <h4 className="text-lg font-semibold mb-2">{t('growth.recentGrowth')}</h4>
-          <p className="text-sm opacity-90">{t('growth.last3Months')}</p>
-          <p className="text-lg font-bold">{t('growth.height')}: {stats.growthRate.height}</p>
-          <p className="text-lg font-bold">{t('growth.weight')}: {stats.growthRate.weight}</p>
+          <h4 className="text-lg font-semibold mb-2 text-blue-800 dark:text-blue-200">{t('growth.recentGrowth')}</h4>
+          <p className="text-sm text-blue-600 dark:text-blue-300">{t('growth.last3Months')}</p>
+          <p className="text-lg font-bold text-blue-900 dark:text-blue-100">{t('growth.height')}: {stats.growthRate.height}</p>
+          <p className="text-lg font-bold text-blue-900 dark:text-blue-100">{t('growth.weight')}: {stats.growthRate.weight}</p>
         </motion.div>
 
         <motion.div 
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2 }}
-          className="bg-gradient-to-br from-green-500 to-emerald-500 rounded-2xl p-6 text-white"
+          className="bg-gradient-to-br from-green-200 via-green-100 to-emerald-100 dark:from-green-900/30 dark:via-green-800/20 dark:to-emerald-900/20 rounded-2xl p-6 shadow-lg"
         >
-          <h4 className="text-lg font-semibold mb-2">{t('growth.lastRecord')}</h4>
-          <p className="text-2xl font-bold">{stats.lastUpdate}</p>
+          <h4 className="text-lg font-semibold mb-2 text-green-800 dark:text-green-200">{t('growth.lastRecord')}</h4>
+          <p className="text-2xl font-bold text-green-900 dark:text-green-100">{stats.lastUpdate}</p>
         </motion.div>
       </div>
 

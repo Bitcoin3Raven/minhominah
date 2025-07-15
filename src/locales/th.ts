@@ -240,7 +240,16 @@ export const th = {
     newAlbum: "อัลบั้มใหม่",
     noAlbums: "ยังไม่มีอัลบั้ม",
     createFirst: "สร้างอัลบั้มแรกของคุณ!",
-    memoriesCount: " ความทรงจำ"
+    memoriesCount: " ความทรงจำ",
+    createAlbum: "สร้างอัลบั้ม",
+    albumName: "ชื่ออัลบั้ม",
+    albumNamePlaceholder: "เช่น ทริปครอบครัว 2024",
+    description: "คำอธิบาย",
+    descriptionPlaceholder: "ใส่คำอธิบายสำหรับอัลบั้มนี้",
+    makePublic: "ตั้งเป็นอัลบั้มสาธารณะ",
+    create: "สร้าง",
+    creating: "กำลังสร้าง...",
+    cancel: "ยกเลิก"
   },
   
   // 포토북 만들기 페이지
@@ -385,6 +394,27 @@ export const th = {
     },
     unknown: "ไม่ทราบ",
     notSet: "ไม่ได้ตั้งค่า",
-    ago: "ที่แล้ว"
+    ago: "ที่แล้ว",
+    tagManagement: "จัดการแท็ก",
+    peopleManagement: "จัดการบุคคล",
+    tags: {
+      name: "ชื่อแท็ก",
+      usageCount: "จำนวนที่ใช้",
+      memories: " ความทรงจำ",
+      deleted: "ลบแท็กเรียบร้อยแล้ว",
+      deleteFailed: "ไม่สามารถลบแท็กได้",
+      deleteConfirm: "คุณแน่ใจหรือไม่ที่จะลบแท็กนี้?",
+      deleteConfirmWithUsage: "แท็กนี้ถูกใช้ใน {{count}} ความทรงจำ คุณแน่ใจหรือไม่ที่จะลบ?"
+    },
+    people: {
+      name: "ชื่อ",
+      usageCount: "จำนวนที่ใช้",
+      memories: " ความทรงจำ",
+      birthdate: "วันเกิด",
+      deleted: "ลบบุคคลเรียบร้อยแล้ว",
+      deleteFailed: "ไม่สามารถลบบุคคลได้",
+      deleteConfirm: "คุณแน่ใจหรือไม่ที่จะลบบุคคลนี้?",
+      deleteConfirmWithUsage: "บุคคลนี้ถูกแท็กใน {{count}} ความทรงจำ คุณแน่ใจหรือไม่ที่จะลบ?"
+    }
   }
 } as const;

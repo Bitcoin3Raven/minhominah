@@ -1,0 +1,68 @@
+// 한국어 admin 번역에 추가
+tagManagement: "태그 관리",
+peopleManagement: "인물 관리",
+tags: {
+  name: "태그명",
+  usageCount: "사용 횟수",
+  memories: "개 추억",
+  deleted: "태그가 삭제되었습니다.",
+  deleteFailed: "태그 삭제에 실패했습니다.",
+  deleteConfirm: "이 태그를 삭제하시겠습니까?",
+  deleteConfirmWithUsage: "이 태그는 {{count}}개의 추억에서 사용 중입니다. 정말 삭제하시겠습니까?"
+},
+people: {
+  name: "이름",
+  usageCount: "사용 횟수",
+  memories: "개 추억",
+  birthdate: "생년월일",
+  deleted: "인물이 삭제되었습니다.",
+  deleteFailed: "인물 삭제에 실패했습니다.",
+  deleteConfirm: "이 인물을 삭제하시겠습니까?",
+  deleteConfirmWithUsage: "이 인물은 {{count}}개의 추억에서 사용 중입니다. 정말 삭제하시겠습니까?"
+}
+
+// 영어 admin 번역에 추가
+tagManagement: "Tag Management",
+peopleManagement: "People Management",
+tags: {
+  name: "Tag Name",
+  usageCount: "Usage Count",
+  memories: " memories",
+  deleted: "Tag has been deleted.",
+  deleteFailed: "Failed to delete tag.",
+  deleteConfirm: "Are you sure you want to delete this tag?",
+  deleteConfirmWithUsage: "This tag is used in {{count}} memories. Are you sure you want to delete it?"
+},
+people: {
+  name: "Name",
+  usageCount: "Usage Count",
+  memories: " memories",
+  birthdate: "Birth Date",
+  deleted: "Person has been deleted.",
+  deleteFailed: "Failed to delete person.",
+  deleteConfirm: "Are you sure you want to delete this person?",
+  deleteConfirmWithUsage: "This person is tagged in {{count}} memories. Are you sure you want to delete?"
+}
+
+// 태국어 admin 번역에 추가
+tagManagement: "จัดการแท็ก",
+peopleManagement: "จัดการบุคคล",
+tags: {
+  name: "ชื่อแท็ก",
+  usageCount: "จำนวนที่ใช้",
+  memories: " ความทรงจำ",
+  deleted: "ลบแท็กเรียบร้อยแล้ว",
+  deleteFailed: "ไม่สามารถลบแท็กได้",
+  deleteConfirm: "คุณแน่ใจหรือไม่ที่จะลบแท็กนี้?",
+  deleteConfirmWithUsage: "แท็กนี้ถูกใช้ใน {{count}} ความทรงจำ คุณแน่ใจหรือไม่ที่จะลบ?"
+},
+people: {
+  name: "ชื่อ",
+  usageCount: "จำนวนที่ใช้",
+  memories: " ความทรงจำ",
+  birthdate: "วันเกิด",
+  deleted: "ลบบุคคลเรียบร้อยแล้ว",
+  deleteFailed: "ไม่สามารถลบบุคคลได้",
+  deleteConfirm: "คุณแน่ใจหรือไม่ที่จะลบบุคคลนี้?",
+  deleteConfirmWithUsage: "บุคคลนี้ถูกแท็กใน {{count}} ความทรงจำ คุณแน่ใจหรือไม่ที่จะลบ?"
+}

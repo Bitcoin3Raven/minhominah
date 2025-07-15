@@ -240,7 +240,16 @@ export const ko = {
     newAlbum: "새 앨범",
     noAlbums: "아직 앨범이 없습니다",
     createFirst: "첫 번째 앨범을 만들어보세요!",
-    memoriesCount: "개의 추억"
+    memoriesCount: "개의 추억",
+    createAlbum: "앨범 만들기",
+    albumName: "앨범 이름",
+    albumNamePlaceholder: "예: 2024년 가족 여행",
+    description: "설명",
+    descriptionPlaceholder: "이 앨범에 대한 설명을 입력하세요",
+    makePublic: "공개 앨범으로 설정",
+    create: "만들기",
+    creating: "만드는 중...",
+    cancel: "취소"
   },
   
   // 포토북 만들기 페이지
@@ -385,7 +394,28 @@ export const ko = {
     },
     unknown: "알 수 없음",
     notSet: "설정 안 됨",
-    ago: "전"
+    ago: "전",
+    tagManagement: "태그 관리",
+    peopleManagement: "인물 관리",
+    tags: {
+      name: "태그명",
+      usageCount: "사용 횟수",
+      memories: "개 추억",
+      deleted: "태그가 삭제되었습니다.",
+      deleteFailed: "태그 삭제에 실패했습니다.",
+      deleteConfirm: "이 태그를 삭제하시겠습니까?",
+      deleteConfirmWithUsage: "이 태그는 {{count}}개의 추억에서 사용 중입니다. 정말 삭제하시겠습니까?"
+    },
+    people: {
+      name: "이름",
+      usageCount: "사용 횟수",
+      memories: "개 추억",
+      birthdate: "생년월일",
+      deleted: "인물이 삭제되었습니다.",
+      deleteFailed: "인물 삭제에 실패했습니다.",
+      deleteConfirm: "이 인물을 삭제하시겠습니까?",
+      deleteConfirmWithUsage: "이 인물은 {{count}}개의 추억에서 사용 중입니다. 정말 삭제하시겠습니까?"
+    }
   }
 } as const;
 
