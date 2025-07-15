@@ -5,13 +5,13 @@ import type { Language } from '../locales';
 interface LanguageOption {
   code: Language;
   name: string;
-  flag: string;
+  flagPath: string;
 }
 
 const languages: LanguageOption[] = [
-  { code: 'ko', name: '한국어', flag: '🇰🇷' },
-  { code: 'th', name: 'ไทย', flag: '🇹🇭' },
-  { code: 'en', name: 'English', flag: '🇺🇸' },
+  { code: 'ko', name: '한국어', flagPath: '/assets/images/flags/ko.svg' },
+  { code: 'th', name: 'ไทย', flagPath: '/assets/images/flags/th.svg' },
+  { code: 'en', name: 'English', flagPath: '/assets/images/flags/en.svg' },
 ];
 
 export const LanguageSelector: React.FC = () => {
@@ -41,17 +41,21 @@ export const LanguageSelector: React.FC = () => {
     <div className="relative" ref={dropdownRef}>
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center gap-2 px-3 py-2 rounded-lg bg-white dark:bg-gray-700 
-                   hover:bg-gray-50 dark:hover:bg-gray-600 transition-all duration-200 
-                   text-sm border border-gray-200 dark:border-gray-600 shadow-sm hover:shadow
-                   font-medium"
+        className="flex items-center gap-2 px-3 py-1.5 rounded-md
+                   hover:bg-gray-100 dark:hover:bg-gray-800 transition-all duration-200 
+                   text-sm"
+        aria-label="Select language"
       >
-        <span className="text-lg">{currentLang.flag}</span>
+        <img 
+          src={currentLang.flagPath} 
+          alt={currentLang.name}
+          className="w-5 h-5 rounded-sm shadow-sm"
+        />
         <span className="hidden sm:inline text-gray-700 dark:text-gray-200">
-          {currentLang.name}
+          {currentLang.code.toUpperCase()}
         </span>
         <svg 
-          className={`w-4 h-4 text-gray-400 dark:text-gray-400 transition-transform ${isOpen ? 'rotate-180' : ''}`} 
+          className={`w-3 h-3 text-gray-500 dark:text-gray-400 transition-transform ${isOpen ? 'rotate-180' : ''}`} 
           fill="none" 
           stroke="currentColor" 
           viewBox="0 0 24 24"
@@ -61,19 +65,22 @@ export const LanguageSelector: React.FC = () => {
       </button>
 
       {isOpen && (
-        <div className="absolute right-0 mt-2 w-36 bg-white dark:bg-gray-700 rounded-lg 
-                        shadow-lg border border-gray-200 dark:border-gray-600 z-50 
-                        overflow-hidden py-1 animate-slideIn">
+        <div className="absolute right-0 mt-1 min-w-[120px] bg-white dark:bg-gray-800 rounded-md 
+                        shadow-lg z-50 overflow-hidden animate-slideIn">
           {languages.map((lang) => (
             <button
               key={lang.code}
               onClick={() => handleLanguageChange(lang.code)}
-              className={`w-full px-3 py-2 text-left hover:bg-gray-100 dark:hover:bg-gray-600 
-                         transition-colors flex items-center gap-3 text-sm
-                         ${language === lang.code ? 'bg-gray-100 dark:bg-gray-600 font-semibold' : ''}`}
+              className={`w-full px-3 py-2 text-left hover:bg-gray-100 dark:hover:bg-gray-700 
+                         transition-colors flex items-center gap-2 text-sm
+                         ${language === lang.code ? 'bg-gray-50 dark:bg-gray-700' : ''}`}
             >
-              <span className="text-lg">{lang.flag}</span>
-              <span className="text-gray-700 dark:text-gray-200">{lang.name}</span>
+              <img 
+                src={lang.flagPath} 
+                alt={lang.name}
+                className="w-5 h-5 rounded-sm shadow-sm flex-shrink-0"
+              />
+              <span className="text-gray-700 dark:text-gray-200 whitespace-nowrap">{lang.name}</span>
             </button>
           ))}
         </div>

@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { useAuth } from '../contexts/AuthContext';
+import { useLanguage } from '../contexts/LanguageContext';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '../lib/supabase';
 import { FiTarget, FiCalendar, FiTrendingUp, FiPlus, FiTrash2, FiUser, FiActivity } from 'react-icons/fi';
@@ -46,6 +47,7 @@ interface GrowthRecord {
 
 const GrowthPage = () => {
   const { user } = useAuth();
+  const { t } = useLanguage();
   const legacyStyles = useLegacyStyles();
   const [selectedPerson, setSelectedPerson] = useState<string | null>(null);
   const [showAddModal, setShowAddModal] = useState(false);
@@ -122,7 +124,7 @@ const GrowthPage = () => {
         weight_kg: '',
         notes: ''
       });
-      alert('성장 기록이 추가되었습니다!');
+      alert(t('growth.recordAdded'));
     },
   });
 
@@ -138,13 +140,13 @@ const GrowthPage = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['growth-records'] });
-      alert('기록이 삭제되었습니다.');
+      alert(t('growth.recordDeleted'));
     },
   });
 
   // 나이 계산
   const calculateAge = (birthDate: string | null, targetDate: string) => {
-    if (!birthDate) return '나이 정보 없음';
+    if (!birthDate) return t('growth.noAgeInfo');
     
     const birth = new Date(birthDate);
     const target = new Date(targetDate);
@@ -166,11 +168,11 @@ const GrowthPage = () => {
     }
     
     if (years === 0) {
-      return `${months}개월`;
+      return `${months}${t('growth.months')}`;
     } else if (months === 0) {
-      return `${years}세`;
+      return `${years}${t('growth.years')}`;
     } else {
-      return `${years}세 ${months}개월`;
+      return `${years}${t('growth.years')} ${months}${t('growth.months')}`;
     }
   };
 
@@ -182,7 +184,7 @@ const GrowthPage = () => {
     }),
     datasets: [
       {
-        label: '키 (cm)',
+        label: t('growth.heightCm'),
         data: growthRecords.map(record => record.height_cm),
         borderColor: '#3B82F6',
         backgroundColor: 'rgba(59, 130, 246, 0.1)',
@@ -190,7 +192,7 @@ const GrowthPage = () => {
         yAxisID: 'y',
       },
       {
-        label: '몸무게 (kg)',
+        label: t('growth.weightKg'),
         data: growthRecords.map(record => record.weight_kg),
         borderColor: '#10B981',
         backgroundColor: 'rgba(16, 185, 129, 0.1)',
@@ -219,7 +221,7 @@ const GrowthPage = () => {
         position: 'left' as const,
         title: {
           display: true,
-          text: '키 (cm)'
+          text: t('growth.heightCm')
         }
       },
       y1: {
@@ -231,7 +233,7 @@ const GrowthPage = () => {
         },
         title: {
           display: true,
-          text: '몸무게 (kg)'
+          text: t('growth.weightKg')
         }
       },
     },
@@ -286,7 +288,7 @@ const GrowthPage = () => {
         height: heightGrowth,
         weight: weightGrowth
       },
-      lastUpdate: `${daysSinceUpdate}일 전`
+      lastUpdate: `${daysSinceUpdate}${t('growth.daysAgo')}`
     };
   };
 
@@ -304,16 +306,18 @@ const GrowthPage = () => {
         <div className="absolute inset-0 bg-gradient-to-br from-pink-400/20 via-purple-400/20 to-blue-400/20"></div>
         <div className="relative">
           <h1 className="text-4xl md:text-5xl font-bold text-center bg-gradient-to-r from-pink-500 to-blue-500 bg-clip-text text-transparent">
-            성장 기록
+            {t('growth.title')}
           </h1>
           <p className="text-center text-lg text-gray-600 mt-4">
-            민호와 민아의 성장 과정을 그래프로 확인해보세요
+            {t('growth.subtitle')}
           </p>
         </div>
       </section>
 
-      {/* 인물 선택 */}
-      <div className="flex justify-center mb-8">
+      {/* Main Content Container */}
+      <div className="max-w-7xl mx-auto px-4">
+        {/* 인물 선택 */}
+        <div className="flex justify-center mb-8">
         <div className="inline-flex rounded-full bg-white shadow-lg p-1">
           {people.map((person) => (
             <button
@@ -343,7 +347,7 @@ const GrowthPage = () => {
             className="px-6 py-3 bg-gradient-to-r from-green-500 to-emerald-500 text-white rounded-full font-medium hover:shadow-lg transform hover:scale-105 transition-all duration-200"
           >
             <FiPlus className="inline-block mr-2" />
-            기록 추가
+            {t('growth.addRecord')}
           </button>
         </div>
       )}
@@ -355,10 +359,10 @@ const GrowthPage = () => {
           animate={{ opacity: 1, y: 0 }}
           className="bg-gradient-to-br from-purple-500 to-pink-500 rounded-2xl p-6 text-white"
         >
-          <h4 className="text-lg font-semibold mb-2">현재 상태</h4>
+          <h4 className="text-lg font-semibold mb-2">{t('growth.currentStatus')}</h4>
           <p className="text-sm opacity-90">{stats.current.age}</p>
-          <p className="text-xl font-bold">키: {stats.current.height}</p>
-          <p className="text-xl font-bold">몸무게: {stats.current.weight}</p>
+          <p className="text-xl font-bold">{t('growth.height')}: {stats.current.height}</p>
+          <p className="text-xl font-bold">{t('growth.weight')}: {stats.current.weight}</p>
         </motion.div>
 
         <motion.div 
@@ -367,10 +371,10 @@ const GrowthPage = () => {
           transition={{ delay: 0.1 }}
           className="bg-gradient-to-br from-blue-500 to-cyan-500 rounded-2xl p-6 text-white"
         >
-          <h4 className="text-lg font-semibold mb-2">최근 성장률</h4>
-          <p className="text-sm opacity-90">최근 3개월</p>
-          <p className="text-lg font-bold">키: {stats.growthRate.height}</p>
-          <p className="text-lg font-bold">몸무게: {stats.growthRate.weight}</p>
+          <h4 className="text-lg font-semibold mb-2">{t('growth.recentGrowth')}</h4>
+          <p className="text-sm opacity-90">{t('growth.last3Months')}</p>
+          <p className="text-lg font-bold">{t('growth.height')}: {stats.growthRate.height}</p>
+          <p className="text-lg font-bold">{t('growth.weight')}: {stats.growthRate.weight}</p>
         </motion.div>
 
         <motion.div 
@@ -379,7 +383,7 @@ const GrowthPage = () => {
           transition={{ delay: 0.2 }}
           className="bg-gradient-to-br from-green-500 to-emerald-500 rounded-2xl p-6 text-white"
         >
-          <h4 className="text-lg font-semibold mb-2">마지막 기록</h4>
+          <h4 className="text-lg font-semibold mb-2">{t('growth.lastRecord')}</h4>
           <p className="text-2xl font-bold">{stats.lastUpdate}</p>
         </motion.div>
       </div>
@@ -393,7 +397,7 @@ const GrowthPage = () => {
         >
           <h3 className="text-xl font-bold text-gray-800 mb-4">
             <FiTrendingUp className="inline-block mr-2 text-blue-500" />
-            성장 차트
+            {t('growth.growthChart')}
           </h3>
           <div className="h-96">
             <Line data={chartData} options={chartOptions} />
@@ -409,25 +413,25 @@ const GrowthPage = () => {
       >
         <h3 className="text-xl font-bold text-gray-800 mb-4">
           <FiCalendar className="inline-block mr-2 text-purple-500" />
-          성장 기록 내역
+          {t('growth.recordHistory')}
         </h3>
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead>
               <tr className="border-b">
-                <th className="text-left py-3 px-4 text-gray-700">날짜</th>
-                <th className="text-left py-3 px-4 text-gray-700">나이</th>
-                <th className="text-left py-3 px-4 text-gray-700">키 (cm)</th>
-                <th className="text-left py-3 px-4 text-gray-700">몸무게 (kg)</th>
-                <th className="text-left py-3 px-4 text-gray-700">메모</th>
-                {user && <th className="text-center py-3 px-4 text-gray-700">작업</th>}
+                <th className="text-left py-3 px-4 text-gray-700">{t('growth.date')}</th>
+                <th className="text-left py-3 px-4 text-gray-700">{t('growth.age')}</th>
+                <th className="text-left py-3 px-4 text-gray-700">{t('growth.heightCm')}</th>
+                <th className="text-left py-3 px-4 text-gray-700">{t('growth.weightKg')}</th>
+                <th className="text-left py-3 px-4 text-gray-700">{t('growth.memo')}</th>
+                {user && <th className="text-center py-3 px-4 text-gray-700">{t('growth.actions')}</th>}
               </tr>
             </thead>
             <tbody>
               {growthRecords.length === 0 ? (
                 <tr>
                   <td colSpan={user ? 6 : 5} className="text-center py-8 text-gray-500">
-                    아직 성장 기록이 없습니다.
+                    {t('growth.noRecords')}
                   </td>
                 </tr>
               ) : (
@@ -447,7 +451,7 @@ const GrowthPage = () => {
                         <td className="py-3 px-4 text-center">
                           <button
                             onClick={() => {
-                              if (confirm('이 기록을 삭제하시겠습니까?')) {
+                              if (confirm(t('growth.deleteConfirm'))) {
                                 deleteMutation.mutate(record.id);
                               }
                             }}
@@ -465,6 +469,7 @@ const GrowthPage = () => {
           </table>
         </div>
       </motion.div>
+      </div> {/* Main Content Container 닫기 */}
 
       {/* 기록 추가 모달 */}
       {showAddModal && (
@@ -474,17 +479,17 @@ const GrowthPage = () => {
             animate={{ opacity: 1, scale: 1 }}
             className="bg-white rounded-2xl shadow-2xl p-6 w-full max-w-md"
           >
-            <h3 className="text-2xl font-bold text-gray-800 mb-4">성장 기록 추가</h3>
+            <h3 className="text-2xl font-bold text-gray-800 mb-4">{t('growth.addRecordTitle')}</h3>
             <form onSubmit={handleSubmit}>
               <div className="mb-4">
-                <label className="block text-gray-700 mb-2">인물</label>
+                <label className="block text-gray-700 mb-2">{t('growth.person')}</label>
                 <select
                   value={formData.person_id}
                   onChange={(e) => setFormData({ ...formData, person_id: e.target.value })}
                   className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                   required
                 >
-                  <option value="">선택하세요</option>
+                  <option value="">{t('growth.selectPerson')}</option>
                   {people.map(person => (
                     <option key={person.id} value={person.id}>{person.name}</option>
                   ))}
@@ -492,7 +497,7 @@ const GrowthPage = () => {
               </div>
               
               <div className="mb-4">
-                <label className="block text-gray-700 mb-2">날짜</label>
+                <label className="block text-gray-700 mb-2">{t('growth.date')}</label>
                 <input
                   type="date"
                   value={formData.record_date}
@@ -504,7 +509,7 @@ const GrowthPage = () => {
               
               <div className="grid grid-cols-2 gap-4 mb-4">
                 <div>
-                  <label className="block text-gray-700 mb-2">키 (cm)</label>
+                  <label className="block text-gray-700 mb-2">{t('growth.heightCm')}</label>
                   <input
                     type="number"
                     step="0.1"
@@ -515,7 +520,7 @@ const GrowthPage = () => {
                   />
                 </div>
                 <div>
-                  <label className="block text-gray-700 mb-2">몸무게 (kg)</label>
+                  <label className="block text-gray-700 mb-2">{t('growth.weightKg')}</label>
                   <input
                     type="number"
                     step="0.1"
@@ -528,7 +533,7 @@ const GrowthPage = () => {
               </div>
               
               <div className="mb-6">
-                <label className="block text-gray-700 mb-2">메모 (선택)</label>
+                <label className="block text-gray-700 mb-2">{t('growth.memoOptional')}</label>
                 <textarea
                   value={formData.notes}
                   onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
@@ -543,14 +548,14 @@ const GrowthPage = () => {
                   disabled={addMutation.isPending}
                   className="flex-1 py-3 bg-gradient-to-r from-green-500 to-emerald-500 text-white rounded-lg font-medium hover:shadow-lg transition-all duration-200 disabled:opacity-50"
                 >
-                  {addMutation.isPending ? '저장 중...' : '저장'}
+                  {addMutation.isPending ? t('growth.saving') : t('growth.save')}
                 </button>
                 <button
                   type="button"
                   onClick={() => setShowAddModal(false)}
                   className="flex-1 py-3 bg-gray-500 text-white rounded-lg font-medium hover:bg-gray-600 transition-all duration-200"
                 >
-                  취소
+                  {t('growth.cancel')}
                 </button>
               </div>
             </form>

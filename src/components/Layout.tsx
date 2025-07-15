@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '../contexts/AuthContext';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '../lib/supabase';
-import { FiMenu, FiX, FiSun, FiMoon, FiUser, FiUsers, FiLogOut, FiShield, FiHome, FiImage, FiPlusCircle, FiFolder, FiBarChart2, FiActivity, FiTrash2, FiUserPlus, FiSettings, FiTrendingUp, FiBook } from 'react-icons/fi';
+import { FiMenu, FiX, FiSun, FiMoon, FiUser, FiUsers, FiLogOut, FiShield, FiHome, FiImage, FiPlusCircle, FiFolder, FiBarChart2, FiActivity, FiTrash2, FiUserPlus, FiSettings, FiTrendingUp, FiBook, FiDatabase } from 'react-icons/fi';
 import { useLegacyStyles } from '../hooks/useLegacyStyles';
 import PWAInstallPrompt from './PWAInstallPrompt';
 import { LanguageSelector } from './LanguageSelector';
@@ -101,6 +101,7 @@ const Layout = ({ children }: LayoutProps) => {
     { path: '/admin', label: t('nav_admin'), icon: <FiSettings className="w-4 h-4 text-gray-500" />, authRequired: true, roleRequired: 'parent' },
     { path: '/activity-log', label: t('nav_activity_log'), icon: <FiActivity className="w-4 h-4 text-blue-500" />, authRequired: true },
     { path: '/trash', label: t('nav_trash'), icon: <FiTrash2 className="w-4 h-4 text-green-500" />, authRequired: true },
+    { path: '/backup', label: t('nav_backup'), icon: <FiDatabase className="w-4 h-4 text-indigo-500" />, authRequired: true },
   ];
 
   // 필터링 함수
@@ -341,7 +342,7 @@ const Layout = ({ children }: LayoutProps) => {
                 ))}
                 
                 {/* 사용자 메뉴 */}
-                {user && (
+                {user ? (
                   <>
                     <li className="px-3 py-1 text-xs font-semibold text-gray-500 uppercase">{t('auth_account')}</li>
                     <li>
@@ -367,6 +368,17 @@ const Layout = ({ children }: LayoutProps) => {
                       </button>
                     </li>
                   </>
+                ) : (
+                  <li className="mt-4">
+                    <Link
+                      to="/login"
+                      onClick={() => setMobileMenuOpen(false)}
+                      className="flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+                    >
+                      <FiUser className="w-4 h-4" />
+                      <span>{t('auth_login')}</span>
+                    </Link>
+                  </li>
                 )}
                 
                 {/* 언어 선택 */}

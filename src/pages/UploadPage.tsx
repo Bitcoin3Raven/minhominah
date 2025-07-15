@@ -10,6 +10,7 @@ import AddPersonModal from '../components/AddPersonModal';
 import AddTagModal from '../components/AddTagModal';
 import { compressImage, formatFileSize, isImageFile } from '../utils/imageUtils';
 import { useLegacyStyles } from '../hooks/useLegacyStyles';
+import { useLanguage } from '../contexts/LanguageContext';
 
 interface UploadFormData {
   title: string;
@@ -35,6 +36,7 @@ interface ExistingMedia {
 const UploadPage = () => {
   const { user } = useAuth();
   const styles = useLegacyStyles(); // 레거시 스타일 적용
+  const { t } = useLanguage();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const editId = searchParams.get('edit');
@@ -208,21 +210,21 @@ const UploadPage = () => {
   // 폼 제출
   const onSubmit = async (data: UploadFormData) => {
     if (!user) {
-      alert('로그인이 필요합니다.');
+      alert(t('upload_login_required'));
       navigate('/login');
       return;
     }
 
     // 편집 모드에서는 새 파일이 없어도 괜찮음
     if (!isEditMode && filePreviews.length === 0) {
-      alert('최소 하나의 사진이나 동영상을 추가해주세요.');
+      alert(t('upload_min_one_file'));
       return;
     }
 
     // 편집 모드에서 모든 미디어를 삭제하는 경우 체크
     if (isEditMode && filePreviews.length === 0 && 
         existingMedia.length === deletedMediaIds.length) {
-      alert('최소 하나의 사진이나 동영상은 유지해야 합니다.');
+      alert(t('upload_min_one_media'));
       return;
     }
 
@@ -369,7 +371,7 @@ const UploadPage = () => {
       console.error('Upload error:', error);
       console.error('Error details:', error.message, error.details);
       const errorMessage = error.message || '알 수 없는 오류가 발생했습니다.';
-      alert(isEditMode ? `수정 중 오류가 발생했습니다: ${errorMessage}` : `업로드 중 오류가 발생했습니다: ${errorMessage}`);
+      alert(isEditMode ? `${t('upload_edit_error')}: ${errorMessage}` : `${t('upload_error')}: ${errorMessage}`);
     } finally {
       setUploading(false);
     }
@@ -390,7 +392,7 @@ const UploadPage = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
           >
-            {isEditMode ? '추억 수정하기' : '새로운 추억 추가'}
+            {isEditMode ? t('upload_edit_title') : t('upload_title')}
           </motion.h1>
           <motion.p 
             className="text-center text-white/90 mt-2"
@@ -398,7 +400,7 @@ const UploadPage = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.2 }}
           >
-            {isEditMode ? '소중한 순간을 다시 편집하세요' : '소중한 순간을 영원히 기록하세요'}
+            {isEditMode ? t('upload_edit_subtitle') : t('upload_subtitle')}
           </motion.p>
         </div>
       </div>
@@ -414,7 +416,7 @@ const UploadPage = () => {
             {/* 파일 업로드 영역 */}
             <div>
               <label className="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">
-                사진/동영상 *
+                {t('upload_media_label')}
               </label>
               <div
                 className={`relative border-2 border-dashed rounded-lg p-8 text-center transition-all ${
@@ -443,17 +445,17 @@ const UploadPage = () => {
                   <FiUpload className="w-16 h-16 mx-auto mb-4 text-purple-500" />
                 </motion.div>
                 <p className="text-gray-600 dark:text-gray-400 mb-2 text-lg">
-                  여기에 파일을 드래그하거나
+                  {t('upload_drag_drop')}
                 </p>
                 <button
                   type="button"
                   onClick={() => fileInputRef.current?.click()}
                   className={styles.button}
                 >
-                  파일 선택
+                  {t('upload_select_file')}
                 </button>
                 <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">
-                  JPG, PNG, GIF, MP4, MOV (최대 50MB)
+                  {t('upload_file_types')}
                 </p>
               </div>
 
@@ -461,7 +463,7 @@ const UploadPage = () => {
               {isEditMode && existingMedia.length > 0 && (
                 <div className="mt-6">
                   <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
-                    기존 파일
+                    {t('upload_existing_files')}
                   </h4>
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                     <AnimatePresence>
@@ -489,7 +491,7 @@ const UploadPage = () => {
                             )}
                             <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-2">
                               <p className="text-xs text-white font-medium">
-                                기존 파일
+                                {t('upload_existing_files')}
                               </p>
                             </div>
                             <button
@@ -553,13 +555,13 @@ const UploadPage = () => {
             {/* 제목 */}
             <div>
               <label className="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">
-                제목 *
+                {t('upload_title_label')}
               </label>
               <input
                 type="text"
-                {...register('title', { required: '제목을 입력해주세요' })}
+                {...register('title', { required: t('upload_title_required') })}
                 className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
-                placeholder="추억의 제목을 입력하세요"
+                placeholder={t('upload_title_placeholder')}
               />
               {errors.title && (
                 <motion.p 
@@ -575,13 +577,13 @@ const UploadPage = () => {
             {/* 설명 */}
             <div>
               <label className="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">
-                설명
+                {t('upload_description_label')}
               </label>
               <textarea
                 {...register('description')}
                 rows={4}
                 className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all resize-none"
-                placeholder="추억에 대한 설명을 입력하세요"
+                placeholder={t('upload_description_placeholder')}
               />
             </div>
 
@@ -589,11 +591,11 @@ const UploadPage = () => {
             <div>
               <label className="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">
                 <FiCalendar className="inline-block w-4 h-4 mr-1 text-purple-500" />
-                날짜 *
+                {t('upload_date_label')}
               </label>
               <input
                 type="date"
-                {...register('memory_date', { required: '날짜를 선택해주세요' })}
+                {...register('memory_date', { required: t('upload_date_required') })}
                 className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
               />
               {errors.memory_date && (
@@ -611,7 +613,7 @@ const UploadPage = () => {
             <div>
               <label className="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">
                 <FiUser className="inline-block w-4 h-4 mr-1 text-purple-500" />
-                함께한 사람
+                {t('upload_people_label')}
               </label>
               <div className="flex flex-wrap gap-2">
                 <motion.button
@@ -634,7 +636,7 @@ const UploadPage = () => {
                       : 'bg-gray-200 text-gray-700 hover:bg-purple-100 dark:bg-gray-700 dark:text-gray-300'
                   }`}
                 >
-                  민호
+                  {t('filter_minho')}
                 </motion.button>
                 <motion.button
                   type="button"
@@ -656,7 +658,7 @@ const UploadPage = () => {
                       : 'bg-gray-200 text-gray-700 hover:bg-pink-100 dark:bg-gray-700 dark:text-gray-300'
                   }`}
                 >
-                  민아
+                  {t('filter_mina')}
                 </motion.button>
                 {people?.filter(p => p.name !== '민호' && p.name !== '민아').map(person => (
                   <motion.button
@@ -689,7 +691,7 @@ const UploadPage = () => {
                   className="px-4 py-2 rounded-full border-2 border-dashed border-purple-300 dark:border-purple-600 text-purple-600 dark:text-purple-400 hover:border-purple-400 dark:hover:border-purple-500 hover:bg-purple-50 dark:hover:bg-purple-900/20 transition-all flex items-center gap-1"
                 >
                   <FiPlus className="w-4 h-4" />
-                  인물 추가
+                  {t('upload_add_person')}
                 </motion.button>
               </div>
             </div>
@@ -698,7 +700,7 @@ const UploadPage = () => {
             <div>
               <label className="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">
                 <FiTag className="inline-block w-4 h-4 mr-1 text-purple-500" />
-                태그
+                {t('upload_tags_label')}
               </label>
               <div className="flex flex-wrap gap-2">
                 {tags?.map(tag => (
@@ -732,7 +734,7 @@ const UploadPage = () => {
                   className="px-3 py-1.5 rounded-full border-2 border-dashed border-purple-300 dark:border-purple-600 text-purple-600 dark:text-purple-400 hover:border-purple-400 dark:hover:border-purple-500 hover:bg-purple-50 dark:hover:bg-purple-900/20 transition-all flex items-center gap-1 text-sm"
                 >
                   <FiPlus className="w-3 h-3" />
-                  태그 추가
+                  {t('upload_add_tag')}
                 </motion.button>
               </div>
             </div>
@@ -746,7 +748,7 @@ const UploadPage = () => {
                 onClick={() => navigate('/memories')}
                 className={styles.secondaryButton}
               >
-                취소
+                {t('btn_cancel')}
               </motion.button>
               <motion.button
                 type="submit"
@@ -755,7 +757,7 @@ const UploadPage = () => {
                 disabled={uploading}
                 className={`${styles.button} disabled:opacity-50 disabled:cursor-not-allowed`}
               >
-                {uploading ? (isEditMode ? '수정 중...' : '업로드 중...') : (isEditMode ? '추억 수정하기' : '추억 추가하기')}
+                {uploading ? (isEditMode ? t('upload_editing') : t('upload_uploading')) : (isEditMode ? t('upload_edit_submit') : t('upload_submit'))}
               </motion.button>
             </div>
 

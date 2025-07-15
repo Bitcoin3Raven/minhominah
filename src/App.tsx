@@ -23,6 +23,7 @@ const InvitePage = lazy(() => import('./pages/InvitePage'));
 const AcceptInvitePage = lazy(() => import('./pages/AcceptInvitePage'));
 const GrowthPage = lazy(() => import('./pages/GrowthPage'));
 const PhotobookCreatorPage = lazy(() => import('./pages/PhotobookCreatorPage'));
+const BackupPage = lazy(() => import('./pages/Backup'));
 
 // Loading component
 const PageLoader = () => (
@@ -109,6 +110,11 @@ function App() {
                   <Route path="/photobook-creator" element={
                     <PrivateRoute>
                       <PhotobookCreatorPage />
+                    </PrivateRoute>
+                  } />
+                  <Route path="/backup" element={
+                    <PrivateRoute>
+                      <BackupPage />
                     </PrivateRoute>
                   } />
                 </Routes>

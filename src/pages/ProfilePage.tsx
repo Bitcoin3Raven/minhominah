@@ -3,6 +3,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { supabase } from '../lib/supabase';
 import { FiUser, FiMail, FiShield, FiEdit2, FiSave, FiX } from 'react-icons/fi';
 import { motion } from 'framer-motion';
+import { useLanguage } from '../contexts/LanguageContext';
 
 interface Profile {
   id: string;
@@ -15,6 +16,7 @@ interface Profile {
 
 const ProfilePage = () => {
   const { user } = useAuth();
+  const { t } = useLanguage();
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
   const [editing, setEditing] = useState(false);
@@ -52,7 +54,7 @@ const ProfilePage = () => {
       });
     } catch (err: any) {
       console.error('Error loading profile:', err);
-      setError('프로필을 불러오는 중 오류가 발생했습니다.');
+      setError(t('profile.loading_error'));
     } finally {
       setLoading(false);
     }
@@ -75,11 +77,11 @@ const ProfilePage = () => {
 
       if (error) throw error;
 
-      setSuccess('프로필이 업데이트되었습니다.');
+      setSuccess(t('profile.update_success'));
       setEditing(false);
       await loadProfile();
     } catch (err: any) {
-      setError('프로필 업데이트 중 오류가 발생했습니다.');
+      setError(t('profile.update_error'));
     } finally {
       setSaving(false);
     }
@@ -87,9 +89,9 @@ const ProfilePage = () => {
 
   const getRoleBadge = (role: string) => {
     const badges = {
-      parent: { bg: 'bg-purple-100 dark:bg-purple-900', text: 'text-purple-700 dark:text-purple-300', label: '부모' },
-      family: { bg: 'bg-blue-100 dark:bg-blue-900', text: 'text-blue-700 dark:text-blue-300', label: '가족' },
-      viewer: { bg: 'bg-gray-100 dark:bg-gray-700', text: 'text-gray-700 dark:text-gray-300', label: '방문자' },
+      parent: { bg: 'bg-purple-100 dark:bg-purple-900', text: 'text-purple-700 dark:text-purple-300', label: t('profile.role_parent') },
+      family: { bg: 'bg-blue-100 dark:bg-blue-900', text: 'text-blue-700 dark:text-blue-300', label: t('profile.role_family') },
+      viewer: { bg: 'bg-gray-100 dark:bg-gray-700', text: 'text-gray-700 dark:text-gray-300', label: t('profile.role_viewer') },
     };
 
     const badge = badges[role as keyof typeof badges] || badges.viewer;
@@ -114,7 +116,7 @@ const ProfilePage = () => {
     return (
       <div className="max-w-2xl mx-auto p-6">
         <div className="bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 rounded-lg p-4">
-          프로필을 찾을 수 없습니다.
+          {t('profile.not_found')}
         </div>
       </div>
     );
@@ -122,7 +124,7 @@ const ProfilePage = () => {
 
   return (
     <div className="max-w-2xl mx-auto">
-      <h1 className="text-3xl font-bold mb-8 text-gray-900 dark:text-white">내 프로필</h1>
+      <h1 className="text-3xl font-bold mb-8 text-gray-900 dark:text-white">{t('profile.title')}</h1>
 
       {error && (
         <motion.div
@@ -148,7 +150,7 @@ const ProfilePage = () => {
         {/* 기본 정보 섹션 */}
         <div className="mb-6">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-xl font-semibold text-gray-900 dark:text-white">기본 정보</h2>
+            <h2 className="text-xl font-semibold text-gray-900 dark:text-white">{t('profile.basic_info')}</h2>
             {!editing && (
               <button
                 onClick={() => setEditing(true)}
@@ -164,7 +166,7 @@ const ProfilePage = () => {
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                 <FiMail className="inline-block w-4 h-4 mr-1" />
-                이메일
+                {t('profile.email')}
               </label>
               <p className="text-gray-900 dark:text-white">{user?.email}</p>
             </div>
@@ -173,7 +175,7 @@ const ProfilePage = () => {
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                 <FiUser className="inline-block w-4 h-4 mr-1" />
-                사용자명
+                {t('profile.username')}
               </label>
               {editing ? (
                 <input
@@ -181,11 +183,11 @@ const ProfilePage = () => {
                   value={formData.username}
                   onChange={(e) => setFormData({ ...formData, username: e.target.value })}
                   className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  placeholder="사용자명 입력"
+                  placeholder={t('profile.username_placeholder')}
                 />
               ) : (
                 <p className="text-gray-900 dark:text-white">
-                  {profile.username || '설정되지 않음'}
+                  {profile.username || t('profile.not_set')}
                 </p>
               )}
             </div>
@@ -193,7 +195,7 @@ const ProfilePage = () => {
             {/* 이름 */}
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                이름
+                {t('profile.full_name')}
               </label>
               {editing ? (
                 <input
@@ -201,11 +203,11 @@ const ProfilePage = () => {
                   value={formData.full_name}
                   onChange={(e) => setFormData({ ...formData, full_name: e.target.value })}
                   className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  placeholder="이름 입력"
+                  placeholder={t('profile.full_name_placeholder')}
                 />
               ) : (
                 <p className="text-gray-900 dark:text-white">
-                  {profile.full_name || '설정되지 않음'}
+                  {profile.full_name || t('profile.not_set')}
                 </p>
               )}
             </div>
@@ -213,15 +215,15 @@ const ProfilePage = () => {
             {/* 역할 */}
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                역할
+                {t('profile.role')}
               </label>
               <div className="mt-1">
                 {getRoleBadge(profile.role)}
               </div>
               <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
-                {profile.role === 'parent' && '모든 기능에 접근할 수 있습니다.'}
-                {profile.role === 'family' && '추억을 보고 댓글을 달 수 있습니다.'}
-                {profile.role === 'viewer' && '추억을 볼 수만 있습니다.'}
+                {profile.role === 'parent' && t('profile.role_parent_desc')}
+                {profile.role === 'family' && t('profile.role_family_desc')}
+                {profile.role === 'viewer' && t('profile.role_viewer_desc')}
               </p>
             </div>
           </div>
@@ -240,7 +242,7 @@ const ProfilePage = () => {
                 className="px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
               >
                 <FiX className="inline-block w-4 h-4 mr-1" />
-                취소
+                {t('profile.cancel')}
               </button>
               <button
                 onClick={handleSave}
@@ -248,7 +250,7 @@ const ProfilePage = () => {
                 className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
               >
                 <FiSave className="inline-block w-4 h-4 mr-1" />
-                {saving ? '저장 중...' : '저장'}
+                {saving ? t('profile.saving') : t('profile.save')}
               </button>
             </div>
           )}
@@ -256,12 +258,12 @@ const ProfilePage = () => {
 
         {/* 계정 정보 */}
         <div className="border-t border-gray-200 dark:border-gray-700 pt-6">
-          <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">계정 정보</h3>
+          <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{t('profile.account_info')}</h3>
           <p className="text-sm text-gray-600 dark:text-gray-400">
-            가입일: {new Date(profile.created_at).toLocaleDateString('ko-KR')}
+            {t('profile.joined_date')}: {new Date(profile.created_at).toLocaleDateString('ko-KR')}
           </p>
           <p className="text-sm text-gray-600 dark:text-gray-400">
-            마지막 수정: {new Date(profile.updated_at).toLocaleDateString('ko-KR')}
+            {t('profile.last_updated')}: {new Date(profile.updated_at).toLocaleDateString('ko-KR')}
           </p>
         </div>
       </div>

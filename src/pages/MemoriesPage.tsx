@@ -9,6 +9,7 @@ import { useInfiniteScroll } from '../hooks/useInfiniteScroll';
 import { highlightText } from '../utils/searchHighlight';
 import OptimizedImage from '../components/OptimizedImage';
 import { useAuth } from '../contexts/AuthContext';
+import { useLanguage } from '../contexts/LanguageContext';
 
 interface Memory {
   id: string;
@@ -69,6 +70,7 @@ const MemoriesPage = () => {
   const loadMoreRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { t } = useLanguage();
   const queryClient = useQueryClient();
   
   const [selectedPerson, setSelectedPerson] = useState<string>(personParam || 'all');
@@ -269,7 +271,7 @@ const MemoriesPage = () => {
     },
     onError: (error) => {
       console.error('삭제 실패:', error);
-      alert('삭제 중 오류가 발생했습니다.');
+      alert(t('memories.deleteError'));
     }
   });
 
@@ -332,12 +334,12 @@ const MemoriesPage = () => {
   if (isError) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[400px]">
-        <p className="text-red-600 dark:text-red-400 mb-4">추억을 불러오는 중 오류가 발생했습니다.</p>
+        <p className="text-red-600 dark:text-red-400 mb-4">{t('memories.error')}</p>
         <button
           onClick={() => window.location.reload()}
           className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
         >
-          새로고침
+          {t('memories.refresh')}
         </button>
       </div>
     );
@@ -348,7 +350,7 @@ const MemoriesPage = () => {
       <div className="mb-8">
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6">
           <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-4 sm:mb-0">
-            추억 갤러리
+            {t('memories.title')}
           </h1>
           <div className="flex items-center space-x-2">
             <button
@@ -377,14 +379,14 @@ const MemoriesPage = () => {
               disabled={filteredMemories?.length === 0}
             >
               <FiPlay className="w-5 h-5" />
-              <span>슬라이드쇼</span>
+              <span>{t('memories.slideshow')}</span>
             </button>
             <button
               onClick={() => setShowFilters(!showFilters)}
               className="relative flex items-center space-x-2 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700"
             >
               <FiFilter className="w-5 h-5" />
-              <span>필터</span>
+              <span>{t('memories.filter')}</span>
               {activeFilterCount > 0 && (
                 <span className="absolute -top-2 -right-2 bg-blue-600 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
                   {activeFilterCount}
@@ -399,7 +401,7 @@ const MemoriesPage = () => {
           <FiSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
           <input
             type="text"
-            placeholder="추억 검색..."
+            placeholder={t('memories.searchPlaceholder')}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
@@ -409,7 +411,7 @@ const MemoriesPage = () => {
         {/* 나이별 필터 */}
         <div className="mb-6">
           <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-            나이별 보기
+            {t('memories.ageFilter')}
           </label>
           <div className="flex flex-wrap gap-2">
             <button
@@ -420,7 +422,7 @@ const MemoriesPage = () => {
                   : 'bg-gray-200 text-gray-700 hover:bg-gray-300 dark:bg-gray-600 dark:text-gray-300 dark:hover:bg-gray-500'
               }`}
             >
-              전체
+              {t('memories.all')}
             </button>
             {[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20].map((age) => {
               // 현재 날짜 기준으로 민호와 민아의 나이 계산
@@ -428,7 +430,7 @@ const MemoriesPage = () => {
               const minhoAge = calculateAge(BIRTH_DATES['민호'], today);
               const minaAge = calculateAge(BIRTH_DATES['민아'], today);
               
-              let ageText = `${age}세`;
+              let ageText = `${age}${t('memories.age')}`;
               let emoji = '';
               let isMinhoAge = age === minhoAge;
               let isMinaAge = age === minaAge;
@@ -484,16 +486,14 @@ const MemoriesPage = () => {
                 {/* 인물 필터 */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    인물
+                    {t('memories.personFilter')}
                   </label>
                   <select
                     value={selectedPerson}
                     onChange={(e) => setSelectedPerson(e.target.value)}
                     className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                   >
-                    <option value="all">전체</option>
-                    <option value="민호">민호</option>
-                    <option value="민아">민아</option>
+                    <option value="all">{t('memories.all')}</option>
                     {people?.map(person => (
                       <option key={person.id} value={person.name}>
                         {person.name}
@@ -505,17 +505,17 @@ const MemoriesPage = () => {
                 {/* 연도 필터 */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    연도
+                    {t('memories.yearFilter')}
                   </label>
                   <select
                     value={selectedYear}
                     onChange={(e) => setSelectedYear(e.target.value)}
                     className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                   >
-                    <option value="all">전체</option>
+                    <option value="all">{t('memories.all')}</option>
                     {yearOptions.map(year => (
                       <option key={year} value={year}>
-                        {year}년
+                        {year}{t('memories.year')}
                       </option>
                     ))}
                   </select>
@@ -524,7 +524,7 @@ const MemoriesPage = () => {
                 {/* 태그 필터 */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    태그
+                    {t('memories.tagFilter')}
                   </label>
                   <div className="flex flex-wrap gap-2">
                     {tags?.map(tag => (
@@ -559,7 +559,7 @@ const MemoriesPage = () => {
                     className="flex items-center space-x-2 px-4 py-2 text-sm text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-200"
                   >
                     <FiX className="w-4 h-4" />
-                    <span>필터 초기화</span>
+                    <span>{t('memories.filterReset')}</span>
                   </button>
                 </div>
               )}
@@ -569,7 +569,7 @@ const MemoriesPage = () => {
 
         {/* 결과 요약 */}
         <div className="mb-4 text-sm text-gray-600 dark:text-gray-400">
-          {filteredMemories?.length || 0}개의 추억
+          {filteredMemories?.length || 0}{t('memories.count')}
         </div>
       </div>
 
@@ -607,7 +607,7 @@ const MemoriesPage = () => {
                         className="flex items-center w-full px-3 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
                       >
                         <FiEdit2 className="w-4 h-4 mr-2" />
-                        수정
+                        {t('memories.edit')}
                       </button>
                       <button
                         onClick={(e) => {
@@ -617,7 +617,7 @@ const MemoriesPage = () => {
                         className="flex items-center w-full px-3 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20"
                       >
                         <FiTrash2 className="w-4 h-4 mr-2" />
-                        삭제
+                        {t('memories.delete')}
                       </button>
                     </div>
                   )}
@@ -655,7 +655,7 @@ const MemoriesPage = () => {
                     {formatDate(memory.memory_date)}
                   </div>
                   {memory.media_files.length > 1 && (
-                    <span>{memory.media_files.length}개 사진</span>
+                    <span>{memory.media_files.length}{t('memories.photos')}</span>
                   )}
                 </div>
                 {memory.memory_tags?.length > 0 && (
@@ -716,7 +716,7 @@ const MemoriesPage = () => {
                     {formatDate(memory.memory_date)}
                   </div>
                   {memory.media_files.length > 1 && (
-                    <span>{memory.media_files.length}개 사진</span>
+                    <span>{memory.media_files.length}{t('memories.photos')}</span>
                   )}
                   {memory.memory_people?.length > 0 && (
                     <span>{memory.memory_people.map(mp => mp.people.name).join(', ')}</span>
@@ -758,8 +758,8 @@ const MemoriesPage = () => {
         <div className="text-center py-20">
           <p className="text-gray-500 dark:text-gray-400">
             {searchQuery || selectedPerson !== 'all' || selectedYear !== 'all' || selectedTags.length > 0
-              ? '검색 결과가 없습니다.'
-              : '아직 추억이 없습니다.'}
+              ? t('memories.noResults')
+              : t('memories.noMemories')}
           </p>
         </div>
       )}
@@ -769,12 +769,12 @@ const MemoriesPage = () => {
         {isFetchingNextPage && (
           <div className="flex items-center space-x-2">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-            <span className="text-gray-600 dark:text-gray-400">더 많은 추억을 불러오는 중...</span>
+            <span className="text-gray-600 dark:text-gray-400">{t('memories.loadingMore')}</span>
           </div>
         )}
         {!hasNextPage && filteredMemories && filteredMemories.length > 0 && (
           <p className="text-gray-500 dark:text-gray-400 text-sm">
-            모든 추억을 불러왔습니다
+            {t('memories.allLoaded')}
           </p>
         )}
       </div>
@@ -797,10 +797,10 @@ const MemoriesPage = () => {
               onClick={(e) => e.stopPropagation()}
             >
               <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-                추억을 삭제하시겠습니까?
+                {t('memories.deleteConfirmTitle')}
               </h3>
               <p className="text-gray-600 dark:text-gray-400 mb-6">
-                "{memoryToDelete.title}" 추억을 삭제하면 복구할 수 없습니다.
+                "{memoryToDelete.title}" {t('memories.deleteConfirmMessage')}
               </p>
               <div className="flex justify-end space-x-3">
                 <button
@@ -808,7 +808,7 @@ const MemoriesPage = () => {
                   className="px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"
                   disabled={deleteMutation.isPending}
                 >
-                  취소
+                  {t('memories.cancel')}
                 </button>
                 <button
                   onClick={handleDeleteConfirm}
@@ -818,10 +818,10 @@ const MemoriesPage = () => {
                   {deleteMutation.isPending ? (
                     <span className="flex items-center">
                       <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                      삭제 중...
+                      {t('memories.deleting')}
                     </span>
                   ) : (
-                    '삭제'
+                    t('memories.delete')
                   )}
                 </button>
               </div>

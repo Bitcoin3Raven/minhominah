@@ -1,9 +1,11 @@
 import { useState } from 'react';
 import { FiTrash2, FiRefreshCw, FiAlertCircle } from 'react-icons/fi';
 import { useAuth } from '../contexts/AuthContext';
+import { useLanguage } from '../contexts/LanguageContext';
 
 const TrashPage = () => {
   const { user } = useAuth();
+  const { t } = useLanguage();
   const [trashedItems, setTrashedItems] = useState([]);
   const [selectedItems, setSelectedItems] = useState<Set<string>>(new Set());
 
@@ -32,7 +34,7 @@ const TrashPage = () => {
   };
 
   const deleteSelectedPermanently = async () => {
-    if (confirm('선택한 항목을 영구적으로 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.')) {
+    if (confirm(t('trash.confirm_permanent_delete'))) {
       // 영구 삭제 로직 구현
       console.log('Permanently deleting items:', Array.from(selectedItems));
     }
@@ -41,10 +43,10 @@ const TrashPage = () => {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">휴지통</h1>
+        <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">{t('trash.title')}</h1>
         <div className="flex items-center space-x-2 text-sm text-gray-600 dark:text-gray-400">
           <FiAlertCircle className="w-4 h-4" />
-          <span>휴지통의 항목은 30일 후 자동으로 영구 삭제됩니다.</span>
+          <span>{t('trash.auto_delete_notice')}</span>
         </div>
       </div>
 
@@ -55,16 +57,16 @@ const TrashPage = () => {
               onClick={selectAll}
               className="text-sm text-blue-600 hover:text-blue-700 dark:text-blue-400"
             >
-              모두 선택
+              {t('trash.select_all')}
             </button>
             <button
               onClick={deselectAll}
               className="text-sm text-blue-600 hover:text-blue-700 dark:text-blue-400"
             >
-              선택 해제
+              {t('trash.deselect_all')}
             </button>
             <span className="text-sm text-gray-600 dark:text-gray-400">
-              {selectedItems.size}개 선택됨
+              {selectedItems.size}{t('trash.selected_count')}
             </span>
           </div>
           {selectedItems.size > 0 && (
@@ -74,14 +76,14 @@ const TrashPage = () => {
                 className="flex items-center space-x-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
               >
                 <FiRefreshCw className="w-4 h-4" />
-                <span>복원</span>
+                <span>{t('trash.restore')}</span>
               </button>
               <button
                 onClick={deleteSelectedPermanently}
                 className="flex items-center space-x-2 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
               >
                 <FiTrash2 className="w-4 h-4" />
-                <span>영구 삭제</span>
+                <span>{t('trash.delete_permanently')}</span>
               </button>
             </div>
           )}
@@ -92,10 +94,10 @@ const TrashPage = () => {
         <div className="text-center py-20">
           <FiTrash2 className="w-24 h-24 mx-auto text-gray-300 dark:text-gray-600 mb-4" />
           <h2 className="text-xl font-semibold text-gray-600 dark:text-gray-400 mb-2">
-            휴지통이 비어있습니다
+            {t('trash.empty_title')}
           </h2>
           <p className="text-gray-500 dark:text-gray-500">
-            삭제된 항목이 여기에 표시됩니다.
+            {t('trash.empty_desc')}
           </p>
         </div>
       ) : (
@@ -135,10 +137,10 @@ const TrashPage = () => {
                   {item.title}
                 </h3>
                 <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">
-                  삭제일: {new Date(item.deletedAt).toLocaleDateString('ko-KR')}
+                  {t('trash.deleted_date')}: {new Date(item.deletedAt).toLocaleDateString('ko-KR')}
                 </p>
                 <p className="text-xs text-red-600 dark:text-red-400">
-                  {Math.ceil((new Date(item.permanentDeleteAt).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24))}일 후 영구 삭제
+                  {Math.ceil((new Date(item.permanentDeleteAt).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24))}{t('trash.permanent_delete_days')}
                 </p>
               </div>
             </div>

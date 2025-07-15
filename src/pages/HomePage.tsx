@@ -6,10 +6,12 @@ import { FiCamera, FiHeart, FiUsers, FiCalendar } from 'react-icons/fi';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
 import { useLegacyStyles } from '../hooks/useLegacyStyles';
+import { useLanguage } from '../contexts/LanguageContext';
 
 const HomePage = () => {
   const { user } = useAuth();
   const styles = useLegacyStyles();
+  const { t } = useLanguage();
   const [stats, setStats] = useState({
     totalMemories: 0,
     totalPhotos: 0,
@@ -77,7 +79,7 @@ const HomePage = () => {
             className="text-center"
           >
             <h1 className="text-3xl md:text-5xl font-bold mb-2" style={{ fontFamily: 'Pretendard' }}>
-              <span style={{ color: '#333' }}>민호와 민아의</span>
+              <span style={{ color: '#333' }}>{t('hero_title')}</span>
               <br />
               <span 
                 className="inline-block"
@@ -89,12 +91,11 @@ const HomePage = () => {
                   fontSize: '1.1em'
                 }}
               >
-                소중한 순간들
+                {t('hero_subtitle')}
               </span>
             </h1>
             <p className="text-lg max-w-2xl mx-auto mb-8" style={{ color: '#666', fontFamily: 'Pretendard' }}>
-              우리 아이들의 성장 이야기를 기록하고,<br className="hidden sm:block" />
-              추억을 간직하며, 사랑을 나누는 공간입니다.
+              {t('hero_description')}
             </p>
 
             <div className="flex flex-col sm:flex-row justify-center gap-3">
@@ -106,7 +107,7 @@ const HomePage = () => {
                   textDecoration: 'none'
                 }}
               >
-                추억 둘러보기
+                {t('hero_view_memories')}
               </Link>
               {user ? (
                 <Link
@@ -118,7 +119,7 @@ const HomePage = () => {
                     textDecoration: 'none'
                   }}
                 >
-                  추억 추가하기
+                  {t('hero_add_memory')}
                 </Link>
               ) : (
                 <Link
@@ -130,7 +131,7 @@ const HomePage = () => {
                     textDecoration: 'none'
                   }}
                 >
-                  추억 추가하기
+                  {t('hero_add_memory')}
                 </Link>
               )}
             </div>
@@ -154,7 +155,7 @@ const HomePage = () => {
                 </div>
               </div>
               <p className="text-3xl font-bold text-gray-800 mb-2">{stats.totalMemories}</p>
-              <p className="text-gray-600">전체 추억</p>
+              <p className="text-gray-600">{t('stat_total_memories')}</p>
             </div>
 
             <div className="card p-6 text-center">
@@ -164,7 +165,7 @@ const HomePage = () => {
                 </div>
               </div>
               <p className="text-3xl font-bold text-gray-800 mb-2">{stats.totalPhotos}</p>
-              <p className="text-gray-600">사진</p>
+              <p className="text-gray-600">{t('stat_photos')}</p>
             </div>
 
             <div className="card p-6 text-center">
@@ -174,7 +175,7 @@ const HomePage = () => {
                 </div>
               </div>
               <p className="text-3xl font-bold text-gray-800 mb-2">0</p>
-              <p className="text-gray-600">동영상</p>
+              <p className="text-gray-600">{t('stat_videos')}</p>
             </div>
 
             <div className="card p-6 text-center">
@@ -184,7 +185,7 @@ const HomePage = () => {
                 </div>
               </div>
               <p className="text-3xl font-bold text-gray-800 mb-2">0</p>
-              <p className="text-gray-600">기념일</p>
+              <p className="text-gray-600">{t('stat_milestones')}</p>
             </div>
           </motion.div>
         </div>
@@ -199,7 +200,7 @@ const HomePage = () => {
             transition={{ duration: 0.5, delay: 0.3 }}
             className="text-3xl font-bold text-center mb-12 text-gray-800"
           >
-            우리 아이들
+            {t('section_our_children')}
           </motion.h2>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
@@ -211,15 +212,15 @@ const HomePage = () => {
             >
               <div className="h-48 bg-gradient-to-br from-blue-400 to-blue-600" />
               <div className="p-6">
-                <h3 className="text-2xl font-bold mb-3 text-gray-800">민호</h3>
+                <h3 className="text-2xl font-bold mb-3 text-gray-800">{t('child_minho_title')}</h3>
                 <p className="text-gray-600">
-                  우리 집의 든든한 첫째, 민호의 성장 이야기
+                  {t('child_minho_desc')}
                 </p>
                 <Link
                   to="/memories?person=민호"
                   className="inline-flex items-center mt-4 text-blue-600 hover:text-blue-700 font-medium"
                 >
-                  민호의 추억 보기 →
+                  {t('child_minho_view')} →
                 </Link>
               </div>
             </motion.div>
@@ -232,15 +233,15 @@ const HomePage = () => {
             >
               <div className="h-48 bg-gradient-to-br from-pink-400 to-pink-600" />
               <div className="p-6">
-                <h3 className="text-2xl font-bold mb-3 text-gray-800">민아</h3>
+                <h3 className="text-2xl font-bold mb-3 text-gray-800">{t('child_mina_title')}</h3>
                 <p className="text-gray-600">
-                  사랑스러운 막내, 민아의 귀여운 일상
+                  {t('child_mina_desc')}
                 </p>
                 <Link
                   to="/memories?person=민아"
                   className="inline-flex items-center mt-4 text-pink-600 hover:text-pink-700 font-medium"
                 >
-                  민아의 추억 보기 →
+                  {t('child_mina_view')} →
                 </Link>
               </div>
             </motion.div>
@@ -258,7 +259,7 @@ const HomePage = () => {
               transition={{ duration: 0.5, delay: 0.6 }}
               className="text-3xl font-bold text-center mb-12 text-gray-800"
             >
-              최근 추억
+              {t('section_recent_memories')}
             </motion.h2>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -293,7 +294,7 @@ const HomePage = () => {
                 to="/memories"
                 className="inline-flex items-center text-primary hover:text-primary-dark font-medium"
               >
-                모든 추억 보기 →
+                {t('view_all_memories')} →
               </Link>
             </div>
           </div>
@@ -305,10 +306,10 @@ const HomePage = () => {
         <div className="container mx-auto px-4">
           <div className="text-center">
             <h2 className="text-3xl font-bold mb-4 text-gray-800">
-              오늘의 소중한 순간을 기록해보세요
+              {t('cta_title')}
             </h2>
             <p className="text-lg text-gray-600 mb-8">
-              시간이 지나도 빛나는 추억들을 민호민아닷컴에 담아두세요
+              {t('cta_desc')}
             </p>
             {user ? (
               <Link
@@ -317,7 +318,7 @@ const HomePage = () => {
                 style={{ padding: '14px 40px' }}
               >
                 <FiCamera className="mr-2" />
-                추억 업로드하기
+                {t('btn_upload_memory')}
               </Link>
             ) : (
               <Link
@@ -325,7 +326,7 @@ const HomePage = () => {
                 className="btn-primary inline-flex items-center justify-center text-lg"
                 style={{ padding: '14px 40px' }}
               >
-                시작하기
+                {t('btn_start')}
               </Link>
             )}
           </div>

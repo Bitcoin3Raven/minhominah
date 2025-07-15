@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { FiCamera, FiUsers, FiCalendar, FiHeart, FiTag, FiTrendingUp } from 'react-icons/fi';
 import { motion } from 'framer-motion';
 import { supabase } from '../lib/supabase';
+import { useLanguage } from '../contexts/LanguageContext';
 import { 
   Chart as ChartJS, 
   CategoryScale, 
@@ -41,12 +42,13 @@ interface Statistics {
 }
 
 const StatisticsPage = () => {
+  const { t } = useLanguage();
   const [stats, setStats] = useState<Statistics>({
     totalMemories: 0,
     totalPhotos: 0,
     totalVideos: 0,
     totalMembers: 2, // 민호, 민아
-    mostActiveMonth: '아직 없음',
+    mostActiveMonth: t('statistics.noneYet'),
     monthlyData: [],
     personData: [],
     tagData: []
@@ -128,7 +130,7 @@ const StatisticsPage = () => {
         totalMembers: 2,
         mostActiveMonth: mostActive.month ? 
           new Date(mostActive.month + '-01').toLocaleDateString('ko-KR', { year: 'numeric', month: 'long' }) : 
-          '아직 없음',
+          t('statistics.noneYet'),
         monthlyData,
         personData,
         tagData
@@ -178,7 +180,7 @@ const StatisticsPage = () => {
       return date.toLocaleDateString('ko-KR', { month: 'short' });
     }),
     datasets: [{
-      label: '추억 수',
+      label: t('statistics.memoryCount'),
       data: stats.monthlyData.map(d => d.count),
       borderColor: 'rgb(147, 51, 234)',
       backgroundColor: 'rgba(147, 51, 234, 0.1)',
@@ -252,41 +254,41 @@ const StatisticsPage = () => {
         </div>
       </div>
 
-      <div className="space-y-6">
+      <div className="space-y-6 max-w-7xl mx-auto pt-8">
         <motion.h1 
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           className="text-3xl font-bold text-gray-900 dark:text-white"
         >
-          통계 대시보드
+          {t('statistics.title')}
         </motion.h1>
 
         {/* 통계 카드 */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           <StatCard
             icon={FiHeart}
-            title="전체 추억"
+            title={t('statistics.totalMemories')}
             value={stats.totalMemories}
             color="bg-gradient-to-r from-pink-500 to-rose-500"
             delay={0.1}
           />
           <StatCard
             icon={FiCamera}
-            title="사진"
+            title={t('statistics.photos')}
             value={stats.totalPhotos}
             color="bg-gradient-to-r from-blue-500 to-cyan-500"
             delay={0.2}
           />
           <StatCard
             icon={FiTrendingUp}
-            title="동영상"
+            title={t('statistics.videos')}
             value={stats.totalVideos}
             color="bg-gradient-to-r from-green-500 to-emerald-500"
             delay={0.3}
           />
           <StatCard
             icon={FiCalendar}
-            title="가장 활발한 달"
+            title={t('statistics.mostActiveMonth')}
             value={stats.mostActiveMonth}
             color="bg-gradient-to-r from-purple-500 to-indigo-500"
             delay={0.4}
@@ -302,7 +304,7 @@ const StatisticsPage = () => {
             className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-xl shadow-lg p-6 border border-gray-200/50 dark:border-gray-700/50"
           >
             <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-              월별 추억 통계
+              {t('statistics.monthlyStats')}
             </h2>
             {stats.monthlyData.length > 0 ? (
               <div className="h-64">
@@ -310,7 +312,7 @@ const StatisticsPage = () => {
               </div>
             ) : (
               <div className="h-64 flex items-center justify-center text-gray-500 dark:text-gray-400">
-                아직 데이터가 없습니다
+                {t('statistics.noData')}
               </div>
             )}
           </motion.div>
@@ -322,7 +324,7 @@ const StatisticsPage = () => {
             className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-xl shadow-lg p-6 border border-gray-200/50 dark:border-gray-700/50"
           >
             <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-              인물별 통계
+              {t('statistics.personStats')}
             </h2>
             {stats.personData.length > 0 ? (
               <div className="h-64">
@@ -330,7 +332,7 @@ const StatisticsPage = () => {
               </div>
             ) : (
               <div className="h-64 flex items-center justify-center text-gray-500 dark:text-gray-400">
-                아직 데이터가 없습니다
+                {t('statistics.noData')}
               </div>
             )}
           </motion.div>
@@ -345,7 +347,7 @@ const StatisticsPage = () => {
         >
           <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center">
             <FiTag className="mr-2" />
-            태그 클라우드
+            {t('statistics.tagCloud')}
           </h2>
           {stats.tagData.length > 0 ? (
             <div className="flex flex-wrap gap-2">
@@ -367,7 +369,7 @@ const StatisticsPage = () => {
             </div>
           ) : (
             <div className="h-32 flex items-center justify-center text-gray-500 dark:text-gray-400">
-              아직 태그가 없습니다
+              {t('statistics.noTags')}
             </div>
           )}
         </motion.div>

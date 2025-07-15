@@ -1,16 +1,18 @@
 import React, { useState } from 'react';
 import { FiPlus, FiFolder, FiLock, FiGlobe } from 'react-icons/fi';
+import { useLanguage } from '../contexts/LanguageContext';
 
 const AlbumsPage = () => {
+  const { t } = useLanguage();
   const [albums, setAlbums] = useState([]);
 
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
-        <h1 className="text-3xl font-bold text-gray-900 dark:text-white">앨범</h1>
+        <h1 className="text-3xl font-bold text-gray-900 dark:text-white">{t('albums.title')}</h1>
         <button className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
           <FiPlus className="w-5 h-5" />
-          <span>새 앨범</span>
+          <span>{t('albums.newAlbum')}</span>
         </button>
       </div>
 
@@ -18,10 +20,10 @@ const AlbumsPage = () => {
         <div className="text-center py-20">
           <FiFolder className="w-24 h-24 mx-auto text-gray-300 dark:text-gray-600 mb-4" />
           <h2 className="text-xl font-semibold text-gray-600 dark:text-gray-400 mb-2">
-            아직 앨범이 없습니다
+            {t('albums.noAlbums')}
           </h2>
           <p className="text-gray-500 dark:text-gray-500">
-            첫 번째 앨범을 만들어보세요!
+            {t('albums.createFirst')}
           </p>
         </div>
       ) : (
@@ -56,7 +58,7 @@ const AlbumsPage = () => {
                   )}
                 </div>
                 <p className="text-gray-600 dark:text-gray-400 text-sm">
-                  {album.memories?.length || 0}개의 추억
+                  {album.memories?.length || 0}{t('albums.memoriesCount')}
                 </p>
               </div>
             </div>
