@@ -1,13 +1,14 @@
-import { useState, useRef, useMemo } from 'react';
-import { useInfiniteQuery, useQuery } from '@tanstack/react-query';
+import { useState, useRef, useMemo, useEffect } from 'react';
+import { useInfiniteQuery, useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useSearchParams, Link } from 'react-router-dom';
-import { FiFilter, FiSearch, FiGrid, FiList, FiCalendar, FiTag, FiX } from 'react-icons/fi';
+import { useSearchParams, Link, useNavigate } from 'react-router-dom';
+import { FiFilter, FiSearch, FiGrid, FiList, FiCalendar, FiTag, FiX, FiMoreVertical, FiEdit2, FiTrash2, FiPlay } from 'react-icons/fi';
 import { supabase } from '../lib/supabase';
 import { useDebounce } from '../hooks/useDebounce';
 import { useInfiniteScroll } from '../hooks/useInfiniteScroll';
 import { highlightText } from '../utils/searchHighlight';
 import OptimizedImage from '../components/OptimizedImage';
+import { useAuth } from '../contexts/AuthContext';
 
 interface Memory {
   id: string;
@@ -15,6 +16,7 @@ interface Memory {
   description: string | null;
   memory_date: string;
   created_at: string;
+  user_id: string;
   media_files: MediaFile[];
   memory_people: MemoryPerson[];
   memory_tags: MemoryTag[];
@@ -43,10 +45,31 @@ interface MemoryTag {
 
 const PAGE_SIZE = 12; // 한 페이지에 표시할 메모리 수
 
+// 민호와 민아의 생년월일
+const BIRTH_DATES = {
+  '민호': new Date('2018-03-18'), // 민호 생년월일
+  '민아': new Date('2019-08-03')  // 민아 생년월일
+};
+
+// 특정 날짜 기준으로 나이 계산
+const calculateAge = (birthDate: Date, targetDate: Date) => {
+  const age = targetDate.getFullYear() - birthDate.getFullYear();
+  const monthDiff = targetDate.getMonth() - birthDate.getMonth();
+  const dayDiff = targetDate.getDate() - birthDate.getDate();
+  
+  if (monthDiff < 0 || (monthDiff === 0 && dayDiff < 0)) {
+    return age - 1;
+  }
+  return age;
+};
+
 const MemoriesPage = () => {
   const [searchParams] = useSearchParams();
   const personParam = searchParams.get('person');
   const loadMoreRef = useRef<HTMLDivElement>(null);
+  const navigate = useNavigate();
+  const { user } = useAuth();
+  const queryClient = useQueryClient();
   
   const [selectedPerson, setSelectedPerson] = useState<string>(personParam || 'all');
   const [selectedYear, setSelectedYear] = useState<string>('all');
@@ -54,6 +77,12 @@ const MemoriesPage = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [showFilters, setShowFilters] = useState(false);
+  const [showDropdown, setShowDropdown] = useState<string | null>(null);
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [memoryToDelete, setMemoryToDelete] = useState<Memory | null>(null);
+  const [selectedAge, setSelectedAge] = useState<number | 'all'>('all'); // 나이별 필터
+  const [showSlideshow, setShowSlideshow] = useState(false); // 슬라이드쇼
+  const [slideshowIndex, setSlideshowIndex] = useState(0); // 슬라이드쇼 인덱스
   
   // 디바운스된 검색어
   const debouncedSearchQuery = useDebounce(searchQuery, 300);
@@ -63,7 +92,8 @@ const MemoriesPage = () => {
     (selectedPerson !== 'all' ? 1 : 0) +
     (selectedYear !== 'all' ? 1 : 0) +
     (selectedTags.length > 0 ? selectedTags.length : 0) +
-    (searchQuery ? 1 : 0);
+    (searchQuery ? 1 : 0) +
+    (selectedAge !== 'all' ? 1 : 0);
     
   // 필터 초기화 함수
   const resetFilters = () => {
@@ -71,6 +101,7 @@ const MemoriesPage = () => {
     setSelectedYear('all');
     setSelectedTags([]);
     setSearchQuery('');
+    setSelectedAge('all');
   };
 
   // 필터 옵션 데이터 로드
@@ -168,6 +199,18 @@ const MemoriesPage = () => {
       if (!hasAllTags) return false;
     }
 
+    // 나이별 필터
+    if (selectedAge !== 'all') {
+      const memoryDate = new Date(memory.memory_date);
+      const hasPerson = memory.memory_people?.some(mp => {
+        const birthDate = BIRTH_DATES[mp.people.name as keyof typeof BIRTH_DATES];
+        if (!birthDate) return false;
+        const ageAtMemory = calculateAge(birthDate, memoryDate);
+        return ageAtMemory === selectedAge;
+      });
+      if (!hasPerson) return false;
+    }
+
     // 검색어 필터
     if (searchQuery) {
       const query = searchQuery.toLowerCase();
@@ -207,6 +250,76 @@ const MemoriesPage = () => {
       day: 'numeric'
     });
   };
+
+  // 삭제 mutation
+  const deleteMutation = useMutation({
+    mutationFn: async (memoryId: string) => {
+      const { error } = await supabase
+        .from('memories')
+        .delete()
+        .eq('id', memoryId)
+        .eq('user_id', user?.id); // 본인 것만 삭제 가능
+        
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['memories-infinite'] });
+      setDeleteModalOpen(false);
+      setMemoryToDelete(null);
+    },
+    onError: (error) => {
+      console.error('삭제 실패:', error);
+      alert('삭제 중 오류가 발생했습니다.');
+    }
+  });
+
+  // 수정 페이지로 이동
+  const handleEdit = (memory: Memory) => {
+    navigate(`/upload?edit=${memory.id}`);
+  };
+
+  // 삭제 확인
+  const handleDeleteClick = (memory: Memory) => {
+    setMemoryToDelete(memory);
+    setDeleteModalOpen(true);
+  };
+
+  // 삭제 실행
+  const handleDeleteConfirm = () => {
+    if (memoryToDelete) {
+      deleteMutation.mutate(memoryToDelete.id);
+    }
+  };
+
+  // 드롭다운 토글
+  const toggleDropdown = (memoryId: string) => {
+    setShowDropdown(showDropdown === memoryId ? null : memoryId);
+  };
+
+  // 외부 클릭시 드롭다운 닫기
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (showDropdown && !(event.target as HTMLElement).closest('.dropdown-menu')) {
+        setShowDropdown(null);
+      }
+    };
+
+    document.addEventListener('click', handleClickOutside);
+    return () => document.removeEventListener('click', handleClickOutside);
+  }, [showDropdown]);
+
+  // 슬라이드쇼 자동 재생
+  useEffect(() => {
+    if (!showSlideshow || !filteredMemories || filteredMemories.length === 0) return;
+
+    const interval = setInterval(() => {
+      setSlideshowIndex((prev) => 
+        prev === filteredMemories.length - 1 ? 0 : prev + 1
+      );
+    }, 3000); // 3초마다 자동 전환
+
+    return () => clearInterval(interval);
+  }, [showSlideshow, filteredMemories, slideshowIndex]);
 
   if (isLoading) {
     return (
@@ -259,6 +372,14 @@ const MemoriesPage = () => {
               <FiList className="w-5 h-5" />
             </button>
             <button
+              onClick={() => setShowSlideshow(true)}
+              className="flex items-center space-x-2 px-4 py-2 bg-gray-100 dark:bg-gray-700 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600"
+              disabled={filteredMemories?.length === 0}
+            >
+              <FiPlay className="w-5 h-5" />
+              <span>슬라이드쇼</span>
+            </button>
+            <button
               onClick={() => setShowFilters(!showFilters)}
               className="relative flex items-center space-x-2 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700"
             >
@@ -283,6 +404,71 @@ const MemoriesPage = () => {
             onChange={(e) => setSearchQuery(e.target.value)}
             className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
           />
+        </div>
+
+        {/* 나이별 필터 */}
+        <div className="mb-6">
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+            나이별 보기
+          </label>
+          <div className="flex flex-wrap gap-2">
+            <button
+              onClick={() => setSelectedAge('all')}
+              className={`px-3 py-1 rounded-full text-sm transition-colors ${
+                selectedAge === 'all'
+                  ? 'bg-blue-600 text-white'
+                  : 'bg-gray-200 text-gray-700 hover:bg-gray-300 dark:bg-gray-600 dark:text-gray-300 dark:hover:bg-gray-500'
+              }`}
+            >
+              전체
+            </button>
+            {[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20].map((age) => {
+              // 현재 날짜 기준으로 민호와 민아의 나이 계산
+              const today = new Date();
+              const minhoAge = calculateAge(BIRTH_DATES['민호'], today);
+              const minaAge = calculateAge(BIRTH_DATES['민아'], today);
+              
+              let ageText = `${age}세`;
+              let emoji = '';
+              let isMinhoAge = age === minhoAge;
+              let isMinaAge = age === minaAge;
+              
+              if (isMinhoAge) {
+                emoji = ' 👦'; // 민호
+              } else if (isMinaAge) {
+                emoji = ' 👧'; // 민아
+              }
+              
+              // 민호/민아 나이에 특별한 스타일 적용
+              let buttonClass = '';
+              if (selectedAge === age) {
+                // 선택된 상태
+                if (isMinhoAge) {
+                  buttonClass = 'bg-blue-600 text-white border-2 border-blue-700 ring-2 ring-blue-400 dark:bg-blue-600 dark:border-blue-700 dark:ring-blue-500';
+                } else if (isMinaAge) {
+                  buttonClass = 'bg-pink-600 text-white border-2 border-pink-700 ring-2 ring-pink-400 dark:bg-pink-600 dark:border-pink-700 dark:ring-pink-500';
+                } else {
+                  buttonClass = 'bg-blue-600 text-white';
+                }
+              } else if (isMinhoAge) {
+                buttonClass = 'bg-blue-100 text-blue-700 border-2 border-blue-400 hover:bg-blue-200 dark:bg-blue-900/30 dark:text-blue-400 dark:border-blue-600 dark:hover:bg-blue-900/50';
+              } else if (isMinaAge) {
+                buttonClass = 'bg-pink-100 text-pink-700 border-2 border-pink-400 hover:bg-pink-200 dark:bg-pink-900/30 dark:text-pink-400 dark:border-pink-600 dark:hover:bg-pink-900/50';
+              } else {
+                buttonClass = 'bg-gray-200 text-gray-700 hover:bg-gray-300 dark:bg-gray-600 dark:text-gray-300 dark:hover:bg-gray-500';
+              }
+              
+              return (
+                <button
+                  key={age}
+                  onClick={() => setSelectedAge(age)}
+                  className={`px-3 py-1 rounded-full text-sm transition-all ${buttonClass}`}
+                >
+                  {ageText}{emoji}
+                </button>
+              );
+            })}
+          </div>
         </div>
 
         {/* 필터 섹션 */}
@@ -396,7 +582,48 @@ const MemoriesPage = () => {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.3, delay: index * 0.05 }}
+              className="relative group"
             >
+              {/* 수정/삭제 드롭다운 - 본인 메모리만 표시 */}
+              {user?.id === memory.user_id && (
+                <div className="absolute top-2 right-2 z-10">
+                  <button
+                    onClick={(e) => {
+                      e.preventDefault();
+                      toggleDropdown(memory.id);
+                    }}
+                    className="p-1.5 bg-white dark:bg-gray-800 rounded-md shadow-md opacity-0 group-hover:opacity-100 transition-opacity"
+                  >
+                    <FiMoreVertical className="w-4 h-4 text-gray-600 dark:text-gray-400" />
+                  </button>
+                  
+                  {showDropdown === memory.id && (
+                    <div className="dropdown-menu absolute right-0 mt-1 w-32 bg-white dark:bg-gray-800 rounded-md shadow-lg border border-gray-200 dark:border-gray-700">
+                      <button
+                        onClick={(e) => {
+                          e.preventDefault();
+                          handleEdit(memory);
+                        }}
+                        className="flex items-center w-full px-3 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+                      >
+                        <FiEdit2 className="w-4 h-4 mr-2" />
+                        수정
+                      </button>
+                      <button
+                        onClick={(e) => {
+                          e.preventDefault();
+                          handleDeleteClick(memory);
+                        }}
+                        className="flex items-center w-full px-3 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20"
+                      >
+                        <FiTrash2 className="w-4 h-4 mr-2" />
+                        삭제
+                      </button>
+                    </div>
+                  )}
+                </div>
+              )}
+              
               <Link
                 to={`/memories/${memory.id}`}
                 className="block bg-white dark:bg-gray-800 rounded-lg overflow-hidden shadow-lg hover:shadow-xl transition-shadow group"
@@ -456,6 +683,7 @@ const MemoriesPage = () => {
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.3, delay: index * 0.05 }}
+              className="relative"
             >
               <Link 
                 to={`/memories/${memory.id}`}
@@ -495,6 +723,30 @@ const MemoriesPage = () => {
                   )}
                 </div>
               </div>
+              
+              {/* 수정/삭제 버튼 - 리스트 뷰 */}
+              {user?.id === memory.user_id && (
+                <div className="flex items-center space-x-2 ml-4">
+                  <button
+                    onClick={(e) => {
+                      e.preventDefault();
+                      handleEdit(memory);
+                    }}
+                    className="p-2 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded"
+                  >
+                    <FiEdit2 className="w-4 h-4" />
+                  </button>
+                  <button
+                    onClick={(e) => {
+                      e.preventDefault();
+                      handleDeleteClick(memory);
+                    }}
+                    className="p-2 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded"
+                  >
+                    <FiTrash2 className="w-4 h-4" />
+                  </button>
+                </div>
+              )}
               </Link>
             </motion.div>
           ))}
@@ -526,6 +778,150 @@ const MemoriesPage = () => {
           </p>
         )}
       </div>
+
+      {/* 삭제 확인 모달 */}
+      <AnimatePresence>
+        {deleteModalOpen && memoryToDelete && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4"
+            onClick={() => setDeleteModalOpen(false)}
+          >
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              className="bg-white dark:bg-gray-800 rounded-lg p-6 max-w-md w-full"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+                추억을 삭제하시겠습니까?
+              </h3>
+              <p className="text-gray-600 dark:text-gray-400 mb-6">
+                "{memoryToDelete.title}" 추억을 삭제하면 복구할 수 없습니다.
+              </p>
+              <div className="flex justify-end space-x-3">
+                <button
+                  onClick={() => setDeleteModalOpen(false)}
+                  className="px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"
+                  disabled={deleteMutation.isPending}
+                >
+                  취소
+                </button>
+                <button
+                  onClick={handleDeleteConfirm}
+                  className="px-4 py-2 bg-red-600 text-white hover:bg-red-700 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed"
+                  disabled={deleteMutation.isPending}
+                >
+                  {deleteMutation.isPending ? (
+                    <span className="flex items-center">
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                      삭제 중...
+                    </span>
+                  ) : (
+                    '삭제'
+                  )}
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* 슬라이드쇼 */}
+      <AnimatePresence>
+        {showSlideshow && filteredMemories && filteredMemories.length > 0 && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black z-50 flex items-center justify-center"
+            onClick={() => setShowSlideshow(false)}
+          >
+            <div className="relative w-full h-full" onClick={(e) => e.stopPropagation()}>
+              {/* 닫기 버튼 */}
+              <button
+                onClick={() => setShowSlideshow(false)}
+                className="absolute top-4 right-4 text-white p-2 rounded-full bg-black/50 hover:bg-black/70 z-10"
+              >
+                <FiX className="w-6 h-6" />
+              </button>
+
+              {/* 슬라이드쇼 이미지 */}
+              {filteredMemories[slideshowIndex]?.media_files.map((media, idx) => (
+                idx === 0 && (
+                  <div key={media.id} className="w-full h-full flex items-center justify-center">
+                    <img
+                      src={getMediaUrl(media.file_path)}
+                      alt={filteredMemories[slideshowIndex].title}
+                      className="max-w-full max-h-full object-contain"
+                    />
+                  </div>
+                )
+              ))}
+
+              {/* 정보 표시 */}
+              <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-8">
+                <h2 className="text-white text-2xl font-bold mb-2">
+                  {filteredMemories[slideshowIndex].title}
+                </h2>
+                {filteredMemories[slideshowIndex].description && (
+                  <p className="text-white/80">
+                    {filteredMemories[slideshowIndex].description}
+                  </p>
+                )}
+                <div className="text-white/60 text-sm mt-2">
+                  {formatDate(filteredMemories[slideshowIndex].memory_date)}
+                  {filteredMemories[slideshowIndex].memory_people?.length > 0 && (
+                    <span className="ml-4">
+                      {filteredMemories[slideshowIndex].memory_people.map(mp => mp.people.name).join(', ')}
+                    </span>
+                  )}
+                </div>
+              </div>
+
+              {/* 이전/다음 버튼 */}
+              <button
+                onClick={() => setSlideshowIndex((prev) => 
+                  prev === 0 ? filteredMemories.length - 1 : prev - 1
+                )}
+                className="absolute left-4 top-1/2 transform -translate-y-1/2 text-white p-3 rounded-full bg-black/50 hover:bg-black/70"
+              >
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                </svg>
+              </button>
+              <button
+                onClick={() => setSlideshowIndex((prev) => 
+                  prev === filteredMemories.length - 1 ? 0 : prev + 1
+                )}
+                className="absolute right-4 top-1/2 transform -translate-y-1/2 text-white p-3 rounded-full bg-black/50 hover:bg-black/70"
+              >
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                </svg>
+              </button>
+
+              {/* 슬라이드 인디케이터 */}
+              <div className="absolute bottom-20 left-1/2 transform -translate-x-1/2 flex space-x-2">
+                {filteredMemories.map((_, index) => (
+                  <button
+                    key={index}
+                    onClick={() => setSlideshowIndex(index)}
+                    className={`w-2 h-2 rounded-full transition-all ${
+                      index === slideshowIndex
+                        ? 'bg-white w-8'
+                        : 'bg-white/50 hover:bg-white/70'
+                    }`}
+                  />
+                ))}
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };

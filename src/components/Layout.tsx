@@ -4,9 +4,11 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '../contexts/AuthContext';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '../lib/supabase';
-import { FiMenu, FiX, FiSun, FiMoon, FiUser, FiUsers, FiLogOut, FiShield, FiHome, FiImage, FiPlusCircle, FiFolder, FiBarChart2, FiActivity, FiTrash2, FiUserPlus, FiSettings, FiTrendingUp } from 'react-icons/fi';
+import { FiMenu, FiX, FiSun, FiMoon, FiUser, FiUsers, FiLogOut, FiShield, FiHome, FiImage, FiPlusCircle, FiFolder, FiBarChart2, FiActivity, FiTrash2, FiUserPlus, FiSettings, FiTrendingUp, FiBook } from 'react-icons/fi';
 import { useLegacyStyles } from '../hooks/useLegacyStyles';
 import PWAInstallPrompt from './PWAInstallPrompt';
+import { LanguageSelector } from './LanguageSelector';
+import { useLanguage } from '../contexts/LanguageContext';
 
 interface LayoutProps {
   children: ReactNode;
@@ -15,6 +17,7 @@ interface LayoutProps {
 const Layout = ({ children }: LayoutProps) => {
   const location = useLocation();
   const { user, signOut } = useAuth();
+  const { t } = useLanguage();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [darkMode, setDarkMode] = useState(false);
   const [mainDropdownOpen, setMainDropdownOpen] = useState(false);
@@ -85,18 +88,19 @@ const Layout = ({ children }: LayoutProps) => {
 
   // 메뉴 구조 정의
   const mainMenuItems = [
-    { path: '/upload', label: '추억 추가', icon: <FiPlusCircle className="w-4 h-4 text-green-500" />, authRequired: true },
-    { path: '/memories', label: '추억 보기', icon: <FiImage className="w-4 h-4 text-blue-500" /> },
-    { path: '/growth', label: '성장 기록', icon: <FiTrendingUp className="w-4 h-4 text-pink-500" /> },
-    { path: '/statistics', label: '통계', icon: <FiBarChart2 className="w-4 h-4 text-purple-500" /> },
-    { path: '/albums', label: '앨범', icon: <FiFolder className="w-4 h-4 text-orange-500" /> },
+    { path: '/upload', label: t('nav_add_memory'), icon: <FiPlusCircle className="w-4 h-4 text-green-500" />, authRequired: true },
+    { path: '/memories', label: t('nav_memories'), icon: <FiImage className="w-4 h-4 text-blue-500" /> },
+    { path: '/growth', label: t('nav_growth'), icon: <FiTrendingUp className="w-4 h-4 text-pink-500" /> },
+    { path: '/statistics', label: t('nav_statistics'), icon: <FiBarChart2 className="w-4 h-4 text-purple-500" /> },
+    { path: '/albums', label: t('nav_albums'), icon: <FiFolder className="w-4 h-4 text-orange-500" /> },
+    { path: '/photobook-creator', label: t('nav_photobook'), icon: <FiBook className="w-4 h-4 text-indigo-500" />, authRequired: true },
   ];
   
   const familyMenuItems = [
-    { path: '/invite', label: '가족 초대', icon: <FiUserPlus className="w-4 h-4 text-gray-500" />, authRequired: true, roleRequired: 'parent' },
-    { path: '/admin', label: '관리자', icon: <FiSettings className="w-4 h-4 text-gray-500" />, authRequired: true, roleRequired: 'parent' },
-    { path: '/activity-log', label: '활동 로그', icon: <FiActivity className="w-4 h-4 text-blue-500" />, authRequired: true },
-    { path: '/trash', label: '휴지통', icon: <FiTrash2 className="w-4 h-4 text-green-500" />, authRequired: true },
+    { path: '/invite', label: t('nav_invite'), icon: <FiUserPlus className="w-4 h-4 text-gray-500" />, authRequired: true, roleRequired: 'parent' },
+    { path: '/admin', label: t('nav_admin'), icon: <FiSettings className="w-4 h-4 text-gray-500" />, authRequired: true, roleRequired: 'parent' },
+    { path: '/activity-log', label: t('nav_activity_log'), icon: <FiActivity className="w-4 h-4 text-blue-500" />, authRequired: true },
+    { path: '/trash', label: t('nav_trash'), icon: <FiTrash2 className="w-4 h-4 text-green-500" />, authRequired: true },
   ];
 
   // 필터링 함수
@@ -133,7 +137,7 @@ const Layout = ({ children }: LayoutProps) => {
                 }`}
               >
                 <FiHome className="w-4 h-4" />
-                <span>홈</span>
+                <span>{t('nav_home')}</span>
               </Link>
               
               {/* 주요 메뉴 드롭다운 */}
@@ -143,7 +147,7 @@ const Layout = ({ children }: LayoutProps) => {
                   className="nav-item flex items-center gap-2 px-3 py-2 text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors"
                 >
                   <FiFolder className="w-4 h-4" />
-                  <span>주요 메뉴</span>
+                  <span>{t('nav_main_menu')}</span>
                   <svg className="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                   </svg>
@@ -181,7 +185,7 @@ const Layout = ({ children }: LayoutProps) => {
                   className="nav-item flex items-center gap-2 px-3 py-2 text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors"
                 >
                   <FiUsers className="w-4 h-4" />
-                  <span>가족</span>
+                  <span>{t('nav_family')}</span>
                   <svg className="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                   </svg>
@@ -196,21 +200,30 @@ const Layout = ({ children }: LayoutProps) => {
                       transition={{ duration: 0.2 }}
                       className="absolute top-full left-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 z-50"
                     >
-                      {filterMenuItems(familyMenuItems).map((item) => (
-                        <Link
-                          key={item.path}
-                          to={item.path}
-                          onClick={() => setFamilyDropdownOpen(false)}
-                          className="flex items-center gap-3 px-4 py-3 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors first:rounded-t-lg last:rounded-b-lg"
-                        >
-                          {item.icon}
-                          <span>{item.label}</span>
-                        </Link>
-                      ))}
+                      {filterMenuItems(familyMenuItems).length === 0 ? (
+                        <div className="px-4 py-3 text-sm text-gray-500 dark:text-gray-400">
+                          {t('nav_no_items')}
+                        </div>
+                      ) : (
+                        filterMenuItems(familyMenuItems).map((item) => (
+                          <Link
+                            key={item.path}
+                            to={item.path}
+                            onClick={() => setFamilyDropdownOpen(false)}
+                            className="flex items-center gap-3 px-4 py-3 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors first:rounded-t-lg last:rounded-b-lg"
+                          >
+                            {item.icon}
+                            <span>{item.label}</span>
+                          </Link>
+                        ))
+                      )}
                     </motion.div>
                   )}
                 </AnimatePresence>
               </div>
+
+              {/* 언어 선택기 */}
+              <LanguageSelector />
 
               {/* 다크모드 토글 */}
               <button
@@ -238,7 +251,7 @@ const Layout = ({ children }: LayoutProps) => {
                     onClick={() => signOut()}
                     className="px-4 py-2 bg-gradient-to-r from-pink-500 to-blue-500 text-white rounded-lg font-medium hover:shadow-lg transition-all hover:scale-105"
                   >
-                    로그아웃
+                    {t('auth_logout')}
                   </button>
                 </div>
               ) : (
@@ -246,7 +259,7 @@ const Layout = ({ children }: LayoutProps) => {
                   to="/login"
                   className="px-4 py-2 bg-gradient-to-r from-pink-500 to-blue-500 text-white rounded-lg font-medium hover:shadow-lg transition-all hover:scale-105"
                 >
-                  로그인
+                  {t('auth_login')}
                 </Link>
               )}
             </nav>
@@ -285,12 +298,12 @@ const Layout = ({ children }: LayoutProps) => {
                     }`}
                   >
                     <FiHome className="w-4 h-4" />
-                    <span>홈</span>
+                    <span>{t('nav_home')}</span>
                   </Link>
                 </li>
                 
                 {/* 주요 메뉴 아이템들 */}
-                <li className="px-3 py-1 text-xs font-semibold text-gray-500 uppercase">주요 메뉴</li>
+                <li className="px-3 py-1 text-xs font-semibold text-gray-500 uppercase">{t('nav_main_menu')}</li>
                 {filterMenuItems(mainMenuItems).map((item) => (
                   <li key={item.path}>
                     <Link
@@ -309,7 +322,7 @@ const Layout = ({ children }: LayoutProps) => {
                 ))}
                 
                 {/* 가족 메뉴 아이템들 */}
-                <li className="px-3 py-1 text-xs font-semibold text-gray-500 uppercase">가족</li>
+                <li className="px-3 py-1 text-xs font-semibold text-gray-500 uppercase">{t('nav_family')}</li>
                 {filterMenuItems(familyMenuItems).map((item) => (
                   <li key={item.path}>
                     <Link
@@ -330,7 +343,7 @@ const Layout = ({ children }: LayoutProps) => {
                 {/* 사용자 메뉴 */}
                 {user && (
                   <>
-                    <li className="px-3 py-1 text-xs font-semibold text-gray-500 uppercase">계정</li>
+                    <li className="px-3 py-1 text-xs font-semibold text-gray-500 uppercase">{t('auth_account')}</li>
                     <li>
                       <Link
                         to="/profile"
@@ -338,7 +351,7 @@ const Layout = ({ children }: LayoutProps) => {
                         className="flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
                       >
                         <FiUser className="w-4 h-4" />
-                        <span>프로필</span>
+                        <span>{t('nav_profile')}</span>
                       </Link>
                     </li>
                     <li>
@@ -350,11 +363,17 @@ const Layout = ({ children }: LayoutProps) => {
                         className="w-full flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
                       >
                         <FiLogOut className="w-4 h-4" />
-                        <span>로그아웃</span>
+                        <span>{t('auth_logout')}</span>
                       </button>
                     </li>
                   </>
                 )}
+                
+                {/* 언어 선택 */}
+                <li className="px-3 py-1 text-xs font-semibold text-gray-500 uppercase mt-4">{t('language')}</li>
+                <li className="px-3 pt-2">
+                  <LanguageSelector />
+                </li>
               </ul>
             </motion.div>
           )}

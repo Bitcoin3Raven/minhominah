@@ -1,11 +1,11 @@
-import { useState, useRef, useCallback } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useState, useRef, useCallback, useEffect } from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { motion, AnimatePresence } from 'framer-motion';
-import { FiUpload, FiX, FiVideo, FiCalendar, FiTag, FiUser, FiPlus } from 'react-icons/fi';
+import { FiUpload, FiX, FiVideo, FiCalendar, FiTag, FiUser, FiPlus, FiEdit2 } from 'react-icons/fi';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation } from '@tanstack/react-query';
 import AddPersonModal from '../components/AddPersonModal';
 import AddTagModal from '../components/AddTagModal';
 import { compressImage, formatFileSize, isImageFile } from '../utils/imageUtils';
@@ -25,14 +25,27 @@ interface FilePreview {
   type: 'image' | 'video';
 }
 
+interface ExistingMedia {
+  id: string;
+  file_path: string;
+  file_type: 'image' | 'video';
+  url?: string;
+}
+
 const UploadPage = () => {
   const { user } = useAuth();
   const styles = useLegacyStyles(); // 레거시 스타일 적용
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const editId = searchParams.get('edit');
+  const isEditMode = !!editId;
+  
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [filePreviews, setFilePreviews] = useState<FilePreview[]>([]);
+  const [existingMedia, setExistingMedia] = useState<ExistingMedia[]>([]);
+  const [deletedMediaIds, setDeletedMediaIds] = useState<string[]>([]);
   const [isDragging, setIsDragging] = useState(false);
   const [showAddPersonModal, setShowAddPersonModal] = useState(false);
   const [showAddTagModal, setShowAddTagModal] = useState(false);
@@ -72,6 +85,50 @@ const UploadPage = () => {
       return data;
     },
   });
+
+  // 편집 모드: 기존 메모리 데이터 로드
+  const { data: editMemory } = useQuery({
+    queryKey: ['memory', editId],
+    queryFn: async () => {
+      if (!editId) return null;
+      
+      const { data, error } = await supabase
+        .from('memories')
+        .select(`
+          *,
+          media_files(*),
+          memory_people(person_id),
+          memory_tags(tag_id)
+        `)
+        .eq('id', editId)
+        .eq('user_id', user?.id)
+        .single();
+        
+      if (error) throw error;
+      return data;
+    },
+    enabled: isEditMode && !!user,
+  });
+
+  // 편집 모드: 폼에 기존 데이터 채우기
+  useEffect(() => {
+    if (editMemory) {
+      setValue('title', editMemory.title);
+      setValue('description', editMemory.description || '');
+      setValue('memory_date', editMemory.memory_date.split('T')[0]);
+      setValue('people', editMemory.memory_people?.map((mp: any) => mp.person_id) || []);
+      setValue('tags', editMemory.memory_tags?.map((mt: any) => mt.tag_id) || []);
+      
+      // 기존 미디어 파일 설정
+      const existingMediaFiles = editMemory.media_files?.map((file: any) => ({
+        id: file.id,
+        file_path: file.file_path,
+        file_type: file.file_type,
+        url: supabase.storage.from('media').getPublicUrl(file.file_path).data.publicUrl
+      })) || [];
+      setExistingMedia(existingMediaFiles);
+    }
+  }, [editMemory, setValue]);
 
   // 파일 처리
   const handleFiles = useCallback(async (files: FileList | null) => {
@@ -142,6 +199,12 @@ const UploadPage = () => {
     });
   };
 
+  // 기존 미디어 파일 삭제
+  const handleDeleteExistingMedia = (mediaId: string) => {
+    setDeletedMediaIds(prev => [...prev, mediaId]);
+    setExistingMedia(prev => prev.filter(media => media.id !== mediaId));
+  };
+
   // 폼 제출
   const onSubmit = async (data: UploadFormData) => {
     if (!user) {
@@ -150,8 +213,16 @@ const UploadPage = () => {
       return;
     }
 
-    if (filePreviews.length === 0) {
+    // 편집 모드에서는 새 파일이 없어도 괜찮음
+    if (!isEditMode && filePreviews.length === 0) {
       alert('최소 하나의 사진이나 동영상을 추가해주세요.');
+      return;
+    }
+
+    // 편집 모드에서 모든 미디어를 삭제하는 경우 체크
+    if (isEditMode && filePreviews.length === 0 && 
+        existingMedia.length === deletedMediaIds.length) {
+      alert('최소 하나의 사진이나 동영상은 유지해야 합니다.');
       return;
     }
 
@@ -159,62 +230,115 @@ const UploadPage = () => {
     setUploadProgress(0);
 
     try {
-      // 1. 추억 생성
-      const { data: memory, error: memoryError } = await supabase
-        .from('memories')
-        .insert({
-          title: data.title,
-          description: data.description,
-          memory_date: data.memory_date,
-          created_by: user.id,
-        })
-        .select()
-        .single();
+      let memoryId: string;
 
-      if (memoryError) throw memoryError;
+      if (isEditMode && editId) {
+        // 편집 모드: 기존 추억 업데이트
+        const { error: updateError } = await supabase
+          .from('memories')
+          .update({
+            title: data.title,
+            description: data.description,
+            memory_date: data.memory_date,
+            updated_at: new Date().toISOString(),
+          })
+          .eq('id', editId)
+          .eq('user_id', user.id);
 
-      // 2. 파일 업로드
-      const totalFiles = filePreviews.length;
+        if (updateError) throw updateError;
+        memoryId = editId;
 
-      for (let i = 0; i < totalFiles; i++) {
-        const filePreview = filePreviews[i];
-        const file = filePreview.file;
-        const fileName = `memories/${memory.id}/${Date.now()}-${file.name}`;
-        
-        // 파일 업로드
-        const { error: uploadError } = await supabase.storage
-          .from('media')
-          .upload(fileName, file);
+        // 삭제된 미디어 파일 처리
+        if (deletedMediaIds.length > 0) {
+          // Storage에서 파일 삭제
+          const deletedMedia = existingMedia.filter(media => 
+            deletedMediaIds.includes(media.id)
+          );
+          
+          for (const media of deletedMedia) {
+            const { error: deleteStorageError } = await supabase.storage
+              .from('media')
+              .remove([media.file_path]);
+            
+            if (deleteStorageError) {
+              console.error('Storage 삭제 오류:', deleteStorageError);
+            }
+          }
 
-        if (uploadError) throw uploadError;
+          // DB에서 미디어 정보 삭제
+          const { error: deleteError } = await supabase
+            .from('media_files')
+            .delete()
+            .in('id', deletedMediaIds);
 
-        // 썸네일 생성 (이미지만)
-        let thumbnailPath = null;
-        if (filePreview.type === 'image') {
-          // 간단한 썸네일 경로 (실제로는 서버측에서 생성해야 함)
-          thumbnailPath = `thumbnails/${fileName}`;
+          if (deleteError) throw deleteError;
         }
 
-        // 3. 미디어 파일 정보 저장
-        const { error: mediaError } = await supabase
-          .from('media_files')
+        // 기존 인물/태그 연결 삭제
+        await supabase.from('memory_people').delete().eq('memory_id', memoryId);
+        await supabase.from('memory_tags').delete().eq('memory_id', memoryId);
+
+      } else {
+        // 새로 생성
+        const { data: memory, error: memoryError } = await supabase
+          .from('memories')
           .insert({
-            memory_id: memory.id,
-            file_path: fileName,
-            thumbnail_path: thumbnailPath,
-            file_type: filePreview.type,
-            file_size: file.size,
-          });
+            title: data.title,
+            description: data.description,
+            memory_date: data.memory_date,
+            user_id: user.id,
+          })
+          .select()
+          .single();
 
-        if (mediaError) throw mediaError;
+        if (memoryError) throw memoryError;
+        memoryId = memory.id;
+      }
 
-        setUploadProgress(((i + 1) / totalFiles) * 50 + 50);
+      // 2. 새 파일 업로드 (있는 경우)
+      if (filePreviews.length > 0) {
+        const totalFiles = filePreviews.length;
+
+        for (let i = 0; i < totalFiles; i++) {
+          const filePreview = filePreviews[i];
+          const file = filePreview.file;
+          const fileName = `memories/${memoryId}/${Date.now()}-${file.name}`;
+          
+          // 파일 업로드
+          const { error: uploadError } = await supabase.storage
+            .from('media')
+            .upload(fileName, file);
+
+          if (uploadError) throw uploadError;
+
+          // 썸네일 생성 (이미지만)
+          let thumbnailPath = null;
+          if (filePreview.type === 'image') {
+            // 간단한 썸네일 경로 (실제로는 서버측에서 생성해야 함)
+            thumbnailPath = `thumbnails/${fileName}`;
+          }
+
+          // 3. 미디어 파일 정보 저장
+          const { error: mediaError } = await supabase
+            .from('media_files')
+            .insert({
+              memory_id: memoryId,
+              file_path: fileName,
+              thumbnail_path: thumbnailPath,
+              file_type: filePreview.type,
+              file_size: file.size,
+            });
+
+          if (mediaError) throw mediaError;
+
+          setUploadProgress(((i + 1) / totalFiles) * 50 + 50);
+        }
       }
 
       // 4. 인물 연결
       if (data.people.length > 0) {
         const peopleInserts = data.people.map(personId => ({
-          memory_id: memory.id,
+          memory_id: memoryId,
           person_id: personId,
         }));
 
@@ -228,7 +352,7 @@ const UploadPage = () => {
       // 5. 태그 연결
       if (data.tags.length > 0) {
         const tagInserts = data.tags.map(tagId => ({
-          memory_id: memory.id,
+          memory_id: memoryId,
           tag_id: tagId,
         }));
 
@@ -241,9 +365,11 @@ const UploadPage = () => {
 
       // 성공 후 추억 갤러리로 이동
       navigate('/memories');
-    } catch (error) {
+    } catch (error: any) {
       console.error('Upload error:', error);
-      alert('업로드 중 오류가 발생했습니다.');
+      console.error('Error details:', error.message, error.details);
+      const errorMessage = error.message || '알 수 없는 오류가 발생했습니다.';
+      alert(isEditMode ? `수정 중 오류가 발생했습니다: ${errorMessage}` : `업로드 중 오류가 발생했습니다: ${errorMessage}`);
     } finally {
       setUploading(false);
     }
@@ -264,7 +390,7 @@ const UploadPage = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
           >
-            새로운 추억 추가
+            {isEditMode ? '추억 수정하기' : '새로운 추억 추가'}
           </motion.h1>
           <motion.p 
             className="text-center text-white/90 mt-2"
@@ -272,7 +398,7 @@ const UploadPage = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.2 }}
           >
-            소중한 순간을 영원히 기록하세요
+            {isEditMode ? '소중한 순간을 다시 편집하세요' : '소중한 순간을 영원히 기록하세요'}
           </motion.p>
         </div>
       </div>
@@ -331,7 +457,56 @@ const UploadPage = () => {
                 </p>
               </div>
 
-              {/* 파일 미리보기 */}
+              {/* 기존 미디어 파일 (편집 모드) */}
+              {isEditMode && existingMedia.length > 0 && (
+                <div className="mt-6">
+                  <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
+                    기존 파일
+                  </h4>
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <AnimatePresence>
+                      {existingMedia
+                        .filter(media => !deletedMediaIds.includes(media.id))
+                        .map((media) => (
+                          <motion.div
+                            key={media.id}
+                            initial={{ opacity: 0, scale: 0.8 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            exit={{ opacity: 0, scale: 0.8 }}
+                            whileHover={{ scale: 1.05 }}
+                            className="relative aspect-square rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-700 shadow-lg"
+                          >
+                            {media.file_type === 'image' ? (
+                              <img
+                                src={media.url}
+                                alt="Existing media"
+                                className="w-full h-full object-cover"
+                              />
+                            ) : (
+                              <div className="flex items-center justify-center h-full bg-purple-50 dark:bg-purple-900/20">
+                                <FiVideo className="w-12 h-12 text-purple-500" />
+                              </div>
+                            )}
+                            <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-2">
+                              <p className="text-xs text-white font-medium">
+                                기존 파일
+                              </p>
+                            </div>
+                            <button
+                              type="button"
+                              onClick={() => handleDeleteExistingMedia(media.id)}
+                              className="absolute top-2 right-2 p-1.5 bg-red-500 text-white rounded-full hover:bg-red-600 transition-all transform hover:scale-110 shadow-lg"
+                            >
+                              <FiX className="w-4 h-4" />
+                            </button>
+                          </motion.div>
+                        ))}
+                    </AnimatePresence>
+                  </div>
+                </div>
+              )}
+
+              {/* 새 파일 미리보기 */}
               {filePreviews.length > 0 && (
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-6">
                   <AnimatePresence>
@@ -580,7 +755,7 @@ const UploadPage = () => {
                 disabled={uploading}
                 className={`${styles.button} disabled:opacity-50 disabled:cursor-not-allowed`}
               >
-                {uploading ? '업로드 중...' : '추억 추가하기'}
+                {uploading ? (isEditMode ? '수정 중...' : '업로드 중...') : (isEditMode ? '추억 수정하기' : '추억 추가하기')}
               </motion.button>
             </div>
 

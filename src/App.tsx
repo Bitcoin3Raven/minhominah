@@ -5,6 +5,7 @@ import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import Layout from './components/Layout';
 import PrivateRoute from './components/PrivateRoute';
 import { AuthProvider } from './contexts/AuthContext';
+import { LanguageProvider } from './contexts/LanguageContext';
 
 // Lazy load pages for code splitting
 const HomePage = lazy(() => import('./pages/HomePage'));
@@ -21,6 +22,7 @@ const AdminPage = lazy(() => import('./pages/AdminPage'));
 const InvitePage = lazy(() => import('./pages/InvitePage'));
 const AcceptInvitePage = lazy(() => import('./pages/AcceptInvitePage'));
 const GrowthPage = lazy(() => import('./pages/GrowthPage'));
+const PhotobookCreatorPage = lazy(() => import('./pages/PhotobookCreatorPage'));
 
 // Loading component
 const PageLoader = () => (
@@ -43,70 +45,77 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <Router>
-        <AuthProvider>
-          <Layout>
-            <Suspense fallback={<PageLoader />}>
-              <Routes>
-                <Route path="/" element={<HomePage />} />
-                <Route path="/login" element={<LoginPage />} />
-                <Route path="/accept-invite" element={<AcceptInvitePage />} />
-                <Route path="/memories" element={
-                  <PrivateRoute>
-                    <MemoriesPage />
-                  </PrivateRoute>
-                } />
-                <Route path="/memories/:id" element={
-                  <PrivateRoute>
-                    <MemoryDetailPage />
-                  </PrivateRoute>
-                } />
-                <Route path="/upload" element={
-                  <PrivateRoute>
-                    <UploadPage />
-                  </PrivateRoute>
-                } />
-                <Route path="/albums" element={
-                  <PrivateRoute>
-                    <AlbumsPage />
-                  </PrivateRoute>
-                } />
-                <Route path="/statistics" element={
-                  <PrivateRoute>
-                    <StatisticsPage />
-                  </PrivateRoute>
-                } />
-                <Route path="/activity-log" element={
-                  <PrivateRoute>
-                    <ActivityLogPage />
-                  </PrivateRoute>
-                } />
-                <Route path="/trash" element={
-                  <PrivateRoute>
-                    <TrashPage />
-                  </PrivateRoute>
-                } />
-                <Route path="/profile" element={
-                  <PrivateRoute>
-                    <ProfilePage />
-                  </PrivateRoute>
-                } />
-                <Route path="/admin" element={
-                  <PrivateRoute>
-                    <AdminPage />
-                  </PrivateRoute>
-                } />
-                <Route path="/invite" element={
-                  <PrivateRoute>
-                    <InvitePage />
-                  </PrivateRoute>
-                } />
-                <Route path="/growth" element={
-                  <GrowthPage />
-                } />
-              </Routes>
-            </Suspense>
-          </Layout>
-        </AuthProvider>
+        <LanguageProvider>
+          <AuthProvider>
+            <Layout>
+              <Suspense fallback={<PageLoader />}>
+                <Routes>
+                  <Route path="/" element={<HomePage />} />
+                  <Route path="/login" element={<LoginPage />} />
+                  <Route path="/accept-invite" element={<AcceptInvitePage />} />
+                  <Route path="/memories" element={
+                    <PrivateRoute>
+                      <MemoriesPage />
+                    </PrivateRoute>
+                  } />
+                  <Route path="/memories/:id" element={
+                    <PrivateRoute>
+                      <MemoryDetailPage />
+                    </PrivateRoute>
+                  } />
+                  <Route path="/upload" element={
+                    <PrivateRoute>
+                      <UploadPage />
+                    </PrivateRoute>
+                  } />
+                  <Route path="/albums" element={
+                    <PrivateRoute>
+                      <AlbumsPage />
+                    </PrivateRoute>
+                  } />
+                  <Route path="/statistics" element={
+                    <PrivateRoute>
+                      <StatisticsPage />
+                    </PrivateRoute>
+                  } />
+                  <Route path="/activity-log" element={
+                    <PrivateRoute>
+                      <ActivityLogPage />
+                    </PrivateRoute>
+                  } />
+                  <Route path="/trash" element={
+                    <PrivateRoute>
+                      <TrashPage />
+                    </PrivateRoute>
+                  } />
+                  <Route path="/profile" element={
+                    <PrivateRoute>
+                      <ProfilePage />
+                    </PrivateRoute>
+                  } />
+                  <Route path="/admin" element={
+                    <PrivateRoute>
+                      <AdminPage />
+                    </PrivateRoute>
+                  } />
+                  <Route path="/invite" element={
+                    <PrivateRoute>
+                      <InvitePage />
+                    </PrivateRoute>
+                  } />
+                  <Route path="/growth" element={
+                    <GrowthPage />
+                  } />
+                  <Route path="/photobook-creator" element={
+                    <PrivateRoute>
+                      <PhotobookCreatorPage />
+                    </PrivateRoute>
+                  } />
+                </Routes>
+              </Suspense>
+            </Layout>
+          </AuthProvider>
+        </LanguageProvider>
       </Router>
       <ReactQueryDevtools initialIsOpen={false} />
     </QueryClientProvider>

@@ -79,13 +79,13 @@ const photobookCreator = {
             console.log('Supabase에서 추억 데이터 로드 시도...');
             
             // Supabase가 초기화되어 있는지 확인
-            if (!window.supabase) {
+            if (!window.supabaseClient) {
                 console.error('Supabase가 초기화되지 않았습니다.');
                 this.memories = [];
                 return;
             }
             
-            const { data, error } = await supabase
+            const { data, error } = await window.supabaseClient
                 .from('memories')
                 .select(`
                     *,

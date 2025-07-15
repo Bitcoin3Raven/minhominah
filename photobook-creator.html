@@ -149,10 +149,11 @@
                 radial-gradient(circle at 90% 90%, rgba(135, 206, 235, 0.8) 0%, rgba(135, 206, 235, 0.5) 25%, transparent 50%),
                 linear-gradient(135deg, #ffe0e6 0%, #fff5f7 50%, #e6f3ff 100%);
             color: #333;
-            padding: 40px 0;
+            padding: 80px 0 40px;
             text-align: center;
             position: relative;
             overflow: hidden;
+            margin-top: -64px;
         }
         
         .dark .hero-section {
@@ -172,12 +173,10 @@
         <div class="container mx-auto px-4 py-4">
             <div class="flex justify-between items-center">
                 <!-- 로고 -->
-                <div class="flex items-center">
-                    <a href="/" class="flex items-center hover:opacity-80 transition-opacity">
-                        <img src="assets/images/logo.png" alt="민호민아 성장앨범" class="h-10 w-auto dark:brightness-90" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
-                        <span class="text-lg font-bold bg-gradient-to-r from-pink-500 to-blue-500 bg-clip-text text-transparent" style="display:none;" data-lang="site_title">민호민아</span>
-                    </a>
-                </div>
+                <a href="/" class="flex items-center hover:opacity-80 transition-opacity">
+                    <img src="assets/images/logo.png" alt="민호민아 성장앨범" class="h-10 w-auto dark:brightness-90" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+                    <span class="text-lg font-bold bg-gradient-to-r from-pink-500 to-blue-500 bg-clip-text text-transparent" style="display:none;" data-lang="site_title">민호민아</span>
+                </a>
                 
                 <!-- 데스크톱 네비게이션 -->
                 <nav class="hidden md:flex items-center space-x-1 lg:space-x-4">
@@ -404,56 +403,58 @@
                 </div>
 
                 <!-- 옵션 설정 -->
-                <div class="mb-8">
-                    <h3 class="text-lg font-semibold mb-4 text-gray-700 dark:text-gray-300" data-lang="options">옵션</h3>
-                    <div class="space-y-3">
-                        <label class="flex items-center cursor-pointer group">
-                            <input type="checkbox" id="includeTitle" checked 
-                                   class="mr-3 w-5 h-5 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500">
-                            <span class="text-gray-700 dark:text-gray-300 group-hover:text-blue-600 transition" data-lang="include_cover_page">표지 페이지 포함</span>
-                        </label>
-                        <label class="flex items-center cursor-pointer group">
-                            <input type="checkbox" id="includeStats" checked 
-                                   class="mr-3 w-5 h-5 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500">
-                            <span class="text-gray-700 dark:text-gray-300 group-hover:text-blue-600 transition" data-lang="include_stats_page">통계 페이지 포함</span>
-                        </label>
-                        <label class="flex items-center cursor-pointer group">
-                            <input type="checkbox" id="includeIndex" 
-                                   class="mr-3 w-5 h-5 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500">
-                            <span class="text-gray-700 dark:text-gray-300 group-hover:text-blue-600 transition" data-lang="include_index_page">목차 페이지 포함</span>
-                        </label>
-                        <label class="flex items-center cursor-pointer group">
-                            <input type="checkbox" id="includeTimeline" 
-                                   class="mr-3 w-5 h-5 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500">
-                            <span class="text-gray-700 dark:text-gray-300 group-hover:text-blue-600 transition" data-lang="include_timeline">타임라인 포함</span>
-                        </label>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+                    <div>
+                        <h3 class="text-lg font-semibold mb-4 text-gray-700 dark:text-gray-300" data-lang="options">옵션</h3>
+                        <div class="space-y-3">
+                            <label class="flex items-center cursor-pointer group">
+                                <input type="checkbox" id="includeTitle" checked 
+                                       class="mr-3 w-5 h-5 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500">
+                                <span class="text-gray-700 dark:text-gray-300 group-hover:text-blue-600 transition" data-lang="include_cover_page">표지 페이지 포함</span>
+                            </label>
+                            <label class="flex items-center cursor-pointer group">
+                                <input type="checkbox" id="includeStats" checked 
+                                       class="mr-3 w-5 h-5 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500">
+                                <span class="text-gray-700 dark:text-gray-300 group-hover:text-blue-600 transition" data-lang="include_stats_page">통계 페이지 포함</span>
+                            </label>
+                            <label class="flex items-center cursor-pointer group">
+                                <input type="checkbox" id="includeIndex" 
+                                       class="mr-3 w-5 h-5 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500">
+                                <span class="text-gray-700 dark:text-gray-300 group-hover:text-blue-600 transition" data-lang="include_index_page">목차 페이지 포함</span>
+                            </label>
+                            <label class="flex items-center cursor-pointer group">
+                                <input type="checkbox" id="includeTimeline" 
+                                       class="mr-3 w-5 h-5 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500">
+                                <span class="text-gray-700 dark:text-gray-300 group-hover:text-blue-600 transition" data-lang="include_timeline">타임라인 포함</span>
+                            </label>
+                        </div>
                     </div>
-                </div>
 
-                <!-- 인물 선택 -->
-                <div class="mb-8">
-                    <h3 class="text-lg font-semibold mb-4 text-gray-700 dark:text-gray-300" data-lang="people_to_include">포함할 인물</h3>
-                    <div class="flex flex-wrap gap-3">
-                        <label class="inline-flex items-center cursor-pointer whitespace-nowrap">
-                            <input type="radio" name="personFilter" value="all" checked 
-                                   class="mr-2 text-blue-600">
-                            <span class="text-gray-700 dark:text-gray-300" data-lang="all">전체</span>
-                        </label>
-                        <label class="inline-flex items-center cursor-pointer whitespace-nowrap">
-                            <input type="radio" name="personFilter" value="minho" 
-                                   class="mr-2 text-blue-600">
-                            <span class="text-gray-700 dark:text-gray-300" data-lang="minho_only">민호만</span>
-                        </label>
-                        <label class="inline-flex items-center cursor-pointer whitespace-nowrap">
-                            <input type="radio" name="personFilter" value="mina" 
-                                   class="mr-2 text-blue-600">
-                            <span class="text-gray-700 dark:text-gray-300" data-lang="mina_only">민아만</span>
-                        </label>
-                        <label class="inline-flex items-center cursor-pointer whitespace-nowrap">
-                            <input type="radio" name="personFilter" value="both" 
-                                   class="mr-2 text-blue-600">
-                            <span class="text-gray-700 dark:text-gray-300" data-lang="minho_mina_together">민호민아 함께</span>
-                        </label>
+                    <!-- 인물 선택 -->
+                    <div>
+                        <h3 class="text-lg font-semibold mb-4 text-gray-700 dark:text-gray-300" data-lang="people_to_include">포함할 인물</h3>
+                        <div class="space-y-3">
+                            <label class="flex items-center cursor-pointer group">
+                                <input type="radio" name="personFilter" value="all" checked 
+                                       class="mr-3 w-5 h-5 text-blue-600">
+                                <span class="text-gray-700 dark:text-gray-300" data-lang="all">전체</span>
+                            </label>
+                            <label class="flex items-center cursor-pointer group">
+                                <input type="radio" name="personFilter" value="minho" 
+                                       class="mr-3 w-5 h-5 text-blue-600">
+                                <span class="text-gray-700 dark:text-gray-300" data-lang="minho_only">민호만</span>
+                            </label>
+                            <label class="flex items-center cursor-pointer group">
+                                <input type="radio" name="personFilter" value="mina" 
+                                       class="mr-3 w-5 h-5 text-blue-600">
+                                <span class="text-gray-700 dark:text-gray-300" data-lang="mina_only">민아만</span>
+                            </label>
+                            <label class="flex items-center cursor-pointer group">
+                                <input type="radio" name="personFilter" value="both" 
+                                       class="mr-3 w-5 h-5 text-blue-600">
+                                <span class="text-gray-700 dark:text-gray-300" data-lang="minho_mina_together">민호민아 함께</span>
+                            </label>
+                        </div>
                     </div>
                 </div>
 
