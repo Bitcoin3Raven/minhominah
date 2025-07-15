@@ -178,6 +178,7 @@ export const ko = {
     edit: "수정",
     delete: "삭제",
     deleteError: "추억 삭제에 실패했습니다.",
+    permissionError: "삭제 권한이 없습니다. 관리자에게 문의하세요.",
     slideshow: "슬라이드쇼"
   },
   
@@ -336,6 +337,55 @@ export const ko = {
     account_info: "계정 정보",
     joined_date: "가입일",
     last_updated: "마지막 수정"
+  },
+
+  // 관리자 페이지
+  admin: {
+    title: "관리자 페이지",
+    subtitle: "사용자 관리 및 시스템 활동을 모니터링합니다.",
+    accessDenied: "접근 권한이 없습니다",
+    accessDeniedDesc: "이 페이지는 관리자(parent)만 접근할 수 있습니다.",
+    userManagement: "사용자 관리",
+    activityLog: "활동 로그",
+    loading: "로딩 중...",
+    user: "사용자",
+    email: "이메일",
+    role: "역할",
+    joinedDate: "가입일",
+    actions: "작업",
+    edit: "편집",
+    roleBadge: {
+      parent: "관리자",
+      family: "가족",
+      viewer: "일반"
+    },
+    updateRole: "역할 변경",
+    updating: "변경 중...",
+    roleUpdated: "사용자 역할이 업데이트되었습니다.",
+    roleUpdateFailed: "역할 업데이트 실패",
+    profileModal: {
+      title: "프로필 편집",
+      email: "이메일",
+      username: "사용자명",
+      fullName: "이름",
+      save: "저장",
+      cancel: "취소",
+      saving: "저장 중...",
+      updated: "프로필이 업데이트되었습니다.",
+      updateFailed: "프로필 업데이트 실패"
+    },
+    activity: {
+      action: "작업",
+      created: "생성",
+      updated: "수정",
+      deleted: "삭제",
+      details: "상세 정보",
+      date: "날짜",
+      noData: "활동 로그가 없습니다."
+    },
+    unknown: "알 수 없음",
+    notSet: "설정 안 됨",
+    ago: "전"
   }
 } as const;
 

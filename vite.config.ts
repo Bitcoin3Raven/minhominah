@@ -13,6 +13,9 @@ export default defineConfig({
   server: {
     port: 3000,
     open: true,
+    fs: {
+      deny: ['**/_backup/**']
+    }
   },
   build: {
     outDir: 'dist',

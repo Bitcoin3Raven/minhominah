@@ -18,6 +18,7 @@ interface Memory {
   memory_date: string;
   created_at: string;
   user_id: string;
+  created_by: string;
   media_files: MediaFile[];
   memory_people: MemoryPerson[];
   memory_tags: MemoryTag[];
@@ -259,8 +260,7 @@ const MemoriesPage = () => {
       const { error } = await supabase
         .from('memories')
         .delete()
-        .eq('id', memoryId)
-        .eq('user_id', user?.id); // 본인 것만 삭제 가능
+        .eq('id', memoryId);
         
       if (error) throw error;
     },
@@ -269,9 +269,14 @@ const MemoriesPage = () => {
       setDeleteModalOpen(false);
       setMemoryToDelete(null);
     },
-    onError: (error) => {
+    onError: (error: any) => {
       console.error('삭제 실패:', error);
-      alert(t('memories.deleteError'));
+      // 권한 관련 에러 체크
+      if (error.message?.includes('permission') || error.code === '42501') {
+        alert(t('memories.permissionError'));
+      } else {
+        alert(t('memories.deleteError'));
+      }
     }
   });
 
@@ -301,7 +306,11 @@ const MemoriesPage = () => {
   // 외부 클릭시 드롭다운 닫기
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (showDropdown && !(event.target as HTMLElement).closest('.dropdown-menu')) {
+      const target = event.target as HTMLElement;
+      // 드롭다운 메뉴나 드롭다운 버튼이 아닌 곳을 클릭했을 때만 닫기
+      if (showDropdown && 
+          !target.closest('.dropdown-menu') && 
+          !target.closest('.dropdown-button')) {
         setShowDropdown(null);
       }
     };
@@ -598,24 +607,29 @@ const MemoriesPage = () => {
               className="relative group"
             >
               {/* 수정/삭제 드롭다운 - 본인 메모리만 표시 */}
-              {user?.id === memory.user_id && (
+              {user?.id === memory.created_by && (
                 <div className="absolute top-2 right-2 z-10">
                   <button
                     onClick={(e) => {
                       e.preventDefault();
+                      e.stopPropagation();
                       toggleDropdown(memory.id);
                     }}
-                    className="p-1.5 bg-white dark:bg-gray-800 rounded-md shadow-md opacity-0 group-hover:opacity-100 transition-opacity"
+                    className="dropdown-button p-1.5 bg-white dark:bg-gray-800 rounded-md shadow-md opacity-0 group-hover:opacity-100 transition-opacity"
                   >
                     <FiMoreVertical className="w-4 h-4 text-gray-600 dark:text-gray-400" />
                   </button>
                   
                   {showDropdown === memory.id && (
-                    <div className="dropdown-menu absolute right-0 mt-1 w-32 bg-white dark:bg-gray-800 rounded-md shadow-lg border border-gray-200 dark:border-gray-700">
+                    <div className="dropdown-menu absolute right-0 mt-1 w-32 bg-white dark:bg-gray-800 rounded-md shadow-lg border border-gray-200 dark:border-gray-700 z-20"
+                      onClick={(e) => e.stopPropagation()}
+                    >
                       <button
                         onClick={(e) => {
                           e.preventDefault();
+                          e.stopPropagation();
                           handleEdit(memory);
+                          setShowDropdown(null);
                         }}
                         className="flex items-center w-full px-3 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
                       >
@@ -625,7 +639,9 @@ const MemoriesPage = () => {
                       <button
                         onClick={(e) => {
                           e.preventDefault();
+                          e.stopPropagation();
                           handleDeleteClick(memory);
+                          setShowDropdown(null);
                         }}
                         className="flex items-center w-full px-3 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20"
                       >
@@ -738,7 +754,7 @@ const MemoriesPage = () => {
               </div>
               
               {/* 수정/삭제 버튼 - 리스트 뷰 */}
-              {user?.id === memory.user_id && (
+              {user?.id === memory.created_by && (
                 <div className="flex items-center space-x-2 ml-4">
                   <button
                     onClick={(e) => {

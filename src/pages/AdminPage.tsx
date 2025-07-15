@@ -1,12 +1,13 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { FiUsers, FiShield, FiActivity, FiTrash2, FiEdit2, FiMail } from 'react-icons/fi';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
+import { useLanguage } from '../contexts/LanguageContext';
 import { toast } from 'react-hot-toast';
 import { format } from 'date-fns';
-import { ko } from 'date-fns/locale';
+import { ko, enUS, th } from 'date-fns/locale';
 
 interface Profile {
   id: string;
@@ -15,6 +16,7 @@ interface Profile {
   role: 'parent' | 'family' | 'viewer';
   created_at: string;
   updated_at: string;
+  email?: string;
 }
 
 interface ActivityLog {
@@ -33,10 +35,24 @@ interface ActivityLog {
 
 const AdminPage = () => {
   const { user } = useAuth();
+  const { t, language } = useLanguage();
   const queryClient = useQueryClient();
   const [selectedTab, setSelectedTab] = useState<'users' | 'activity'>('users');
   const [editingUserId, setEditingUserId] = useState<string | null>(null);
   const [selectedRole, setSelectedRole] = useState<string>('');
+  const [editProfileModal, setEditProfileModal] = useState<{
+    isOpen: boolean;
+    userId: string | null;
+    username: string;
+    fullName: string;
+    email: string;
+  }>({
+    isOpen: false,
+    userId: null,
+    username: '',
+    fullName: '',
+    email: ''
+  });
 
   // 현재 사용자의 프로필 확인 (parent 역할인지)
   const { data: currentUserProfile, isLoading: isCheckingRole } = useQuery({
@@ -55,17 +71,27 @@ const AdminPage = () => {
     enabled: !!user,
   });
 
-  // 모든 사용자 목록 가져오기
+  // 모든 사용자 목록 가져오기 (이메일 포함)
   const { data: users, isLoading: isLoadingUsers } = useQuery({
     queryKey: ['all-users'],
     queryFn: async () => {
-      const { data, error } = await supabase
+      // RPC 함수 사용 가능한지 시도
+      const { data: rpcData, error: rpcError } = await supabase
+        .rpc('get_users_with_email');
+      
+      if (!rpcError && rpcData) {
+        return rpcData as (Profile & { email: string })[];
+      }
+      
+      // RPC 함수가 없으면 기존 방식 사용
+      const { data: profiles, error: profilesError } = await supabase
         .from('profiles')
         .select('*')
         .order('created_at', { ascending: false });
       
-      if (error) throw error;
-      return data as Profile[];
+      if (profilesError) throw profilesError;
+      
+      return profiles as Profile[];
     },
     enabled: currentUserProfile?.role === 'parent',
   });
@@ -101,12 +127,46 @@ const AdminPage = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['all-users'] });
-      toast.success('사용자 역할이 업데이트되었습니다.');
+      toast.success(t('admin.roleUpdated'));
       setEditingUserId(null);
       setSelectedRole('');
     },
     onError: (error: any) => {
-      toast.error(error.message || '역할 업데이트 실패');
+      toast.error(error.message || t('admin.roleUpdateFailed'));
+    },
+  });
+
+  // 프로필 정보 업데이트
+  const updateProfileMutation = useMutation({
+    mutationFn: async ({ userId, username, fullName }: { 
+      userId: string; 
+      username: string; 
+      fullName: string;
+    }) => {
+      const { error } = await supabase
+        .from('profiles')
+        .update({
+          username: username || null,
+          full_name: fullName || null,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', userId);
+      
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['all-users'] });
+      toast.success(t('admin.profileModal.updated'));
+      setEditProfileModal({
+        isOpen: false,
+        userId: null,
+        username: '',
+        fullName: '',
+        email: ''
+      });
+    },
+    onError: (error: any) => {
+      toast.error(error.message || t('admin.profileModal.updateFailed'));
     },
   });
 
@@ -124,10 +184,10 @@ const AdminPage = () => {
       <div className="text-center py-20">
         <FiShield className="w-16 h-16 mx-auto text-gray-400 mb-4" />
         <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
-          접근 권한이 없습니다
+          {t('admin.accessDenied')}
         </h2>
         <p className="text-gray-600 dark:text-gray-400">
-          이 페이지는 관리자(parent)만 접근할 수 있습니다.
+          {t('admin.accessDeniedDesc')}
         </p>
       </div>
     );
@@ -149,11 +209,11 @@ const AdminPage = () => {
   const getRoleLabel = (role: string) => {
     switch (role) {
       case 'parent':
-        return '관리자';
+        return t('admin.roleBadge.parent');
       case 'family':
-        return '가족';
+        return t('admin.roleBadge.family');
       case 'viewer':
-        return '일반';
+        return t('admin.roleBadge.viewer');
       default:
         return role;
     }
@@ -162,11 +222,11 @@ const AdminPage = () => {
   const getActionLabel = (action: string) => {
     switch (action) {
       case 'created':
-        return '생성';
+        return t('admin.activity.created');
       case 'updated':
-        return '수정';
+        return t('admin.activity.updated');
       case 'deleted':
-        return '삭제';
+        return t('admin.activity.deleted');
       default:
         return action;
     }
@@ -176,10 +236,10 @@ const AdminPage = () => {
     <div>
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
-          관리자 페이지
+          {t('admin.title')}
         </h1>
         <p className="text-gray-600 dark:text-gray-400">
-          사용자 관리 및 시스템 활동을 모니터링합니다.
+          {t('admin.subtitle')}
         </p>
       </div>
 
@@ -195,7 +255,7 @@ const AdminPage = () => {
             }`}
           >
             <FiUsers className="inline-block w-5 h-5 mr-2" />
-            사용자 관리
+            {t('admin.userManagement')}
           </button>
           <button
             onClick={() => setSelectedTab('activity')}
@@ -206,7 +266,7 @@ const AdminPage = () => {
             }`}
           >
             <FiActivity className="inline-block w-5 h-5 mr-2" />
-            활동 로그
+            {t('admin.activityLog')}
           </button>
         </nav>
       </div>
@@ -224,19 +284,19 @@ const AdminPage = () => {
                 <thead className="bg-gray-50 dark:bg-gray-900">
                   <tr>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                      사용자
+                      {t('admin.user')}
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                      이메일
+                      {t('admin.email')}
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                      역할
+                      {t('admin.role')}
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                      가입일
+                      {t('admin.joinedDate')}
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                      작업
+                      {t('admin.actions')}
                     </th>
                   </tr>
                 </thead>
@@ -251,16 +311,16 @@ const AdminPage = () => {
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div>
                           <div className="text-sm font-medium text-gray-900 dark:text-white">
-                            {user.full_name || '이름 없음'}
+                            {user.full_name || t('admin.notSet')}
                           </div>
                           <div className="text-sm text-gray-500 dark:text-gray-400">
-                            @{user.username}
+                            @{user.username || t('admin.notSet')}
                           </div>
                         </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="text-sm text-gray-900 dark:text-white">
-                          {user.username}
+                          {user.email || t('admin.notSet')}
                         </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
@@ -270,9 +330,9 @@ const AdminPage = () => {
                             onChange={(e) => setSelectedRole(e.target.value)}
                             className="text-sm border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700"
                           >
-                            <option value="viewer">일반</option>
-                            <option value="family">가족</option>
-                            <option value="parent">관리자</option>
+                            <option value="viewer">{t('admin.roleBadge.viewer')}</option>
+                            <option value="family">{t('admin.roleBadge.family')}</option>
+                            <option value="parent">{t('admin.roleBadge.parent')}</option>
                           </select>
                         ) : (
                           <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${getRoleBadgeColor(user.role)}`}>
@@ -281,7 +341,9 @@ const AdminPage = () => {
                         )}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
-                        {format(new Date(user.created_at), 'yyyy-MM-dd', { locale: ko })}
+                        {format(new Date(user.created_at), 'yyyy-MM-dd', { 
+                          locale: language === 'ko' ? ko : language === 'th' ? th : enUS 
+                        })}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                         {editingUserId === user.id ? (
@@ -295,7 +357,7 @@ const AdminPage = () => {
                               }}
                               className="text-green-600 hover:text-green-900 dark:text-green-400 dark:hover:text-green-300"
                             >
-                              저장
+                              {t('admin.profileModal.save')}
                             </button>
                             <button
                               onClick={() => {
@@ -304,20 +366,38 @@ const AdminPage = () => {
                               }}
                               className="text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-300"
                             >
-                              취소
+                              {t('admin.profileModal.cancel')}
                             </button>
                           </div>
                         ) : (
-                          <button
-                            onClick={() => {
-                              setEditingUserId(user.id);
-                              setSelectedRole(user.role);
-                            }}
-                            disabled={user.id === currentUserProfile.id}
-                            className="text-indigo-600 hover:text-indigo-900 dark:text-indigo-400 dark:hover:text-indigo-300 disabled:opacity-50 disabled:cursor-not-allowed"
-                          >
-                            <FiEdit2 className="w-4 h-4" />
-                          </button>
+                          <div className="flex space-x-2">
+                            <button
+                              onClick={() => {
+                                setEditProfileModal({
+                                  isOpen: true,
+                                  userId: user.id,
+                                  username: user.username || '',
+                                  fullName: user.full_name || '',
+                                  email: user.email || ''
+                                });
+                              }}
+                              className="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300 flex items-center"
+                              title={t('admin.profileModal.title')}
+                            >
+                              <FiMail className="w-4 h-4" />
+                            </button>
+                            <button
+                              onClick={() => {
+                                setEditingUserId(user.id);
+                                setSelectedRole(user.role);
+                              }}
+                              disabled={user.id === currentUserProfile.id}
+                              className="text-indigo-600 hover:text-indigo-900 dark:text-indigo-400 dark:hover:text-indigo-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                              title={t('admin.updateRole')}
+                            >
+                              <FiEdit2 className="w-4 h-4" />
+                            </button>
+                          </div>
                         )}
                       </td>
                     </motion.tr>
@@ -338,7 +418,8 @@ const AdminPage = () => {
             </div>
           ) : (
             <div className="space-y-4">
-              {activities?.map((activity) => (
+              {activities && activities.length > 0 ? (
+                activities.map((activity) => (
                 <motion.div
                   key={activity.id}
                   initial={{ opacity: 0, y: 20 }}
@@ -355,7 +436,7 @@ const AdminPage = () => {
                           {getActionLabel(activity.action)}
                         </span>
                         <span className="text-gray-700 dark:text-gray-300">
-                          {activity.entity_type === 'memory' ? '추억' : activity.entity_type}
+                          {activity.entity_type === 'memory' ? t('memories.title') : activity.entity_type}
                         </span>
                         {activity.details?.title && (
                           <span className="text-gray-600 dark:text-gray-400">
@@ -364,16 +445,122 @@ const AdminPage = () => {
                         )}
                       </div>
                       <div className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-                        {format(new Date(activity.created_at), 'yyyy년 MM월 dd일 HH:mm', { locale: ko })}
+                        {format(new Date(activity.created_at), 
+                          language === 'ko' ? 'yyyy년 MM월 dd일 HH:mm' : 'MMM dd, yyyy HH:mm', 
+                          { locale: language === 'ko' ? ko : language === 'th' ? th : enUS }
+                        )}
                       </div>
                     </div>
                   </div>
                 </motion.div>
-              ))}
+                ))
+              ) : (
+                <div className="text-center py-12">
+                  <FiActivity className="w-12 h-12 mx-auto text-gray-400 mb-4" />
+                  <p className="text-gray-500 dark:text-gray-400">
+                    {t('admin.activity.noData')}
+                  </p>
+                </div>
+              )}
             </div>
           )}
         </div>
       )}
+      
+      {/* 프로필 편집 모달 */}
+      <AnimatePresence>
+        {editProfileModal.isOpen && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4"
+            onClick={() => setEditProfileModal({ isOpen: false, userId: null, username: '', fullName: '', email: '' })}
+          >
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              className="bg-white dark:bg-gray-800 rounded-lg p-6 max-w-md w-full"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+                {t('admin.profileModal.title')}
+              </h3>
+              
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    {t('admin.profileModal.email')}
+                  </label>
+                  <input
+                    type="email"
+                    value={editProfileModal.email}
+                    readOnly
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white cursor-not-allowed"
+                  />
+                  <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                    {language === 'ko' ? '이메일은 변경할 수 없습니다.' : language === 'th' ? 'ไม่สามารถเปลี่ยนอีเมลได้' : 'Email cannot be changed.'}
+                  </p>
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    {t('admin.profileModal.fullName')}
+                  </label>
+                  <input
+                    type="text"
+                    value={editProfileModal.fullName}
+                    onChange={(e) => setEditProfileModal({ ...editProfileModal, fullName: e.target.value })}
+                    placeholder={language === 'ko' ? '이름을 입력하세요' : language === 'th' ? 'กรอกชื่อ' : 'Enter full name'}
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                  />
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    {t('admin.profileModal.username')}
+                  </label>
+                  <input
+                    type="text"
+                    value={editProfileModal.username}
+                    onChange={(e) => setEditProfileModal({ ...editProfileModal, username: e.target.value })}
+                    placeholder={language === 'ko' ? '사용자명을 입력하세요' : language === 'th' ? 'กรอกชื่อผู้ใช้' : 'Enter username'}
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                  />
+                  <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                    {language === 'ko' ? '@username 형식으로 표시됩니다.' : language === 'th' ? 'จะแสดงในรูปแบบ @username' : 'Will be displayed as @username.'}
+                  </p>
+                </div>
+              </div>
+              
+              <div className="flex justify-end space-x-3 mt-6">
+                <button
+                  onClick={() => setEditProfileModal({ isOpen: false, userId: null, username: '', fullName: '', email: '' })}
+                  className="px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"
+                >
+                  {t('admin.profileModal.cancel')}
+                </button>
+                <button
+                  onClick={() => {
+                    if (editProfileModal.userId) {
+                      updateProfileMutation.mutate({
+                        userId: editProfileModal.userId,
+                        username: editProfileModal.username,
+                        fullName: editProfileModal.fullName
+                      });
+                    }
+                  }}
+                  disabled={updateProfileMutation.isPending}
+                  className="px-4 py-2 bg-blue-600 text-white hover:bg-blue-700 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {updateProfileMutation.isPending ? t('admin.profileModal.saving') : t('admin.profileModal.save')}
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };

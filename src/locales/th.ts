@@ -178,6 +178,7 @@ export const th = {
     edit: "แก้ไข",
     delete: "ลบ",
     deleteError: "ไม่สามารถลบความทรงจำได้",
+    permissionError: "คุณไม่มีสิทธิ์ในการลบ กรุณาติดต่อผู้ดูแลระบบ",
     slideshow: "สไลด์โชว์"
   },
   
@@ -336,5 +337,54 @@ export const th = {
     account_info: "ข้อมูลบัญชี",
     joined_date: "เข้าร่วมเมื่อ",
     last_updated: "แก้ไขล่าสุด"
+  },
+
+  // หน้าผู้ดูแลระบบ
+  admin: {
+    title: "หน้าผู้ดูแลระบบ",
+    subtitle: "จัดการผู้ใช้และตรวจสอบกิจกรรมของระบบ",
+    accessDenied: "ไม่มีสิทธิ์เข้าถึง",
+    accessDeniedDesc: "หน้านี้สำหรับผู้ดูแลระบบ (parent) เท่านั้น",
+    userManagement: "จัดการผู้ใช้",
+    activityLog: "บันทึกกิจกรรม",
+    loading: "กำลังโหลด...",
+    user: "ผู้ใช้",
+    email: "อีเมล",
+    role: "บทบาท",
+    joinedDate: "เข้าร่วมเมื่อ",
+    actions: "การดำเนินการ",
+    edit: "แก้ไข",
+    roleBadge: {
+      parent: "ผู้ดูแลระบบ",
+      family: "ครอบครัว",
+      viewer: "ทั่วไป"
+    },
+    updateRole: "เปลี่ยนบทบาท",
+    updating: "กำลังเปลี่ยน...",
+    roleUpdated: "อัปเดตบทบาทผู้ใช้แล้ว",
+    roleUpdateFailed: "อัปเดตบทบาทล้มเหลว",
+    profileModal: {
+      title: "แก้ไขโปรไฟล์",
+      email: "อีเมล",
+      username: "ชื่อผู้ใช้",
+      fullName: "ชื่อเต็ม",
+      save: "บันทึก",
+      cancel: "ยกเลิก",
+      saving: "กำลังบันทึก...",
+      updated: "อัปเดตโปรไฟล์แล้ว",
+      updateFailed: "อัปเดตโปรไฟล์ล้มเหลว"
+    },
+    activity: {
+      action: "การดำเนินการ",
+      created: "สร้าง",
+      updated: "แก้ไข",
+      deleted: "ลบ",
+      details: "รายละเอียด",
+      date: "วันที่",
+      noData: "ไม่มีบันทึกกิจกรรม"
+    },
+    unknown: "ไม่ทราบ",
+    notSet: "ไม่ได้ตั้งค่า",
+    ago: "ที่แล้ว"
   }
 } as const;

@@ -178,6 +178,7 @@ export const en = {
     edit: "Edit",
     delete: "Delete",
     deleteError: "Failed to delete the memory.",
+    permissionError: "You don't have permission to delete. Please contact the administrator.",
     slideshow: "Slideshow"
   },
   
@@ -336,5 +337,54 @@ export const en = {
     account_info: "Account Information",
     joined_date: "Joined",
     last_updated: "Last Updated"
+  },
+
+  // Admin Page
+  admin: {
+    title: "Admin Page",
+    subtitle: "Manage users and monitor system activities.",
+    accessDenied: "Access Denied",
+    accessDeniedDesc: "This page is only accessible to administrators (parent).",
+    userManagement: "User Management",
+    activityLog: "Activity Log",
+    loading: "Loading...",
+    user: "User",
+    email: "Email",
+    role: "Role",
+    joinedDate: "Joined",
+    actions: "Actions",
+    edit: "Edit",
+    roleBadge: {
+      parent: "Admin",
+      family: "Family",
+      viewer: "Viewer"
+    },
+    updateRole: "Change Role",
+    updating: "Updating...",
+    roleUpdated: "User role has been updated.",
+    roleUpdateFailed: "Failed to update role",
+    profileModal: {
+      title: "Edit Profile",
+      email: "Email",
+      username: "Username",
+      fullName: "Full Name",
+      save: "Save",
+      cancel: "Cancel",
+      saving: "Saving...",
+      updated: "Profile has been updated.",
+      updateFailed: "Failed to update profile"
+    },
+    activity: {
+      action: "Action",
+      created: "Created",
+      updated: "Updated",
+      deleted: "Deleted",
+      details: "Details",
+      date: "Date",
+      noData: "No activity logs available."
+    },
+    unknown: "Unknown",
+    notSet: "Not Set",
+    ago: "ago"
   }
 } as const;
