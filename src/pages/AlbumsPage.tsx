@@ -5,6 +5,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '../lib/supabase';
 import { motion, AnimatePresence } from 'framer-motion';
+import { Link } from 'react-router-dom';
 
 interface Album {
   id: string;
@@ -17,6 +18,11 @@ interface Album {
   updated_at: string;
   memories_count?: number;
   cover_url?: string;
+  cover_image?: {
+    id: string;
+    file_path: string;
+    file_type: 'image' | 'video';
+  } | null;
 }
 
 const AlbumsPage = () => {
@@ -78,6 +84,12 @@ const AlbumsPage = () => {
     },
   });
 
+  // 미디어 URL 가져오기
+  const getMediaUrl = (path: string) => {
+    const { data } = supabase.storage.from('media').getPublicUrl(path);
+    return data.publicUrl;
+  };
+
   const handleCreateAlbum = (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.name.trim()) return;
@@ -85,7 +97,7 @@ const AlbumsPage = () => {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 pt-8">
       <div className="flex justify-between items-center">
         <h1 className="text-3xl font-bold text-gray-900 dark:text-white">{t('albums.title')}</h1>
         <button 
@@ -109,39 +121,34 @@ const AlbumsPage = () => {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {albums.map((album) => (
-            <div
+            <Link
               key={album.id}
-              className="bg-white dark:bg-gray-800 rounded-lg shadow-lg overflow-hidden hover:shadow-xl transition-shadow cursor-pointer"
+              to={`/albums/${album.id}`}
+              className="block"
             >
-              <div className="aspect-w-16 aspect-h-9 bg-gray-200 dark:bg-gray-700">
-                {album.coverImage ? (
-                  <img
-                    src={album.coverImage}
-                    alt={album.name}
-                    className="object-cover w-full h-full"
-                  />
-                ) : (
+              <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg overflow-hidden hover:shadow-xl transition-shadow cursor-pointer">
+                <div className="h-48 bg-gray-200 dark:bg-gray-700">
                   <div className="flex items-center justify-center h-full">
                     <FiFolder className="w-16 h-16 text-gray-400" />
                   </div>
-                )}
-              </div>
-              <div className="p-4">
-                <div className="flex items-center justify-between mb-2">
-                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
-                    {album.name}
-                  </h3>
-                  {album.isPublic ? (
-                    <FiGlobe className="w-4 h-4 text-gray-500" />
-                  ) : (
-                    <FiLock className="w-4 h-4 text-gray-500" />
-                  )}
                 </div>
-                <p className="text-gray-600 dark:text-gray-400 text-sm">
-                  {album.memories_count || 0} {t('albums.memoriesCount')}
-                </p>
+                <div className="p-4">
+                  <div className="flex items-center justify-between mb-2">
+                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+                      {album.name}
+                    </h3>
+                    {album.is_public ? (
+                      <FiGlobe className="w-4 h-4 text-gray-500" />
+                    ) : (
+                      <FiLock className="w-4 h-4 text-gray-500" />
+                    )}
+                  </div>
+                  <p className="text-gray-600 dark:text-gray-400 text-sm">
+                    {album.memories_count || 0} {t('albums.memoriesCount')}
+                  </p>
+                </div>
               </div>
-            </div>
+            </Link>
           ))}
         </div>
       )}

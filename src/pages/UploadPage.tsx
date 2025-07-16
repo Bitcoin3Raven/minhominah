@@ -2,7 +2,7 @@ import { useState, useRef, useCallback, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { motion, AnimatePresence } from 'framer-motion';
-import { FiUpload, FiX, FiVideo, FiCalendar, FiTag, FiUser, FiPlus, FiEdit2 } from 'react-icons/fi';
+import { FiUpload, FiX, FiVideo, FiCalendar, FiTag, FiUser, FiPlus, FiEdit2, FiFolder } from 'react-icons/fi';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
 import { useQuery, useMutation } from '@tanstack/react-query';
@@ -18,6 +18,7 @@ interface UploadFormData {
   memory_date: string;
   people: string[];
   tags: string[];
+  albums: string[];
 }
 
 interface FilePreview {
@@ -63,11 +64,13 @@ const UploadPage = () => {
     defaultValues: {
       people: [],
       tags: [],
+      albums: [],
     },
   });
 
   const selectedPeople = watch('people');
   const selectedTags = watch('tags');
+  const selectedAlbums = watch('albums');
 
   // 사람 목록 불러오기
   const { data: people, refetch: refetchPeople } = useQuery({
@@ -89,6 +92,16 @@ const UploadPage = () => {
     },
   });
 
+  // 앨범 목록 불러오기
+  const { data: albums } = useQuery({
+    queryKey: ['albums'],
+    queryFn: async () => {
+      const { data, error } = await supabase.from('albums').select('*').order('created_at', { ascending: false });
+      if (error) throw error;
+      return data;
+    },
+  });
+
   // 편집 모드: 기존 메모리 데이터 로드
   const { data: editMemory } = useQuery({
     queryKey: ['memory', editId],
@@ -101,7 +114,8 @@ const UploadPage = () => {
           *,
           media_files(*),
           memory_people(person_id),
-          memory_tags(tag_id)
+          memory_tags(tag_id),
+          album_memories(album_id)
         `)
         .eq('id', editId)
         .eq('created_by', user?.id)
@@ -115,12 +129,15 @@ const UploadPage = () => {
 
   // 편집 모드: 폼에 기존 데이터 채우기
   useEffect(() => {
-    if (editMemory && people && tags) {
+    if (editMemory && people && tags && albums) {
       // 인물 ID 설정
       const peopleIds = editMemory.memory_people?.map((mp: any) => mp.person_id).filter(id => id != null) || [];
       
       // 태그 ID 설정
       const tagIds = editMemory.memory_tags?.map((mt: any) => mt.tag_id).filter(id => id != null) || [];
+      
+      // 앨범 ID 설정
+      const albumIds = editMemory.album_memories?.map((am: any) => am.album_id).filter(id => id != null) || [];
       
       // reset을 사용하여 폼 전체를 한번에 업데이트
       reset({
@@ -129,6 +146,7 @@ const UploadPage = () => {
         memory_date: editMemory.memory_date.split('T')[0],
         people: peopleIds,
         tags: tagIds,
+        albums: albumIds,
       });
       
       // 기존 미디어 파일 설정
@@ -140,7 +158,7 @@ const UploadPage = () => {
       })) || [];
       setExistingMedia(existingMediaFiles);
     }
-  }, [editMemory, people, tags, reset]);
+  }, [editMemory, people, tags, albums, reset]);
 
   // 파일 처리
   const handleFiles = useCallback(async (files: FileList | null) => {
@@ -307,6 +325,16 @@ const UploadPage = () => {
           throw deleteTagsError;
         }
 
+        const { error: deleteAlbumsError } = await supabase
+          .from('album_memories')
+          .delete()
+          .eq('memory_id', memoryId);
+        
+        if (deleteAlbumsError) {
+          console.error('기존 앨범 삭제 실패:', deleteAlbumsError);
+          throw deleteAlbumsError;
+        }
+
       } else {
         // 새로 생성
         const { data: memory, error: memoryError } = await supabase
@@ -405,6 +433,29 @@ const UploadPage = () => {
             });
 
           if (tagsError) throw tagsError;
+        }
+      }
+
+      // 6. 앨범 연결
+      if (data.albums.length > 0) {
+        // null이나 undefined, 빈 문자열 값 필터링
+        const validAlbums = data.albums.filter(albumId => albumId != null && albumId !== '');
+        
+        if (validAlbums.length > 0) {
+          const albumInserts = validAlbums.map(albumId => ({
+            album_id: albumId,
+            memory_id: memoryId,
+            position: 0,
+          }));
+
+          const { error: albumsError } = await supabase
+            .from('album_memories')
+            .upsert(albumInserts, { 
+              onConflict: 'album_id,memory_id',
+              ignoreDuplicates: true 
+            });
+
+          if (albumsError) throw albumsError;
         }
       }
 
@@ -853,6 +904,69 @@ const UploadPage = () => {
                   <FiPlus className="w-3 h-3" />
                   {t('upload_add_tag')}
                 </motion.button>
+              </div>
+            </div>
+
+            {/* 앨범 선택 */}
+            <div>
+              <label className="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">
+                <FiFolder className="inline-block w-4 h-4 mr-1 text-purple-500" />
+                {t('upload_album_label')}
+              </label>
+              
+              {/* 선택된 앨범 표시 */}
+              {selectedAlbums.length > 0 && (
+                <div className="flex flex-wrap gap-2 mb-3">
+                  {selectedAlbums.map(albumId => {
+                    const album = albums?.find(a => a.id === albumId);
+                    if (!album) return null;
+                    return (
+                      <motion.span
+                        key={albumId}
+                        initial={{ opacity: 0, scale: 0.8 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        exit={{ opacity: 0, scale: 0.8 }}
+                        className="inline-flex items-center px-3 py-1.5 bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 rounded-full text-sm"
+                      >
+                        <FiFolder className="w-3 h-3 mr-1" />
+                        {album.name}
+                        <button
+                          type="button"
+                          onClick={() => setValue('albums', selectedAlbums.filter(id => id !== albumId))}
+                          className="ml-2 hover:text-purple-900 dark:hover:text-purple-100"
+                        >
+                          <FiX className="w-3 h-3" />
+                        </button>
+                      </motion.span>
+                    );
+                  })}
+                </div>
+              )}
+              
+              {/* 선택 가능한 앨범 목록 */}
+              <div className="flex flex-wrap gap-2">
+                {albums?.map(album => (
+                  <motion.button
+                    key={album.id}
+                    type="button"
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={() => {
+                      if (!selectedAlbums.includes(album.id)) {
+                        setValue('albums', [...selectedAlbums, album.id]);
+                      }
+                    }}
+                    disabled={selectedAlbums.includes(album.id)}
+                    className={`px-3 py-1.5 rounded-full text-sm transition-all ${
+                      selectedAlbums.includes(album.id)
+                        ? 'bg-gray-100 text-gray-400 cursor-not-allowed dark:bg-gray-800 dark:text-gray-600'
+                        : 'bg-gray-200 text-gray-700 hover:bg-purple-100 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600'
+                    }`}
+                  >
+                    <FiFolder className="inline-block w-3 h-3 mr-1" />
+                    {album.name}
+                  </motion.button>
+                ))}
               </div>
             </div>
 

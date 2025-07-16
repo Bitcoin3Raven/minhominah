@@ -17,6 +17,8 @@ export const ko = {
   nav_activity_log: "활동 로그",
   nav_trash: "휴지통",
   nav_profile: "프로필",
+  nav_login: "로그인",
+  nav_logout: "로그아웃",
   
   // 사이트 공통
   site_title: "민호민아",
@@ -27,6 +29,32 @@ export const ko = {
   auth_logout: "로그아웃",
   auth_signup: "회원가입",
   auth_account: "계정",
+  
+  // 로그인 페이지
+  login: {
+    title: "로그인",
+    signupTitle: "회원가입",
+    subtitle: "민호민아의 소중한 추억을 함께해요",
+    name: "이름",
+    namePlaceholder: "홍길동",
+    email: "이메일",
+    emailPlaceholder: "your@email.com",
+    password: "비밀번호",
+    passwordPlaceholder: "••••••••",
+    confirmPassword: "비밀번호 확인",
+    passwordMismatch: "비밀번호가 일치하지 않습니다.",
+    passwordTooShort: "비밀번호는 최소 6자 이상이어야 합니다.",
+    signupSuccess: "회원가입이 완료되었습니다! 이메일을 확인해주세요.",
+    emailAlreadyExists: "이미 등록된 이메일입니다.",
+    signupError: "회원가입 중 오류가 발생했습니다.",
+    loginError: "이메일 또는 비밀번호가 올바르지 않습니다.",
+    signingUp: "가입 중...",
+    loggingIn: "로그인 중...",
+    haveAccount: "이미 계정이 있으신가요?",
+    noAccount: "계정이 없으신가요?",
+    loginButton: "로그인",
+    signupButton: "회원가입"
+  },
   
   // 히어로 섹션
   hero_title: "민호와 민아의",
@@ -140,6 +168,7 @@ export const ko = {
   upload_add_person: "인물 추가",
   upload_tags_label: "태그",
   upload_add_tag: "태그 추가",
+  upload_album_label: "앨범",
   upload_submit: "추억 추가하기",
   upload_edit_submit: "추억 수정하기",
   upload_uploading: "업로드 중...",
@@ -184,7 +213,12 @@ export const ko = {
     download: "다운로드",
     comments: "댓글",
     backToGallery: "추억 갤러리로 돌아가기",
-    notFound: "추억을 찾을 수 없습니다."
+    notFound: "추억을 찾을 수 없습니다.",
+    notFoundDescription: "요청하신 추억이 존재하지 않거나 삭제되었습니다.",
+    loadError: "추억을 불러오는 중 오류가 발생했습니다.",
+    addToAlbum: "앨범에 추가",
+    selectAlbums: "앨범 선택",
+    updateError: "추억 업데이트에 실패했습니다."
   },
   
   // 성장 기록 페이지
@@ -254,7 +288,21 @@ export const ko = {
     makePublic: "공개 앨범으로 설정",
     create: "만들기",
     creating: "만드는 중...",
-    cancel: "취소"
+    cancel: "취소",
+    backToAlbums: "앨범 목록으로 돌아가기",
+    notFound: "앨범을 찾을 수 없습니다",
+    noMemories: "이 앨범에 추억이 없습니다",
+    addMemoriesDesc: "추억 갤러리에서 이 앨범에 추가할 수 있습니다",
+    addMemories: "추억 추가하기",
+    editAlbum: "앨범 수정",
+    save: "저장",
+    saving: "저장 중...",
+    deleteAlbum: "앨범 삭제",
+    deleteConfirm: "이 앨범을 삭제하시겠습니까? 앨범 안의 추억들은 삭제되지 않습니다.",
+    delete: "삭제",
+    deleting: "삭제 중...",
+    updateError: "앨범 업데이트에 실패했습니다.",
+    setCover: "앨범 커버로 설정"
   },
   
   // 포토북 만들기 페이지

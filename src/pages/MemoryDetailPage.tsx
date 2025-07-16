@@ -1,10 +1,11 @@
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { motion, AnimatePresence } from 'framer-motion';
-import { FiArrowLeft, FiCalendar, FiTag, FiUser, FiDownload, FiShare2, FiHeart, FiMessageSquare, FiMoreVertical, FiEdit2, FiTrash2, FiX } from 'react-icons/fi';
+import { FiArrowLeft, FiCalendar, FiTag, FiUser, FiDownload, FiShare2, FiHeart, FiMessageSquare, FiMoreVertical, FiEdit2, FiTrash2, FiX, FiFolder } from 'react-icons/fi';
 import { supabase } from '../lib/supabase';
 import { useState, useEffect } from 'react';
 import CommentSection from '../components/CommentSection';
+import AddToAlbumModal from '../components/AddToAlbumModal';
 import { useAuth } from '../contexts/AuthContext';
 import { useLanguage } from '../contexts/LanguageContext';
 
@@ -51,10 +52,13 @@ const MemoryDetailPage = () => {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [showDropdown, setShowDropdown] = useState(false);
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [showAlbumModal, setShowAlbumModal] = useState(false);
 
-  const { data: memory, isLoading } = useQuery({
+  const { data: memory, isLoading, error } = useQuery({
     queryKey: ['memory', id],
     queryFn: async () => {
+      if (!id) throw new Error('Invalid memory ID');
+      
       const { data, error } = await supabase
         .from('memories')
         .select(`
@@ -66,9 +70,22 @@ const MemoryDetailPage = () => {
         .eq('id', id)
         .single();
 
-      if (error) throw error;
+      if (error) {
+        console.error('Memory fetch error:', error);
+        if (error.code === 'PGRST116') {
+          throw new Error('Memory not found');
+        }
+        throw error;
+      }
+      
+      if (!data) {
+        throw new Error('Memory not found');
+      }
+      
       return data as Memory;
     },
+    retry: 2,
+    retryDelay: 1000,
   });
 
   // 삭제 mutation
@@ -195,10 +212,25 @@ const MemoryDetailPage = () => {
     );
   }
 
-  if (!memory) {
+  if (error || !memory) {
     return (
-      <div className="text-center py-20">
-        <p className="text-gray-500 dark:text-gray-400">{t('memories.notFound')}</p>
+      <div className="flex flex-col items-center justify-center min-h-[400px] text-center px-4">
+        <div className="text-6xl mb-4">😢</div>
+        <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
+          {t('memories.notFound')}
+        </h2>
+        <p className="text-gray-600 dark:text-gray-400 mb-6">
+          {error?.message === 'Memory not found' 
+            ? t('memories.notFoundDescription')
+            : t('memories.loadError')}
+        </p>
+        <button
+          onClick={() => navigate('/memories')}
+          className="flex items-center space-x-2 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors"
+        >
+          <FiArrowLeft className="w-4 h-4" />
+          <span>{t('memories.backToGallery')}</span>
+        </button>
       </div>
     );
   }
@@ -256,6 +288,11 @@ const MemoryDetailPage = () => {
                       src={getMediaUrl(memory.media_files[currentImageIndex].file_path)}
                       alt={memory.title}
                       className="w-full h-full object-contain"
+                      loading="lazy"
+                      onError={(e) => {
+                        console.error('Image load error:', e);
+                        (e.target as HTMLImageElement).src = '/assets/images/placeholder.svg';
+                      }}
                     />
                   ) : (
                     <video
@@ -286,6 +323,10 @@ const MemoryDetailPage = () => {
                             src={getMediaUrl(file.thumbnail_path || file.file_path)}
                             alt=""
                             className="w-full h-full object-cover"
+                            loading="lazy"
+                            onError={(e) => {
+                              (e.target as HTMLImageElement).src = '/assets/images/placeholder.svg';
+                            }}
                           />
                         ) : (
                           <div className="w-full h-full bg-gray-300 dark:bg-gray-600 flex items-center justify-center">
@@ -330,6 +371,18 @@ const MemoryDetailPage = () => {
                     <div className="dropdown-menu absolute right-0 mt-1 w-36 bg-white dark:bg-gray-800 rounded-md shadow-lg border border-gray-200 dark:border-gray-700 z-20"
                       onClick={(e) => e.stopPropagation()}
                     >
+                      <button
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          setShowAlbumModal(true);
+                          setShowDropdown(false);
+                        }}
+                        className="flex items-center w-full px-3 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+                      >
+                        <FiFolder className="w-4 h-4 mr-2" />
+                        {t('memories.addToAlbum')}
+                      </button>
                       <button
                         onClick={(e) => {
                           e.preventDefault();
@@ -505,6 +558,18 @@ const MemoryDetailPage = () => {
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* 앨범 추가 모달 */}
+      {memory && (
+        <AddToAlbumModal
+          isOpen={showAlbumModal}
+          onClose={() => setShowAlbumModal(false)}
+          memoryId={memory.id}
+          onSuccess={() => {
+            queryClient.invalidateQueries({ queryKey: ['album-memories'] });
+          }}
+        />
+      )}
     </div>
   );
 };

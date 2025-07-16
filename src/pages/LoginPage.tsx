@@ -1,12 +1,14 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
+import { useLanguage } from '../contexts/LanguageContext';
 import { FiMail, FiLock, FiEye, FiEyeOff, FiUser } from 'react-icons/fi';
 import { motion } from 'framer-motion';
 
 const LoginPage = () => {
   const navigate = useNavigate();
   const { signIn, signUp } = useAuth();
+  const { t } = useLanguage();
   const [isSignUp, setIsSignUp] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -27,19 +29,19 @@ const LoginPage = () => {
       if (isSignUp) {
         // 회원가입 로직
         if (password !== confirmPassword) {
-          setError('비밀번호가 일치하지 않습니다.');
+          setError(t('login.passwordMismatch'));
           setLoading(false);
           return;
         }
         
         if (password.length < 6) {
-          setError('비밀번호는 최소 6자 이상이어야 합니다.');
+          setError(t('login.passwordTooShort'));
           setLoading(false);
           return;
         }
 
         await signUp(email, password);
-        setSuccess('회원가입이 완료되었습니다! 이메일을 확인해주세요.');
+        setSuccess(t('login.signupSuccess'));
         
         // 회원가입 후 자동 로그인
         setTimeout(async () => {
@@ -58,12 +60,12 @@ const LoginPage = () => {
     } catch (err: any) {
       if (isSignUp) {
         if (err.message?.includes('already registered')) {
-          setError('이미 등록된 이메일입니다.');
+          setError(t('login.emailAlreadyExists'));
         } else {
-          setError('회원가입 중 오류가 발생했습니다.');
+          setError(t('login.signupError'));
         }
       } else {
-        setError('이메일 또는 비밀번호가 올바르지 않습니다.');
+        setError(t('login.loginError'));
       }
     } finally {
       setLoading(false);
@@ -101,11 +103,11 @@ const LoginPage = () => {
         <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-lg rounded-2xl shadow-2xl p-8 border border-gray-200/50 dark:border-gray-700/50">
           <h1 className="text-3xl font-bold text-center mb-2">
             <span className="bg-gradient-to-r from-pink-500 to-blue-500 text-transparent bg-clip-text">
-              {isSignUp ? '회원가입' : '로그인'}
+              {isSignUp ? t('login.signupTitle') : t('login.title')}
             </span>
           </h1>
           <p className="text-center text-gray-600 dark:text-gray-400 text-sm mb-8">
-            민호민아의 소중한 추억을 함께해요
+            {t('login.subtitle')}
           </p>
 
           <form onSubmit={handleSubmit} className="space-y-5">
@@ -132,7 +134,7 @@ const LoginPage = () => {
             {isSignUp && (
               <div>
                 <label htmlFor="name" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  이름
+                  {t('login.name')}
                 </label>
                 <div className="relative">
                   <FiUser className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-gray-500" />
@@ -142,7 +144,7 @@ const LoginPage = () => {
                     value={name}
                     onChange={(e) => setName(e.target.value)}
                     className="w-full pl-10 pr-3 py-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white/50 dark:bg-gray-700/50 backdrop-blur-sm text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
-                    placeholder="홍길동"
+                    placeholder={t('login.namePlaceholder')}
                     required={isSignUp}
                   />
                 </div>
@@ -151,7 +153,7 @@ const LoginPage = () => {
 
             <div>
               <label htmlFor="email" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                이메일
+                {t('login.email')}
               </label>
               <div className="relative">
                 <FiMail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-gray-500" />
@@ -161,7 +163,7 @@ const LoginPage = () => {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   className="w-full pl-10 pr-3 py-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white/50 dark:bg-gray-700/50 backdrop-blur-sm text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
-                  placeholder="your@email.com"
+                  placeholder={t('login.emailPlaceholder')}
                   required
                 />
               </div>
@@ -169,7 +171,7 @@ const LoginPage = () => {
 
             <div>
               <label htmlFor="password" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                비밀번호
+                {t('login.password')}
               </label>
               <div className="relative">
                 <FiLock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-gray-500" />
@@ -179,7 +181,7 @@ const LoginPage = () => {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   className="w-full pl-10 pr-10 py-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white/50 dark:bg-gray-700/50 backdrop-blur-sm text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
-                  placeholder="••••••••"
+                  placeholder={t('login.passwordPlaceholder')}
                   required
                 />
                 <button
@@ -195,7 +197,7 @@ const LoginPage = () => {
             {isSignUp && (
               <div>
                 <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  비밀번호 확인
+                  {t('login.confirmPassword')}
                 </label>
                 <div className="relative">
                   <FiLock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-gray-500" />
@@ -205,7 +207,7 @@ const LoginPage = () => {
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
                     className="w-full pl-10 pr-10 py-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white/50 dark:bg-gray-700/50 backdrop-blur-sm text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
-                    placeholder="••••••••"
+                    placeholder={t('login.passwordPlaceholder')}
                     required={isSignUp}
                   />
                 </div>
@@ -217,13 +219,13 @@ const LoginPage = () => {
               disabled={loading}
               className="w-full py-3 px-4 bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white font-medium rounded-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed transform hover:scale-[1.02] active:scale-[0.98] shadow-lg"
             >
-              {loading ? (isSignUp ? '가입 중...' : '로그인 중...') : (isSignUp ? '회원가입' : '로그인')}
+              {loading ? (isSignUp ? t('login.signingUp') : t('login.loggingIn')) : (isSignUp ? t('login.signupButton') : t('login.loginButton'))}
             </button>
           </form>
 
           <div className="mt-6 text-center">
             <p className="text-sm text-gray-600 dark:text-gray-400">
-              {isSignUp ? '이미 계정이 있으신가요?' : '계정이 없으신가요?'}{' '}
+              {isSignUp ? t('login.haveAccount') : t('login.noAccount')}{' '}
               <button
                 type="button"
                 onClick={() => {
@@ -235,7 +237,7 @@ const LoginPage = () => {
                 }}
                 className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 font-medium transition-all duration-200"
               >
-                {isSignUp ? '로그인' : '회원가입'}
+                {isSignUp ? t('login.loginButton') : t('login.signupButton')}
               </button>
             </p>
           </div>

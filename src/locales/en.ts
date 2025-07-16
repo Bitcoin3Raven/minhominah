@@ -17,6 +17,8 @@ export const en = {
   nav_activity_log: "Activity Log",
   nav_trash: "Trash",
   nav_profile: "Profile",
+  nav_login: "Login",
+  nav_logout: "Logout",
   
   // 사이트 공통
   site_title: "MinhoMinah",
@@ -27,6 +29,32 @@ export const en = {
   auth_logout: "Logout",
   auth_signup: "Sign Up",
   auth_account: "Account",
+  
+  // Login Page
+  login: {
+    title: "Login",
+    signupTitle: "Sign Up",
+    subtitle: "Share precious memories of Minho & Minah",
+    name: "Name",
+    namePlaceholder: "John Doe",
+    email: "Email",
+    emailPlaceholder: "your@email.com",
+    password: "Password",
+    passwordPlaceholder: "••••••••",
+    confirmPassword: "Confirm Password",
+    passwordMismatch: "Passwords do not match.",
+    passwordTooShort: "Password must be at least 6 characters.",
+    signupSuccess: "Sign up successful! Please check your email.",
+    emailAlreadyExists: "This email is already registered.",
+    signupError: "An error occurred during sign up.",
+    loginError: "Invalid email or password.",
+    signingUp: "Signing up...",
+    loggingIn: "Logging in...",
+    haveAccount: "Already have an account?",
+    noAccount: "Don't have an account?",
+    loginButton: "Login",
+    signupButton: "Sign Up"
+  },
   
   // 히어로 섹션
   hero_title: "Minho & Minah",
@@ -140,6 +168,7 @@ export const en = {
   upload_add_person: "Add Person",
   upload_tags_label: "Tags",
   upload_add_tag: "Add Tag",
+  upload_album_label: "Albums",
   upload_submit: "Add Memory",
   upload_edit_submit: "Update Memory",
   upload_uploading: "Uploading...",
@@ -184,7 +213,12 @@ export const en = {
     download: "Download",
     comments: "Comments",
     backToGallery: "Back to Memory Gallery",
-    notFound: "Memory not found."
+    notFound: "Memory not found.",
+    notFoundDescription: "The memory you requested does not exist or has been deleted.",
+    loadError: "An error occurred while loading the memory.",
+    addToAlbum: "Add to Album",
+    selectAlbums: "Select Albums",
+    updateError: "Failed to update the memory."
   },
   
   // 성장 기록 페이지
@@ -254,7 +288,21 @@ export const en = {
     makePublic: "Make this album public",
     create: "Create",
     creating: "Creating...",
-    cancel: "Cancel"
+    cancel: "Cancel",
+    backToAlbums: "Back to Albums",
+    notFound: "Album not found",
+    noMemories: "No memories in this album",
+    addMemoriesDesc: "You can add memories from the memories gallery",
+    addMemories: "Add Memories",
+    editAlbum: "Edit Album",
+    save: "Save",
+    saving: "Saving...",
+    deleteAlbum: "Delete Album",
+    deleteConfirm: "Are you sure you want to delete this album? The memories in it will not be deleted.",
+    delete: "Delete",
+    deleting: "Deleting...",
+    updateError: "Failed to update albums.",
+    setCover: "Set as Album Cover"
   },
   
   // 포토북 만들기 페이지

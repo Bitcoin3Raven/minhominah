@@ -14,6 +14,7 @@ const MemoriesPage = lazy(() => import('./pages/MemoriesPage'));
 const MemoryDetailPage = lazy(() => import('./pages/MemoryDetailPage'));
 const UploadPage = lazy(() => import('./pages/UploadPage'));
 const AlbumsPage = lazy(() => import('./pages/AlbumsPage'));
+const AlbumDetailPage = lazy(() => import('./pages/AlbumDetailPage'));
 const StatisticsPage = lazy(() => import('./pages/StatisticsPage'));
 const ActivityLogPage = lazy(() => import('./pages/ActivityLogPage'));
 const TrashPage = lazy(() => import('./pages/TrashPage'));
@@ -36,9 +37,11 @@ const PageLoader = () => (
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      staleTime: 5 * 60 * 1000, // 5분
-      gcTime: 10 * 60 * 1000, // 10분
+      staleTime: 10 * 60 * 1000, // 10분 (기존 5분에서 연장)
+      gcTime: 30 * 60 * 1000, // 30분 (기존 10분에서 연장)
       refetchOnWindowFocus: false,
+      retry: 3, // 실패 시 3번 재시도
+      retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000), // 지수 백오프
     },
   },
 });
@@ -74,6 +77,11 @@ function App() {
                   <Route path="/albums" element={
                     <PrivateRoute>
                       <AlbumsPage />
+                    </PrivateRoute>
+                  } />
+                  <Route path="/albums/:id" element={
+                    <PrivateRoute>
+                      <AlbumDetailPage />
                     </PrivateRoute>
                   } />
                   <Route path="/statistics" element={

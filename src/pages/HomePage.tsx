@@ -8,11 +8,31 @@ import { useAuth } from '../contexts/AuthContext';
 import { useLegacyStyles } from '../hooks/useLegacyStyles';
 import { useLanguage } from '../contexts/LanguageContext';
 
+interface MediaFile {
+  id: string;
+  file_path: string;
+  thumbnail_path: string | null;
+  file_type: 'image' | 'video';
+}
+
+interface Memory {
+  id: string;
+  title: string;
+  memory_date: string;
+  media_files?: MediaFile[];
+}
+
+interface Stats {
+  totalMemories: number;
+  totalPhotos: number;
+  recentMemories: Memory[];
+}
+
 const HomePage = () => {
   const { user } = useAuth();
   const styles = useLegacyStyles();
   const { t } = useLanguage();
-  const [stats, setStats] = useState({
+  const [stats, setStats] = useState<Stats>({
     totalMemories: 0,
     totalPhotos: 0,
     recentMemories: [],
@@ -34,10 +54,13 @@ const HomePage = () => {
         .from('media_files')
         .select('*', { count: 'exact', head: true });
 
-      // 최근 추억
+      // 최근 추억 (미디어 파일 포함)
       const { data: recentMemories } = await supabase
         .from('memories')
-        .select('*')
+        .select(`
+          *,
+          media_files(*)
+        `)
         .order('memory_date', { ascending: false })
         .limit(3);
 
@@ -49,6 +72,12 @@ const HomePage = () => {
     } catch (error) {
       console.error('Error loading stats:', error);
     }
+  };
+
+  // 미디어 URL 가져오기
+  const getMediaUrl = (path: string) => {
+    const { data } = supabase.storage.from('media').getPublicUrl(path);
+    return data.publicUrl;
   };
 
   return (
@@ -147,7 +176,7 @@ const HomePage = () => {
       </section>
 
       {/* 통계 섹션 */}
-      <section className="py-16 bg-background-secondary dark:bg-gray-800" style={{ backgroundColor: '#f8f9fa' }}>
+      <section className="py-16 bg-background-secondary dark:from-gray-800/50 dark:to-gray-900/50 dark:bg-gradient-to-b" style={{ backgroundColor: '#f8f9fa' }}>
         <div className="container mx-auto px-4">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -155,7 +184,7 @@ const HomePage = () => {
             transition={{ duration: 0.5, delay: 0.2 }}
             className="grid grid-cols-1 md:grid-cols-4 gap-6"
           >
-            <div className="card p-6 text-center bg-card dark:bg-gray-700 shadow-custom-md">
+            <div className="card p-6 text-center bg-card dark:bg-gray-800/80 shadow-custom-md dark:backdrop-blur">
               <div className="mb-4">
                 <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-pink-100 dark:bg-pink-900/30">
                   <FiHeart className="w-8 h-8 text-pink-600 dark:text-pink-400" />
@@ -165,7 +194,7 @@ const HomePage = () => {
               <p className="text-gray-600 dark:text-gray-300">{t('stat_total_memories')}</p>
             </div>
 
-            <div className="card p-6 text-center bg-card dark:bg-gray-700 shadow-custom-md">
+            <div className="card p-6 text-center bg-card dark:bg-gray-800/80 shadow-custom-md dark:backdrop-blur">
               <div className="mb-4">
                 <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-blue-100 dark:bg-blue-900/30">
                   <FiCamera className="w-8 h-8 text-blue-600 dark:text-blue-400" />
@@ -175,7 +204,7 @@ const HomePage = () => {
               <p className="text-gray-600 dark:text-gray-300">{t('stat_photos')}</p>
             </div>
 
-            <div className="card p-6 text-center bg-card dark:bg-gray-700 shadow-custom-md">
+            <div className="card p-6 text-center bg-card dark:bg-gray-800/80 shadow-custom-md dark:backdrop-blur">
               <div className="mb-4">
                 <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-purple-100 dark:bg-purple-900/30">
                   <FiCalendar className="w-8 h-8 text-purple-600 dark:text-purple-400" />
@@ -185,7 +214,7 @@ const HomePage = () => {
               <p className="text-gray-600 dark:text-gray-300">{t('stat_videos')}</p>
             </div>
 
-            <div className="card p-6 text-center bg-card dark:bg-gray-700 shadow-custom-md">
+            <div className="card p-6 text-center bg-card dark:bg-gray-800/80 shadow-custom-md dark:backdrop-blur">
               <div className="mb-4">
                 <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-green-100 dark:bg-green-900/30">
                   <FiUsers className="w-8 h-8 text-green-600 dark:text-green-400" />
@@ -199,7 +228,7 @@ const HomePage = () => {
       </section>
 
       {/* 아이들 소개 섹션 */}
-      <section className="py-16 bg-white dark:bg-gray-900">
+      <section className="py-16 bg-white dark:from-gray-900/50 dark:to-gray-800/50 dark:bg-gradient-to-b">
         <div className="container mx-auto px-4">
           <motion.h2
             initial={{ opacity: 0, y: 20 }}
@@ -258,7 +287,7 @@ const HomePage = () => {
 
       {/* 최근 추억 섹션 */}
       {stats.recentMemories.length > 0 && (
-        <section className="py-16 bg-background-secondary dark:bg-gray-800" style={{ backgroundColor: '#f8f9fa' }}>
+        <section className="py-16 bg-background-secondary dark:from-gray-800/50 dark:to-gray-900/50 dark:bg-gradient-to-b" style={{ backgroundColor: '#f8f9fa' }}>
           <div className="container mx-auto px-4">
             <motion.h2
               initial={{ opacity: 0, y: 20 }}
@@ -271,28 +300,52 @@ const HomePage = () => {
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               {stats.recentMemories.map((memory, index) => (
-                <motion.div
+                <Link
                   key={memory.id}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.5, delay: 0.7 + index * 0.1 }}
-                  className="card overflow-hidden hover:transform hover:translateY(-4px) transition-all duration-300 bg-card dark:bg-gray-700 shadow-custom-md"
+                  to={`/memories/${memory.id}`}
+                  className="block"
                 >
-                  <div className="aspect-w-16 aspect-h-9 bg-gray-200 dark:bg-gray-600">
-                    {/* 썸네일 이미지 */}
-                    <div className="flex items-center justify-center h-48 bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-700 dark:to-gray-800">
-                      <FiCamera className="w-12 h-12 text-gray-400 dark:text-gray-500" />
+                  <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.5, delay: 0.7 + index * 0.1 }}
+                    className="card overflow-hidden hover:transform hover:translateY(-4px) transition-all duration-300 bg-card dark:bg-gray-800/80 shadow-custom-md dark:backdrop-blur"
+                  >
+                    <div className="aspect-w-16 aspect-h-9 bg-gray-200 dark:bg-gray-600">
+                      {/* 썸네일 이미지 */}
+                      <div className="relative h-48 bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-700 dark:to-gray-800 overflow-hidden">
+                        {memory.media_files && memory.media_files.length > 0 ? (
+                          <img
+                            src={getMediaUrl(memory.media_files[0].thumbnail_path || memory.media_files[0].file_path)}
+                            alt={memory.title}
+                            className="w-full h-full object-cover"
+                            onError={(e) => {
+                              (e.target as HTMLImageElement).style.display = 'none';
+                              const fallbackDiv = e.currentTarget.nextElementSibling;
+                              if (fallbackDiv) {
+                                (fallbackDiv as HTMLElement).style.display = 'flex';
+                              }
+                            }}
+                          />
+                        ) : null}
+                        <div 
+                          className={`absolute inset-0 flex items-center justify-center ${memory.media_files && memory.media_files.length > 0 ? 'hidden' : 'flex'}`}
+                          style={{ display: memory.media_files && memory.media_files.length > 0 ? 'none' : 'flex' }}
+                        >
+                          <FiCamera className="w-12 h-12 text-gray-400 dark:text-gray-500" />
+                        </div>
+                      </div>
                     </div>
-                  </div>
-                  <div className="p-4">
-                    <h3 className="font-semibold text-gray-800 dark:text-gray-100 mb-2">
-                      {memory.title}
-                    </h3>
-                    <p className="text-sm text-gray-600 dark:text-gray-400">
-                      {new Date(memory.memory_date).toLocaleDateString('ko-KR')}
-                    </p>
-                  </div>
-                </motion.div>
+                    <div className="p-4">
+                      <h3 className="font-semibold text-gray-800 dark:text-gray-100 mb-2">
+                        {memory.title}
+                      </h3>
+                      <p className="text-sm text-gray-600 dark:text-gray-400">
+                        {new Date(memory.memory_date).toLocaleDateString('ko-KR')}
+                      </p>
+                    </div>
+                  </motion.div>
+                </Link>
               ))}
             </div>
 

@@ -123,7 +123,7 @@ const ProfilePage = () => {
   }
 
   return (
-    <div className="max-w-2xl mx-auto">
+    <div className="max-w-2xl mx-auto pt-8">
       <h1 className="text-3xl font-bold mb-8 text-gray-900 dark:text-white">{t('profile.title')}</h1>
 
       {error && (

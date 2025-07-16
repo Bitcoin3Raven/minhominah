@@ -17,6 +17,8 @@ export const th = {
   nav_activity_log: "บันทึกกิจกรรม",
   nav_trash: "ถังขยะ",
   nav_profile: "โปรไฟล์",
+  nav_login: "เข้าสู่ระบบ",
+  nav_logout: "ออกจากระบบ",
   
   // 사이트 공통
   site_title: "มินโฮมินอา",
@@ -27,6 +29,32 @@ export const th = {
   auth_logout: "ออกจากระบบ",
   auth_signup: "สมัครสมาชิก",
   auth_account: "บัญชี",
+  
+  // หน้าเข้าสู่ระบบ
+  login: {
+    title: "เข้าสู่ระบบ",
+    signupTitle: "สมัครสมาชิก",
+    subtitle: "แบ่งปันความทรงจำอันล้ำค่าของมินโฮและมินอา",
+    name: "ชื่อ",
+    namePlaceholder: "สมชาย ใจดี",
+    email: "อีเมล",
+    emailPlaceholder: "your@email.com",
+    password: "รหัสผ่าน",
+    passwordPlaceholder: "••••••••",
+    confirmPassword: "ยืนยันรหัสผ่าน",
+    passwordMismatch: "รหัสผ่านไม่ตรงกัน",
+    passwordTooShort: "รหัสผ่านต้องมีอย่างน้อย 6 ตัวอักษร",
+    signupSuccess: "สมัครสมาชิกสำเร็จ! กรุณาตรวจสอบอีเมลของคุณ",
+    emailAlreadyExists: "อีเมลนี้ลงทะเบียนแล้ว",
+    signupError: "เกิดข้อผิดพลาดระหว่างการสมัครสมาชิก",
+    loginError: "อีเมลหรือรหัสผ่านไม่ถูกต้อง",
+    signingUp: "กำลังสมัครสมาชิก...",
+    loggingIn: "กำลังเข้าสู่ระบบ...",
+    haveAccount: "มีบัญชีอยู่แล้ว?",
+    noAccount: "ยังไม่มีบัญชี?",
+    loginButton: "เข้าสู่ระบบ",
+    signupButton: "สมัครสมาชิก"
+  },
   
   // 히어로 섹션
   hero_title: "มินโฮและมินอา",
@@ -140,6 +168,7 @@ export const th = {
   upload_add_person: "เพิ่มบุคคล",
   upload_tags_label: "แท็ก",
   upload_add_tag: "เพิ่มแท็ก",
+  upload_album_label: "อัลบั้ม",
   upload_submit: "เพิ่มความทรงจำ",
   upload_edit_submit: "อัพเดทความทรงจำ",
   upload_uploading: "กำลังอัพโหลด...",
@@ -184,7 +213,12 @@ export const th = {
     download: "ดาวน์โหลด",
     comments: "ความคิดเห็น",
     backToGallery: "กลับไปที่แกลเลอรี่ความทรงจำ",
-    notFound: "ไม่พบความทรงจำ"
+    notFound: "ไม่พบความทรงจำ",
+    notFoundDescription: "ความทรงจำที่คุณร้องขอไม่มีอยู่หรือถูกลบไปแล้ว",
+    loadError: "เกิดข้อผิดพลาดขณะโหลดความทรงจำ",
+    addToAlbum: "เพิ่มไปยังอัลบั้ม",
+    selectAlbums: "เลือกอัลบั้ม",
+    updateError: "ไม่สามารถอัปเดตความทรงจำได้"
   },
   
   // 성장 기록 페이지
@@ -254,7 +288,21 @@ export const th = {
     makePublic: "ตั้งเป็นอัลบั้มสาธารณะ",
     create: "สร้าง",
     creating: "กำลังสร้าง...",
-    cancel: "ยกเลิก"
+    cancel: "ยกเลิก",
+    backToAlbums: "กลับไปที่อัลบั้ม",
+    notFound: "ไม่พบอัลบั้ม",
+    noMemories: "ไม่มีความทรงจำในอัลบั้มนี้",
+    addMemoriesDesc: "คุณสามารถเพิ่มความทรงจำจากแกลเลอรีความทรงจำ",
+    addMemories: "เพิ่มความทรงจำ",
+    editAlbum: "แก้ไขอัลบั้ม",
+    save: "บันทึก",
+    saving: "กำลังบันทึก...",
+    deleteAlbum: "ลบอัลบั้ม",
+    deleteConfirm: "คุณแน่ใจหรือไม่ที่จะลบอัลบั้มนี้? ความทรงจำในอัลบั้มจะไม่ถูกลบ",
+    delete: "ลบ",
+    deleting: "กำลังลบ...",
+    updateError: "ไม่สามารถอัปเดตอัลบั้มได้",
+    setCover: "ตั้งเป็นปกอัลบั้ม"
   },
   
   // 포토북 만들기 페이지

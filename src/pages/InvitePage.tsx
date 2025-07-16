@@ -176,7 +176,7 @@ const InvitePage = () => {
   }
 
   return (
-    <div>
+    <div className="pt-8">
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
           가족 구성원 초대
