@@ -99,7 +99,7 @@ const Layout = ({ children }: LayoutProps) => {
       <header className="fixed top-0 left-0 right-0 z-50 backdrop-blur-lg bg-white/90 dark:from-slate-900/95 dark:to-blue-900/95 dark:bg-gradient-to-r shadow-md dark:border-b dark:border-blue-800/50">
         <div className={legacyStyles.container}>
           <div className="flex items-center justify-between h-16">
-            <Link to="/" className="flex items-center hover:opacity-80 transition-opacity">
+            <Link to="/" className="flex items-center hover:opacity-80 transition-opacity flex-shrink-0">
               <img 
                 src="/assets/images/logo.png" 
                 alt="민호민아닷컴" 
@@ -206,7 +206,7 @@ const Layout = ({ children }: LayoutProps) => {
             </nav>
             
             {/* 오른쪽 메뉴 */}
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-3 flex-shrink min-w-0">
               {/* 언어 선택기 */}
               <LanguageSelector />
               
@@ -236,7 +236,7 @@ const Layout = ({ children }: LayoutProps) => {
                   
                   <Link
                     to="/profile"
-                    className="p-2 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
+                    className="hidden md:block p-2 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
                   >
                     <FiUser className="w-5 h-5" />
                   </Link>
@@ -251,7 +251,7 @@ const Layout = ({ children }: LayoutProps) => {
               ) : (
                 <Link
                   to="/login"
-                  className="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-gradient-to-r from-purple-600 to-pink-600 rounded-full hover:shadow-lg transition-all duration-300"
+                  className="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-gradient-to-r from-purple-600 to-pink-600 rounded-full hover:shadow-lg transition-all duration-300 whitespace-nowrap"
                 >
                   {t('nav_login')}
                 </Link>
