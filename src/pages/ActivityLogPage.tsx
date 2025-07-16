@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { FiActivity, FiFilter, FiDownload } from 'react-icons/fi';
+import { FiActivity, FiFilter } from 'react-icons/fi';
 import { useAuth } from '../contexts/AuthContext';
 import { useLanguage } from '../contexts/LanguageContext';
 
@@ -37,7 +37,7 @@ const ActivityLogPage = () => {
     <div className="space-y-6 pt-8">
       <div className="flex justify-between items-center">
         <h1 className="text-3xl font-bold text-gray-900 dark:text-white">{t('activityLog.title')}</h1>
-        <div className="flex items-center space-x-4">
+        <div className="flex items-center">
           <select
             value={filter}
             onChange={(e) => setFilter(e.target.value)}
@@ -49,10 +49,6 @@ const ActivityLogPage = () => {
             <option value="delete">{t('activityLog.delete')}</option>
             <option value="share">{t('activityLog.share')}</option>
           </select>
-          <button className="flex items-center space-x-2 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
-            <FiDownload className="w-5 h-5" />
-            <span>{t('activityLog.export')}</span>
-          </button>
         </div>
       </div>
 

@@ -40,7 +40,7 @@ const LoginPage = () => {
           return;
         }
 
-        await signUp(email, password);
+        await signUp(email, password, name);
         setSuccess(t('login.signupSuccess'));
         
         // 회원가입 후 자동 로그인

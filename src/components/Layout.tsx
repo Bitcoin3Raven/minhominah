@@ -1,5 +1,5 @@
 import { ReactNode, useState, useEffect } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '../contexts/AuthContext';
 import { useQuery } from '@tanstack/react-query';
@@ -17,6 +17,7 @@ interface LayoutProps {
 
 const Layout = ({ children }: LayoutProps) => {
   const location = useLocation();
+  const navigate = useNavigate();
   const { user, signOut } = useAuth();
   const { t } = useLanguage();
   const { darkMode, toggleDarkMode } = useDarkMode();
@@ -67,6 +68,20 @@ const Layout = ({ children }: LayoutProps) => {
     return () => document.removeEventListener('click', handleClickOutside);
   }, []);
 
+  // 메뉴 아이템 클릭 핸들러
+  const handleMenuItemClick = (item: any, closeDropdown: () => void) => {
+    // 로그인이 필요한 메뉴이고 로그인하지 않은 경우
+    if (item.authRequired && !user) {
+      navigate('/login');
+      closeDropdown();
+      return;
+    }
+    
+    // 정상적으로 이동
+    navigate(item.path);
+    closeDropdown();
+  };
+
   // 메뉴 구조 정의
   const mainMenuItems = [
     { path: '/upload', label: t('nav_add_memory'), icon: <FiPlusCircle className="w-4 h-4 text-green-500" />, authRequired: true },
@@ -78,17 +93,17 @@ const Layout = ({ children }: LayoutProps) => {
   ];
   
   const familyMenuItems = [
+    { path: '/activity-log', label: t('nav_activity_log'), icon: <FiActivity className="w-4 h-4 text-blue-500" /> },
+    { path: '/trash', label: t('nav_trash'), icon: <FiTrash2 className="w-4 h-4 text-green-500" /> },
+    { path: '/backup', label: t('nav_backup'), icon: <FiDatabase className="w-4 h-4 text-indigo-500" /> },
     { path: '/invite', label: t('nav_invite'), icon: <FiUserPlus className="w-4 h-4 text-gray-500" />, authRequired: true, roleRequired: 'parent' },
     { path: '/admin', label: t('nav_admin'), icon: <FiSettings className="w-4 h-4 text-gray-500" />, authRequired: true, roleRequired: 'parent' },
-    { path: '/activity-log', label: t('nav_activity_log'), icon: <FiActivity className="w-4 h-4 text-blue-500" />, authRequired: true },
-    { path: '/trash', label: t('nav_trash'), icon: <FiTrash2 className="w-4 h-4 text-green-500" />, authRequired: true },
-    { path: '/backup', label: t('nav_backup'), icon: <FiDatabase className="w-4 h-4 text-indigo-500" />, authRequired: true },
   ];
 
-  // 필터링 함수
+  // 필터링 함수 - 로그인 전에도 authRequired 메뉴를 보여주도록 수정
   const filterMenuItems = (items: any[]) => {
     return items.filter(item => {
-      if (item.authRequired && !user) return false;
+      // roleRequired가 있고 사용자의 role이 맞지 않으면 숨김
       if (item.roleRequired && userProfile?.role !== item.roleRequired) return false;
       return true;
     });
@@ -145,15 +160,14 @@ const Layout = ({ children }: LayoutProps) => {
                       className="absolute top-full left-0 mt-2 w-48 bg-white dark:from-slate-800/95 dark:to-blue-900/95 dark:bg-gradient-to-br rounded-lg shadow-lg border border-gray-200 dark:border-blue-700 dark:shadow-xl z-50"
                     >
                       {filterMenuItems(mainMenuItems).map((item) => (
-                        <Link
+                        <button
                           key={item.path}
-                          to={item.path}
-                          onClick={() => setMainDropdownOpen(false)}
-                          className="flex items-center gap-3 px-4 py-3 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-blue-800/50 transition-colors first:rounded-t-lg last:rounded-b-lg"
+                          onClick={() => handleMenuItemClick(item, () => setMainDropdownOpen(false))}
+                          className="w-full flex items-center gap-3 px-4 py-3 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-blue-800/50 transition-colors first:rounded-t-lg last:rounded-b-lg text-left"
                         >
                           {item.icon}
                           <span>{item.label}</span>
-                        </Link>
+                        </button>
                       ))}
                     </motion.div>
                   )}
@@ -182,23 +196,16 @@ const Layout = ({ children }: LayoutProps) => {
                       transition={{ duration: 0.2 }}
                       className="absolute top-full left-0 mt-2 w-48 bg-white dark:from-slate-800/95 dark:to-blue-900/95 dark:bg-gradient-to-br rounded-lg shadow-lg border border-gray-200 dark:border-blue-700 dark:shadow-xl z-50"
                     >
-                      {filterMenuItems(familyMenuItems).length === 0 ? (
-                        <div className="px-4 py-3 text-sm text-gray-500 dark:text-gray-400">
-                          No items
-                        </div>
-                      ) : (
-                        filterMenuItems(familyMenuItems).map((item) => (
-                          <Link
-                            key={item.path}
-                            to={item.path}
-                            onClick={() => setFamilyDropdownOpen(false)}
-                            className="flex items-center gap-3 px-4 py-3 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-blue-800/50 transition-colors first:rounded-t-lg last:rounded-b-lg"
-                          >
-                            {item.icon}
-                            <span>{item.label}</span>
-                          </Link>
-                        ))
-                      )}
+                      {filterMenuItems(familyMenuItems).map((item) => (
+                        <button
+                          key={item.path}
+                          onClick={() => handleMenuItemClick(item, () => setFamilyDropdownOpen(false))}
+                          className="w-full flex items-center gap-3 px-4 py-3 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-blue-800/50 transition-colors first:rounded-t-lg last:rounded-b-lg text-left"
+                        >
+                          {item.icon}
+                          <span>{item.label}</span>
+                        </button>
+                      ))}
                     </motion.div>
                   )}
                 </AnimatePresence>
@@ -301,18 +308,17 @@ const Layout = ({ children }: LayoutProps) => {
                 <li className="px-3 py-1 text-xs font-semibold text-gray-500 uppercase">{t('nav_main_menu')}</li>
                 {filterMenuItems(mainMenuItems).map((item) => (
                   <li key={item.path}>
-                    <Link
-                      to={item.path}
-                      onClick={() => setMobileMenuOpen(false)}
-                      className={`flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-lg transition-colors ${
+                    <button
+                      onClick={() => handleMenuItemClick(item, () => setMobileMenuOpen(false))}
+                      className={`w-full flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-lg transition-colors ${
                         location.pathname === item.path
                           ? 'bg-blue-100 text-blue-600 dark:bg-blue-900 dark:text-blue-400'
                           : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-blue-800/50'
-                      }`}
+                      } text-left`}
                     >
                       {item.icon}
                       <span>{item.label}</span>
-                    </Link>
+                    </button>
                   </li>
                 ))}
                 
@@ -322,18 +328,17 @@ const Layout = ({ children }: LayoutProps) => {
                     <li className="px-3 py-1 text-xs font-semibold text-gray-500 uppercase">{t('nav_family')}</li>
                     {filterMenuItems(familyMenuItems).map((item) => (
                       <li key={item.path}>
-                        <Link
-                          to={item.path}
-                          onClick={() => setMobileMenuOpen(false)}
-                          className={`flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-lg transition-colors ${
+                        <button
+                          onClick={() => handleMenuItemClick(item, () => setMobileMenuOpen(false))}
+                          className={`w-full flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-lg transition-colors ${
                             location.pathname === item.path
                               ? 'bg-blue-100 text-blue-600 dark:bg-blue-900 dark:text-blue-400'
                               : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-blue-800/50'
-                          }`}
+                          } text-left`}
                         >
                           {item.icon}
                           <span>{item.label}</span>
-                        </Link>
+                        </button>
                       </li>
                     ))}
                   </>
