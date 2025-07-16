@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '../contexts/AuthContext';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '../lib/supabase';
-import { FiMenu, FiX, FiSun, FiMoon, FiUser, FiUsers, FiLogOut, FiShield, FiHome, FiImage, FiPlusCircle, FiFolder, FiBarChart2, FiActivity, FiTrash2, FiUserPlus, FiSettings, FiTrendingUp, FiBook, FiDatabase } from 'react-icons/fi';
+import { FiMenu, FiX, FiSun, FiMoon, FiUser, FiUsers, FiLogOut, FiLogIn, FiHome, FiImage, FiPlusCircle, FiFolder, FiBarChart2, FiActivity, FiTrash2, FiUserPlus, FiSettings, FiTrendingUp, FiBook, FiDatabase } from 'react-icons/fi';
 import { useLegacyStyles } from '../hooks/useLegacyStyles';
 import PWAInstallPrompt from './PWAInstallPrompt';
 import { LanguageSelector } from './LanguageSelector';
@@ -18,7 +18,7 @@ interface LayoutProps {
 const Layout = ({ children }: LayoutProps) => {
   const location = useLocation();
   const { user, signOut } = useAuth();
-  const { t, language } = useLanguage();
+  const { t } = useLanguage();
   const { darkMode, toggleDarkMode } = useDarkMode();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [mainDropdownOpen, setMainDropdownOpen] = useState(false);
@@ -226,36 +226,30 @@ const Layout = ({ children }: LayoutProps) => {
               {/* 사용자 메뉴 */}
               {user ? (
                 <>
-                  {/* 권한 표시 배지 */}
-                  {userProfile?.role === 'parent' && (
-                    <div className="hidden md:flex items-center gap-1 px-2 py-1 bg-purple-100 dark:bg-purple-900 rounded-full">
-                      <FiShield className="w-3 h-3 text-purple-600 dark:text-purple-400" />
-                      <span className="text-xs font-medium text-purple-600 dark:text-purple-400">Admin</span>
-                    </div>
-                  )}
-                  
                   <Link
                     to="/profile"
-                    className="hidden md:block p-2 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
+                    className="hidden md:block relative p-2 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
                   >
                     <FiUser className="w-5 h-5" />
                   </Link>
                   
                   <button
                     onClick={() => signOut()}
-                    className="p-2 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors text-red-600 dark:text-red-400"
+                    className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-gradient-to-r from-pink-400 to-rose-400 rounded-full hover:shadow-lg transition-all duration-300"
                   >
                     <FiLogOut className="w-5 h-5" />
+                    <span className="hidden md:inline whitespace-nowrap">{t('nav_logout')}</span>
                   </button>
                 </>
               ) : (
                 <Link
                   to="/login"
-                  className={`inline-flex items-center px-4 py-2 font-medium text-white bg-gradient-to-r from-purple-600 to-pink-600 rounded-full hover:shadow-lg transition-all duration-300 whitespace-nowrap ${
-                    language === 'th' ? 'text-xs' : 'text-sm'
-                  }`}
+                  className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-gradient-to-r from-purple-500 to-pink-400 rounded-full hover:shadow-lg transition-all duration-300"
                 >
-                  {t('nav_login')}
+                  {/* 모바일: 로그인 아이콘 (들어오는 화살표) */}
+                  <FiLogIn className="w-5 h-5 md:hidden" />
+                  {/* 데스크톱: 텍스트 */}
+                  <span className="hidden md:inline whitespace-nowrap">{t('nav_login')}</span>
                 </Link>
               )}
               
