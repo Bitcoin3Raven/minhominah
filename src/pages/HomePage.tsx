@@ -101,11 +101,11 @@ const HomePage = () => {
         
         {/* 추가 장식 요소 - 다크모드에서 투명도 조정 및 모바일 반응형 개선 */}
         <div className="absolute inset-0">
-          {/* 핑크색 원 - 왼쪽 위 */}
-          <div className="absolute top-20 left-10 md:left-20 w-48 h-48 md:w-72 md:h-72 bg-pink-300 dark:bg-pink-600/30 rounded-full mix-blend-multiply filter blur-xl opacity-70 dark:opacity-30 animate-blob"></div>
+          {/* 핑크색 원 - 왼쪽 위, 더 연하게 처리 */}
+          <div className="absolute top-20 left-10 md:left-20 w-48 h-48 md:w-72 md:h-72 bg-pink-300 dark:bg-pink-600/20 rounded-full mix-blend-multiply filter blur-xl opacity-40 dark:opacity-20 animate-blob"></div>
           
-          {/* 파란색 원 - 오른쪽 위 */}
-          <div className="absolute top-40 right-10 md:right-20 w-48 h-48 md:w-72 md:h-72 bg-blue-300 dark:bg-blue-600/30 rounded-full mix-blend-multiply filter blur-xl opacity-70 dark:opacity-30 animate-blob animation-delay-2000"></div>
+          {/* 파란색 원 - 오른쪽 위, 더 연하게 처리 */}
+          <div className="absolute top-40 right-10 md:right-20 w-48 h-48 md:w-72 md:h-72 bg-blue-300 dark:bg-blue-600/20 rounded-full mix-blend-multiply filter blur-xl opacity-40 dark:opacity-20 animate-blob animation-delay-2000"></div>
           
           {/* 보라색 원 - 가운데 아래, 더 아래로 이동하고 투명도 낮춤 */}
           <div className="absolute -bottom-32 md:-bottom-16 left-1/2 transform -translate-x-1/2 w-48 h-48 md:w-72 md:h-72 bg-purple-300 dark:bg-purple-600/30 rounded-full mix-blend-multiply filter blur-xl opacity-40 dark:opacity-20 animate-blob-gentle animation-delay-4000"></div>
