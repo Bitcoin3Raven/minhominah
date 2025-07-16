@@ -18,7 +18,7 @@ interface LayoutProps {
 const Layout = ({ children }: LayoutProps) => {
   const location = useLocation();
   const { user, signOut } = useAuth();
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const { darkMode, toggleDarkMode } = useDarkMode();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [mainDropdownOpen, setMainDropdownOpen] = useState(false);
@@ -251,7 +251,9 @@ const Layout = ({ children }: LayoutProps) => {
               ) : (
                 <Link
                   to="/login"
-                  className="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-gradient-to-r from-purple-600 to-pink-600 rounded-full hover:shadow-lg transition-all duration-300 whitespace-nowrap"
+                  className={`inline-flex items-center px-4 py-2 font-medium text-white bg-gradient-to-r from-purple-600 to-pink-600 rounded-full hover:shadow-lg transition-all duration-300 whitespace-nowrap ${
+                    language === 'th' ? 'text-xs' : 'text-sm'
+                  }`}
                 >
                   {t('nav_login')}
                 </Link>
