@@ -655,7 +655,7 @@ const AdminPage = () => {
                         <button
                           onClick={() => {
                             if (tag.usageCount > 0) {
-                              if (window.confirm(t('admin.tags.deleteConfirmWithUsage', { count: tag.usageCount }))) {
+                              if (window.confirm(t('admin.tags.deleteConfirmWithUsage').replace('{count}', tag.usageCount.toString()))) {
                                 deleteTagMutation.mutate(tag.id);
                               }
                             } else {
@@ -735,7 +735,7 @@ const AdminPage = () => {
                         <button
                           onClick={() => {
                             if (person.usageCount > 0) {
-                              if (window.confirm(t('admin.people.deleteConfirmWithUsage', { count: person.usageCount }))) {
+                              if (window.confirm(t('admin.people.deleteConfirmWithUsage').replace('{count}', person.usageCount.toString()))) {
                                 deletePersonMutation.mutate(person.id);
                               }
                             } else {
