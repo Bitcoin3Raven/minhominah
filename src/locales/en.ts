@@ -179,7 +179,12 @@ export const en = {
     delete: "Delete",
     deleteError: "Failed to delete the memory.",
     permissionError: "You don't have permission to delete. Please contact the administrator.",
-    slideshow: "Slideshow"
+    slideshow: "Slideshow",
+    share: "Share",
+    download: "Download",
+    comments: "Comments",
+    backToGallery: "Back to Memory Gallery",
+    notFound: "Memory not found."
   },
   
   // 성장 기록 페이지

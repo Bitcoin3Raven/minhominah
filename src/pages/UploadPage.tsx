@@ -58,6 +58,7 @@ const UploadPage = () => {
     formState: { errors },
     setValue,
     watch,
+    reset,
   } = useForm<UploadFormData>({
     defaultValues: {
       people: [],
@@ -103,7 +104,7 @@ const UploadPage = () => {
           memory_tags(tag_id)
         `)
         .eq('id', editId)
-        .eq('user_id', user?.id)
+        .eq('created_by', user?.id)
         .single();
         
       if (error) throw error;
@@ -114,12 +115,21 @@ const UploadPage = () => {
 
   // 편집 모드: 폼에 기존 데이터 채우기
   useEffect(() => {
-    if (editMemory) {
-      setValue('title', editMemory.title);
-      setValue('description', editMemory.description || '');
-      setValue('memory_date', editMemory.memory_date.split('T')[0]);
-      setValue('people', editMemory.memory_people?.map((mp: any) => mp.person_id) || []);
-      setValue('tags', editMemory.memory_tags?.map((mt: any) => mt.tag_id) || []);
+    if (editMemory && people && tags) {
+      // 인물 ID 설정
+      const peopleIds = editMemory.memory_people?.map((mp: any) => mp.person_id).filter(id => id != null) || [];
+      
+      // 태그 ID 설정
+      const tagIds = editMemory.memory_tags?.map((mt: any) => mt.tag_id).filter(id => id != null) || [];
+      
+      // reset을 사용하여 폼 전체를 한번에 업데이트
+      reset({
+        title: editMemory.title,
+        description: editMemory.description || '',
+        memory_date: editMemory.memory_date.split('T')[0],
+        people: peopleIds,
+        tags: tagIds,
+      });
       
       // 기존 미디어 파일 설정
       const existingMediaFiles = editMemory.media_files?.map((file: any) => ({
@@ -130,7 +140,7 @@ const UploadPage = () => {
       })) || [];
       setExistingMedia(existingMediaFiles);
     }
-  }, [editMemory, setValue]);
+  }, [editMemory, people, tags, reset]);
 
   // 파일 처리
   const handleFiles = useCallback(async (files: FileList | null) => {
@@ -245,7 +255,7 @@ const UploadPage = () => {
             updated_at: new Date().toISOString(),
           })
           .eq('id', editId)
-          .eq('user_id', user.id);
+          .eq('created_by', user.id);
 
         if (updateError) throw updateError;
         memoryId = editId;
@@ -277,8 +287,25 @@ const UploadPage = () => {
         }
 
         // 기존 인물/태그 연결 삭제
-        await supabase.from('memory_people').delete().eq('memory_id', memoryId);
-        await supabase.from('memory_tags').delete().eq('memory_id', memoryId);
+        const { error: deletePeopleError } = await supabase
+          .from('memory_people')
+          .delete()
+          .eq('memory_id', memoryId);
+        
+        if (deletePeopleError) {
+          console.error('기존 인물 삭제 실패:', deletePeopleError);
+          throw deletePeopleError;
+        }
+
+        const { error: deleteTagsError } = await supabase
+          .from('memory_tags')
+          .delete()
+          .eq('memory_id', memoryId);
+        
+        if (deleteTagsError) {
+          console.error('기존 태그 삭제 실패:', deleteTagsError);
+          throw deleteTagsError;
+        }
 
       } else {
         // 새로 생성
@@ -288,7 +315,7 @@ const UploadPage = () => {
             title: data.title,
             description: data.description,
             memory_date: data.memory_date,
-            user_id: user.id,
+            created_by: user.id,
           })
           .select()
           .single();
@@ -316,8 +343,8 @@ const UploadPage = () => {
           // 썸네일 생성 (이미지만)
           let thumbnailPath = null;
           if (filePreview.type === 'image') {
-            // 간단한 썸네일 경로 (실제로는 서버측에서 생성해야 함)
-            thumbnailPath = `thumbnails/${fileName}`;
+            // 실제 썸네일 생성 전까지는 원본 이미지를 썸네일로 사용
+            thumbnailPath = fileName;
           }
 
           // 3. 미디어 파일 정보 저장
@@ -339,30 +366,46 @@ const UploadPage = () => {
 
       // 4. 인물 연결
       if (data.people.length > 0) {
-        const peopleInserts = data.people.map(personId => ({
-          memory_id: memoryId,
-          person_id: personId,
-        }));
+        // null이나 undefined, 빈 문자열 값 필터링
+        const validPeople = data.people.filter(personId => personId != null && personId !== '');
+        
+        if (validPeople.length > 0) {
+          const peopleInserts = validPeople.map(personId => ({
+            memory_id: memoryId,
+            person_id: personId,
+          }));
 
-        const { error: peopleError } = await supabase
-          .from('memory_people')
-          .insert(peopleInserts);
+          const { error: peopleError } = await supabase
+            .from('memory_people')
+            .upsert(peopleInserts, { 
+              onConflict: 'memory_id,person_id',
+              ignoreDuplicates: true 
+            });
 
-        if (peopleError) throw peopleError;
+          if (peopleError) throw peopleError;
+        }
       }
 
       // 5. 태그 연결
       if (data.tags.length > 0) {
-        const tagInserts = data.tags.map(tagId => ({
-          memory_id: memoryId,
-          tag_id: tagId,
-        }));
+        // null이나 undefined, 빈 문자열 값 필터링
+        const validTags = data.tags.filter(tagId => tagId != null && tagId !== '');
+        
+        if (validTags.length > 0) {
+          const tagInserts = validTags.map(tagId => ({
+            memory_id: memoryId,
+            tag_id: tagId,
+          }));
 
-        const { error: tagsError } = await supabase
-          .from('memory_tags')
-          .insert(tagInserts);
+          const { error: tagsError } = await supabase
+            .from('memory_tags')
+            .upsert(tagInserts, { 
+              onConflict: 'memory_id,tag_id',
+              ignoreDuplicates: true 
+            });
 
-        if (tagsError) throw tagsError;
+          if (tagsError) throw tagsError;
+        }
       }
 
       // 성공 후 추억 갤러리로 이동

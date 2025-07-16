@@ -179,7 +179,12 @@ export const ko = {
     delete: "삭제",
     deleteError: "추억 삭제에 실패했습니다.",
     permissionError: "삭제 권한이 없습니다. 관리자에게 문의하세요.",
-    slideshow: "슬라이드쇼"
+    slideshow: "슬라이드쇼",
+    share: "공유하기",
+    download: "다운로드",
+    comments: "댓글",
+    backToGallery: "추억 갤러리로 돌아가기",
+    notFound: "추억을 찾을 수 없습니다."
   },
   
   // 성장 기록 페이지

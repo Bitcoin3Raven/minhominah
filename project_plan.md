@@ -63,6 +63,102 @@
 - [ ] 배포
 
 ## 작업 로그
+### 2025-01-21 (오늘)
+- **메모리 수정 시 중복 키 에러 해결** ✅
+  - 문제: "duplicate key value violates unique constraint" 에러 발생
+  - 원인: 편집 모드에서 기존 태그/인물 삭제 후 같은 것을 다시 추가할 때 중복 발생
+  - 해결:
+    - insert 대신 upsert 사용으로 변경
+    - onConflict와 ignoreDuplicates 옵션 추가
+    - 기존 연결 삭제 시 에러 처리 추가
+  - 수정 파일: UploadPage.tsx
+- **메모리 수정 시 기존 태그/인물 미표시 문제 해결** ✅
+  - 문제: 편집 모드에서 기존에 등록한 태그와 인물이 화면에 표시되지 않음
+  - 원인: react-hook-form의 setValue가 UI에 제대로 반영되지 않음
+  - 해결:
+    - reset 함수를 사용하여 폼 전체를 한번에 업데이트
+    - 편집 데이터 로드 시 people과 tags 데이터가 모두 로드된 후 실행하도록 의존성 추가
+  - 수정 파일: UploadPage.tsx
+- **메모리 수정 시 태그/인물 null 에러 해결** 🔧
+  - 문제: "null value in column 'tag_id' violates not-null constraint" 에러
+  - 원인: 
+    - 태그/인물 배열에 빈 문자열('')이 포함되어 있을 가능성
+    - memory_tags 테이블의 RLS 정책이 upsert 작업과 충돌
+  - 해결:
+    - null, undefined뿐만 아니라 빈 문자열도 필터링하도록 수정
+    - database-fix-memory-tags-rls-v2.sql 파일 생성
+    - FIX_MEMORY_TAGS_NULL_ERROR.md 가이드 문서 생성
+  - 필요 작업: Supabase에서 RLS 정책 수정 SQL 실행
+- **memory_people RLS 정책 에러 긴급 수정** 🚨
+  - 문제: "new row violates row-level security policy for table 'memory_people'" 에러
+  - 원인: memory_people 테이블의 RLS 정책이 너무 복잡하여 upsert 작업 실패
+  - 해결:
+    - database-emergency-fix-rls.sql 파일 생성
+    - 모든 인증된 사용자가 접근 가능한 간단한 정책으로 변경
+    - memory_people, memory_tags 모두 동일하게 적용
+  - 필요 작업: **즉시 Supabase에서 긴급 RLS 정책 SQL 실행 필요**
+- **메모리 수정 시 person_id NULL 에러 해결** ✅
+  - 문제: "null value in column 'person_id' violates not-null constraint" 에러
+  - 원인: 인물/태그 연결 시 배열에 null/undefined 값이 포함됨
+  - 해결:
+    - 인물/태그 연결 시 null/undefined 값 필터링 추가
+    - 편집 모드에서 created_by로 권한 체크 변경
+    - 편집 모드에서 기존 데이터 로드 시 null 값 필터링
+  - 수정 파일: UploadPage.tsx
+- **user_id와 created_by 필드 중복 문제 정리** ✅
+  - 문제: memories 테이블에 user_id와 created_by 두 개의 필드가 중복으로 존재
+  - 원인: 초기 스키마(created_by) + 나중에 추가된 필드(user_id)
+  - 해결:
+    - UploadPage.tsx 수정: user_id 제거하고 created_by만 사용
+    - 메모리 생성/수정 시 created_by 필드만 사용하도록 통일
+    - database-cleanup-user-id-created-by.sql 파일 생성
+  - 권장: created_by 필드만 사용 (원래 스키마 유지)
+  - 필요 작업: Supabase에서 데이터 정리 SQL 실행
+- **인증 토큰 에러 발생** 🔧
+  - 문제: "Error: No authorization token was found" 에러 발생
+  - 원인: 세션 만료, 쿠키/로컬 스토리지 문제, JWT 토큰 만료 등
+  - 해결 방법:
+    - FIX_AUTH_TOKEN_ERROR.md 가이드 문서 생성
+    - 로그아웃 후 재로그인
+    - 브라우저 캐시 및 쿠키 클리어
+    - 시크릿 모드로 시도
+  - 장기적 해결: Supabase JWT 만료 시간 연장 고려
+- **썸네일 경로 400 에러 문제 해결** ✅
+  - 문제: 메모리 페이지에서 썸네일 이미지 로드 시 400 Bad Request 에러
+  - 원인: 썸네일 경로는 생성하지만 실제 썸네일 파일은 업로드하지 않음
+    - thumbnail_path가 'thumbnails/...' 형태로 저장되지만 실제 파일 없음
+  - 해결:
+    - UploadPage.tsx 수정: 썸네일 경로를 원본 이미지 경로로 설정
+    - database-fix-thumbnail-paths.sql 파일 생성
+    - 기존 데이터의 잘못된 썸네일 경로를 원본 경로로 변경하는 SQL 작성
+  - 필요 작업: Supabase에서 썸네일 경로 수정 SQL 실행
+- **메모리 업로드 RLS 정책 오류 해결** 🔧
+  - 문제: "new row violates row-level security policy for table 'memory_people'" 에러
+  - 원인: memory_people, memory_tags 테이블의 RLS 정책이 너무 엄격함
+  - 해결:
+    - database-fix-memory-people-rls.sql 파일 생성
+    - database-fix-memory-connections-rls.sql 파일 생성 (통합 수정)
+    - 인증된 사용자가 자신의 메모리에 인물/태그 연결 가능하도록 정책 수정
+  - 필요 작업: Supabase에서 RLS 정책 수정 SQL 실행
+- **메모리 수정/삭제 버튼 표시 문제 해결** ✅
+  - 문제: 본인이 등록한 메모리에서도 수정/삭제 버튼이 보이지 않음
+  - 원인: user_id와 created_by 필드 불일치
+    - 메모리 생성 시 user_id만 설정되고 created_by는 NULL
+    - 권한 체크는 created_by로 하고 있어 불일치 발생
+  - 해결:
+    - UploadPage.tsx 수정: 메모리 생성 시 created_by 필드도 함께 설정
+    - database-fix-memories-created-by.sql 파일 생성
+    - FIX_MEMORY_EDIT_DELETE_BUTTON.md 가이드 문서 생성
+  - 필요 작업: Supabase에서 기존 데이터의 created_by 필드 업데이트 SQL 실행
+- **메모리 상세 페이지 수정/삭제 기능 추가** ✅ (이전 작업)
+  - 메모리 상세 페이지에서도 수정/삭제 가능하도록 개선
+  - 상세 페이지 우측 상단에 점점점(더보기) 메뉴 추가
+  - 메모리 목록 페이지와 동일한 권한 체크 로직 적용 (created_by 필드 사용)
+  - 삭제 확인 모달 구현 (목록 페이지와 동일한 UI/UX)
+  - 다국어 지원 완료 (memories.share, memories.download, memories.comments 키 추가)
+  - 수정 버튼 클릭 시 /upload?edit={id} 페이지로 이동
+  - 삭제 성공 시 /memories 페이지로 리디렉션
+
 ### 2025-01-16
 - 프로젝트 계획 문서 생성
 - 다국어 지원 시스템 구현 완료

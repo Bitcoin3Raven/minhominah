@@ -1,15 +1,56 @@
 import { useParams, useNavigate } from 'react-router-dom';
-import { useQuery } from '@tanstack/react-query';
-import { motion } from 'framer-motion';
-import { FiArrowLeft, FiCalendar, FiTag, FiUser, FiDownload, FiShare2, FiHeart, FiMessageSquare } from 'react-icons/fi';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { motion, AnimatePresence } from 'framer-motion';
+import { FiArrowLeft, FiCalendar, FiTag, FiUser, FiDownload, FiShare2, FiHeart, FiMessageSquare, FiMoreVertical, FiEdit2, FiTrash2, FiX } from 'react-icons/fi';
 import { supabase } from '../lib/supabase';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import CommentSection from '../components/CommentSection';
+import { useAuth } from '../contexts/AuthContext';
+import { useLanguage } from '../contexts/LanguageContext';
+
+interface Memory {
+  id: string;
+  title: string;
+  description: string | null;
+  memory_date: string;
+  created_at: string;
+  user_id: string;
+  created_by: string;
+  media_files: MediaFile[];
+  memory_people: MemoryPerson[];
+  memory_tags: MemoryTag[];
+}
+
+interface MediaFile {
+  id: string;
+  file_path: string;
+  thumbnail_path: string | null;
+  file_type: 'image' | 'video';
+}
+
+interface MemoryPerson {
+  people: {
+    id: string;
+    name: string;
+  };
+}
+
+interface MemoryTag {
+  tags: {
+    id: string;
+    name: string;
+  };
+}
 
 const MemoryDetailPage = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
+  const { user } = useAuth();
+  const { t, language } = useLanguage();
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [showDropdown, setShowDropdown] = useState(false);
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
 
   const { data: memory, isLoading } = useQuery({
     queryKey: ['memory', id],
@@ -26,9 +67,65 @@ const MemoryDetailPage = () => {
         .single();
 
       if (error) throw error;
-      return data;
+      return data as Memory;
     },
   });
+
+  // 삭제 mutation
+  const deleteMutation = useMutation({
+    mutationFn: async (memoryId: string) => {
+      const { error } = await supabase
+        .from('memories')
+        .delete()
+        .eq('id', memoryId);
+        
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['memories-infinite'] });
+      navigate('/memories');
+    },
+    onError: (error: any) => {
+      console.error('삭제 실패:', error);
+      if (error.message?.includes('permission') || error.code === '42501' || error.code === '403') {
+        alert(t('memories.permissionError'));
+      } else {
+        alert(t('memories.deleteError'));
+      }
+    }
+  });
+
+  // 수정 페이지로 이동
+  const handleEdit = () => {
+    navigate(`/upload?edit=${id}`);
+  };
+
+  // 삭제 확인
+  const handleDeleteClick = () => {
+    setDeleteModalOpen(true);
+  };
+
+  // 삭제 실행
+  const handleDeleteConfirm = () => {
+    if (id) {
+      deleteMutation.mutate(id);
+    }
+  };
+
+  // 외부 클릭시 드롭다운 닫기
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      const target = event.target as HTMLElement;
+      if (showDropdown && 
+          !target.closest('.dropdown-menu') && 
+          !target.closest('.dropdown-button')) {
+        setShowDropdown(false);
+      }
+    };
+
+    document.addEventListener('click', handleClickOutside);
+    return () => document.removeEventListener('click', handleClickOutside);
+  }, [showDropdown]);
 
   const getMediaUrl = (path: string) => {
     const { data } = supabase.storage.from('media').getPublicUrl(path);
@@ -37,7 +134,8 @@ const MemoryDetailPage = () => {
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
-    return date.toLocaleDateString('ko-KR', {
+    const locale = language === 'ko' ? 'ko-KR' : language === 'th' ? 'th-TH' : 'en-US';
+    return date.toLocaleDateString(locale, {
       year: 'numeric',
       month: 'long',
       day: 'numeric'
@@ -100,7 +198,7 @@ const MemoryDetailPage = () => {
   if (!memory) {
     return (
       <div className="text-center py-20">
-        <p className="text-gray-500 dark:text-gray-400">추억을 찾을 수 없습니다.</p>
+        <p className="text-gray-500 dark:text-gray-400">{t('memories.notFound')}</p>
       </div>
     );
   }
@@ -133,7 +231,7 @@ const MemoryDetailPage = () => {
             className="flex items-center space-x-2 text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-200 transition-colors"
           >
             <FiArrowLeft className="w-5 h-5" />
-            <span>추억 갤러리로 돌아가기</span>
+            <span>{t('memories.backToGallery')}</span>
           </button>
         </motion.div>
 
@@ -209,9 +307,58 @@ const MemoryDetailPage = () => {
             transition={{ duration: 0.5, delay: 0.2 }}
             className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-2xl shadow-xl p-6 border border-gray-200/50 dark:border-gray-700/50"
           >
-            <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
-              {memory.title}
-            </h1>
+            <div className="flex items-start justify-between mb-4">
+              <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
+                {memory.title}
+              </h1>
+              
+              {/* 수정/삭제 드롭다운 */}
+              {user?.id && memory.created_by === user.id && (
+                <div className="relative">
+                  <button
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      setShowDropdown(!showDropdown);
+                    }}
+                    className="dropdown-button p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+                  >
+                    <FiMoreVertical className="w-5 h-5 text-gray-600 dark:text-gray-400" />
+                  </button>
+                  
+                  {showDropdown && (
+                    <div className="dropdown-menu absolute right-0 mt-1 w-36 bg-white dark:bg-gray-800 rounded-md shadow-lg border border-gray-200 dark:border-gray-700 z-20"
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      <button
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          handleEdit();
+                          setShowDropdown(false);
+                        }}
+                        className="flex items-center w-full px-3 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+                      >
+                        <FiEdit2 className="w-4 h-4 mr-2" />
+                        {t('memories.edit')}
+                      </button>
+                      <button
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          handleDeleteClick();
+                          setShowDropdown(false);
+                        }}
+                        className="flex items-center w-full px-3 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20"
+                      >
+                        <FiTrash2 className="w-4 h-4 mr-2" />
+                        {t('memories.delete')}
+                      </button>
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
 
             {memory.description && (
               <p className="text-gray-600 dark:text-gray-400 mb-6">
@@ -278,7 +425,7 @@ const MemoryDetailPage = () => {
                 className="w-full flex items-center justify-center space-x-2 px-4 py-3 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-xl hover:from-blue-600 hover:to-purple-700 transition-all shadow-lg"
               >
                 <FiShare2 className="w-5 h-5" />
-                <span>공유하기</span>
+                <span>{t('memories.share')}</span>
               </motion.button>
               <motion.button 
                 whileHover={{ scale: 1.02 }}
@@ -287,7 +434,7 @@ const MemoryDetailPage = () => {
                 className="w-full flex items-center justify-center space-x-2 px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-700 transition-all"
               >
                 <FiDownload className="w-5 h-5" />
-                <span>다운로드</span>
+                <span>{t('memories.download')}</span>
               </motion.button>
             </div>
           </motion.div>
@@ -302,11 +449,62 @@ const MemoryDetailPage = () => {
         >
           <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-6 flex items-center">
             <FiMessageSquare className="mr-2" />
-            댓글
+            {t('memories.comments')}
           </h2>
           <CommentSection memoryId={id!} />
         </motion.div>
       </div>
+
+      {/* 삭제 확인 모달 */}
+      <AnimatePresence>
+        {deleteModalOpen && memory && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4"
+            onClick={() => setDeleteModalOpen(false)}
+          >
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              className="bg-white dark:bg-gray-800 rounded-lg p-6 max-w-md w-full"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+                {t('memories.deleteConfirmTitle')}
+              </h3>
+              <p className="text-gray-600 dark:text-gray-400 mb-6">
+                "{memory.title}" {t('memories.deleteConfirmMessage')}
+              </p>
+              <div className="flex justify-end space-x-3">
+                <button
+                  onClick={() => setDeleteModalOpen(false)}
+                  className="px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"
+                  disabled={deleteMutation.isPending}
+                >
+                  {t('memories.cancel')}
+                </button>
+                <button
+                  onClick={handleDeleteConfirm}
+                  className="px-4 py-2 bg-red-600 text-white hover:bg-red-700 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed"
+                  disabled={deleteMutation.isPending}
+                >
+                  {deleteMutation.isPending ? (
+                    <span className="flex items-center">
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                      {t('memories.deleting')}
+                    </span>
+                  ) : (
+                    t('memories.delete')
+                  )}
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };

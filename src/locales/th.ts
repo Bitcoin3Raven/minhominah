@@ -179,7 +179,12 @@ export const th = {
     delete: "ลบ",
     deleteError: "ไม่สามารถลบความทรงจำได้",
     permissionError: "คุณไม่มีสิทธิ์ในการลบ กรุณาติดต่อผู้ดูแลระบบ",
-    slideshow: "สไลด์โชว์"
+    slideshow: "สไลด์โชว์",
+    share: "แชร์",
+    download: "ดาวน์โหลด",
+    comments: "ความคิดเห็น",
+    backToGallery: "กลับไปที่แกลเลอรี่ความทรงจำ",
+    notFound: "ไม่พบความทรงจำ"
   },
   
   // 성장 기록 페이지
