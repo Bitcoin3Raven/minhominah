@@ -427,7 +427,20 @@
   - 포토북 만들기 페이지: 타이틀 수직 중앙 정렬
     - Hero Section에 flexbox 적용 및 padding 조정
 
-### 2025-01-16 (오늘)
+### 2025-01-17 (오늘)
+- **배포 사이트 404 에러 발생** 🚨
+  - 문제: www.minhominah.com에서 빌드된 파일들을 찾을 수 없음
+    - assets/index-B6TDmNP7.js 404 에러
+    - assets/GrowthPage-K9WjrXgE.js 404 에러
+    - TypeError: Failed to fetch dynamically imported module
+  - 원인: Vite 빌드 파일이 서버에서 제대로 서빙되지 않음
+  - 진행 중: 빌드 및 배포 설정 확인
+  - 해결: 
+    - 새로운 빌드 생성 완료 (npm run build)
+    - 새로운 파일명: GrowthPage-IcX9kjaQ.js, index-B6veEBfE.js
+    - Git을 통한 Vercel 자동 배포 진행 중
+
+### 2025-01-16
 - PhotobookCreatorPage 스타일 개선
   - UploadPage와 동일한 깔끔한 디자인 적용
   - Hero Section 추가 (그라데이션 배경)
