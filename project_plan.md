@@ -93,7 +93,23 @@
 - [ ] 배포
 
 ## 작업 로그
-### 2025-01-21 (오늘)
+### 2025-01-23 (오늘)
+- **배포 문제 해결** 🔧 (2025-01-23)
+  - 문제: www.minhominah.com에서 404 에러 발생
+    - assets/index-B6TDmNP7.js 404 에러
+    - assets/GrowthPage-K9WjrXgE.js 404 에러
+  - 원인:
+    - 배포된 index.html이 존재하지 않는 파일을 참조
+    - Vercel 빌드와 로컬 빌드 간 불일치
+    - 캐시 무효화 필요
+  - 해결 시도:
+    - [x] Service Worker 캐시 버전 v1 → v2-2025-01-23로 업데이트
+    - [x] 로컬 재빌드 실행
+    - [ ] Vercel에서 재배포 필요
+  - 생성 파일:
+    - docs/DEPLOYMENT_DEBUG.md
+
+### 2025-01-21 (이전)
 - **로그인/로그아웃 버튼 색상 조화 개선** ✅ (2025-01-21)
   - 문제: 
     - Admin 프로필 아이콘의 보라색 점이 불필요
@@ -428,17 +444,17 @@
     - Hero Section에 flexbox 적용 및 padding 조정
 
 ### 2025-01-17 (오늘)
-- **배포 사이트 404 에러 발생** 🚨
+- **배포 사이트 404 에러 발생 및 해결** ✅
   - 문제: www.minhominah.com에서 빌드된 파일들을 찾을 수 없음
     - assets/index-B6TDmNP7.js 404 에러
     - assets/GrowthPage-K9WjrXgE.js 404 에러
     - TypeError: Failed to fetch dynamically imported module
   - 원인: Vite 빌드 파일이 서버에서 제대로 서빙되지 않음
-  - 진행 중: 빌드 및 배포 설정 확인
   - 해결: 
     - 새로운 빌드 생성 완료 (npm run build)
     - 새로운 파일명: GrowthPage-IcX9kjaQ.js, index-B6veEBfE.js
-    - Git을 통한 Vercel 자동 배포 진행 중
+    - Git을 통한 Vercel 자동 배포 완료
+    - 사이트 정상 작동 확인 ✅
 
 ### 2025-01-16
 - PhotobookCreatorPage 스타일 개선
