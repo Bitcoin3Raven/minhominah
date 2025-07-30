@@ -507,6 +507,32 @@ const UploadPage = () => {
           transition={{ duration: 0.6, delay: 0.3 }}
         >
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-6 p-6">
+            {/* Hidden fields for array values */}
+            {selectedPeople.map((personId, index) => (
+              <input
+                key={`person-${index}`}
+                type="hidden"
+                {...register(`people.${index}`)}
+                value={personId}
+              />
+            ))}
+            {selectedTags.map((tagId, index) => (
+              <input
+                key={`tag-${index}`}
+                type="hidden"
+                {...register(`tags.${index}`)}
+                value={tagId}
+              />
+            ))}
+            {selectedAlbums.map((albumId, index) => (
+              <input
+                key={`album-${index}`}
+                type="hidden"
+                {...register(`albums.${index}`)}
+                value={albumId}
+              />
+            ))}
+
             {/* 파일 업로드 영역 */}
             <div>
               <label className="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">
