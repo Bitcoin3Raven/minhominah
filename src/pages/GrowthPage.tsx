@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { motion } from 'framer-motion';
 import { useAuth } from '../contexts/AuthContext';
 import { useLanguage } from '../contexts/LanguageContext';
@@ -7,6 +7,7 @@ import { supabase } from '../lib/supabase';
 import { FiTarget, FiCalendar, FiTrendingUp, FiPlus, FiTrash2, FiUser, FiActivity } from 'react-icons/fi';
 import { useLegacyStyles } from '../hooks/useLegacyStyles';
 import { Line } from 'react-chartjs-2';
+import { GrowthPageSkeleton } from '../components/SkeletonLoader';
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -60,8 +61,8 @@ const GrowthPage = () => {
   });
   const queryClient = useQueryClient();
 
-  // 인물 목록 가져오기
-  const { data: people = [] } = useQuery({
+  // 인물 목록 가져오기 (prefetch 적용)
+  const { data: people = [], isLoading: isPeopleLoading } = useQuery({
     queryKey: ['people'],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -72,10 +73,12 @@ const GrowthPage = () => {
       if (error) throw error;
       return data as Person[];
     },
+    staleTime: 5 * 60 * 1000, // 5분간 캐시
+    cacheTime: 10 * 60 * 1000, // 10분간 캐시 보관
   });
 
-  // 성장 기록 가져오기
-  const { data: growthRecords = [] } = useQuery({
+  // 성장 기록 가져오기 (빠른 로딩을 위해 캐시 활용)
+  const { data: growthRecords = [], isLoading: isRecordsLoading } = useQuery({
     queryKey: ['growth-records', selectedPerson],
     queryFn: async () => {
       if (!selectedPerson) return [];
@@ -90,6 +93,8 @@ const GrowthPage = () => {
       return data as GrowthRecord[];
     },
     enabled: !!selectedPerson,
+    staleTime: 2 * 60 * 1000, // 2분간 캐시
+    cacheTime: 5 * 60 * 1000, // 5분간 캐시 보관
   });
 
   // 첫 번째 인물 자동 선택
@@ -299,6 +304,28 @@ const GrowthPage = () => {
     addMutation.mutate(formData);
   };
 
+  // 초기 로딩 상태 처리
+  if (isPeopleLoading) {
+    return <GrowthPageSkeleton />;
+  }
+
+  // 데이터가 없는 경우
+  if (people.length === 0) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <FiUser className="mx-auto text-6xl text-gray-400 mb-4" />
+          <h2 className="text-2xl font-bold text-gray-700 dark:text-gray-300 mb-2">
+            {t('growth.noPeople')}
+          </h2>
+          <p className="text-gray-600 dark:text-gray-400">
+            {t('growth.noPeopleDesc')}
+          </p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen">
       {/* 히어로 섹션 */}
@@ -353,6 +380,18 @@ const GrowthPage = () => {
       )}
 
       {/* 통계 카드 */}
+      {isRecordsLoading ? (
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+          {[1, 2, 3].map((i) => (
+            <div key={i} className="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-lg animate-pulse">
+              <div className="h-6 bg-gray-200 dark:bg-gray-700 rounded w-3/4 mb-2"></div>
+              <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-1/2 mb-2"></div>
+              <div className="h-8 bg-gray-200 dark:bg-gray-700 rounded w-full mb-1"></div>
+              <div className="h-8 bg-gray-200 dark:bg-gray-700 rounded w-full"></div>
+            </div>
+          ))}
+        </div>
+      ) : (
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
         <motion.div 
           initial={{ opacity: 0, y: 20 }}
@@ -387,6 +426,7 @@ const GrowthPage = () => {
           <p className="text-2xl font-bold text-green-900 dark:text-green-100">{stats.lastUpdate}</p>
         </motion.div>
       </div>
+      )}
 
       {/* 차트 */}
       {growthRecords.length > 0 && (
