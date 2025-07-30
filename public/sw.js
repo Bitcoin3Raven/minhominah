@@ -1,7 +1,7 @@
 // 민호민아 성장앨범 - Service Worker
 // PWA 기능: 오프라인 지원, 푸시 알림, 백그라운드 동기화
 
-const CACHE_VERSION = 'v2-2025-01-23';
+const CACHE_VERSION = 'v3-2025-07-30';
 const CACHE_NAME = `minhominah-${CACHE_VERSION}`;
 const API_CACHE_NAME = `minhominah-api-${CACHE_VERSION}`;
 const IMAGE_CACHE_NAME = `minhominah-images-${CACHE_VERSION}`;

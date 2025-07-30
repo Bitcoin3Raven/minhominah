@@ -186,6 +186,16 @@
 
 ## 작업 로그
 ### 2025-07-30 (오늘)
+- **Service Worker 캐시 문제 해결** ✅ (2025-07-30)
+  - 문제: MemoriesPage-DcbORwUM.js 404 에러 발생
+  - 원인: Service Worker가 오래된 파일을 캐싱하여 새 빌드 파일과 불일치
+  - 해결:
+    - [x] Service Worker 캐시 버전을 v3-2025-07-30으로 업데이트
+    - [x] vite.config.ts에 빌드 최적화 설정 추가 (manualChunks)
+    - [x] index.html에 캐시 강제 업데이트 스크립트 추가
+  - 결과: 캐시 버전 관리 개선 및 자동 캐시 정리
+  - 수정 파일: sw.js, vite.config.ts, index.html
+
 - **홈페이지 민호와 민아 이미지를 첫 번째 PNG 버전으로 재적용** ✅ (2025-07-30)
   - SVG에서 처음 제작했던 PNG 이미지로 변경
   - 정사각형 형태의 귀여운 캐릭터 이미지 사용
