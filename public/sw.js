@@ -26,14 +26,6 @@ const CACHE_EXCLUDE_PATTERNS = [
   /node_modules/
 ];
 
-// 브라우저 확장 프로그램 관련 패턴
-const EXTENSION_PATTERNS = [
-  /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i, // UUID 패턴
-  /pocket.*universe/i,
-  /phantom.*solana/i,
-  /metamask/i,
-  /walletconnect/i
-];
 
 // 설치 이벤트 - 정적 리소스 캐싱
 self.addEventListener('install', (event) => {
@@ -96,10 +88,9 @@ self.addEventListener('fetch', (event) => {
   }
 
   // 브라우저 확장 프로그램 관련 요청 무시
-  const filename = url.pathname.split('/').pop();
-  if (filename && EXTENSION_PATTERNS.some(pattern => pattern.test(filename))) {
-    event.respondWith(new Response('', { status: 200 }));
-    return;
+  // UUID 패턴 직접 체크
+  if (url.pathname.match(/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/i)) {
+    return; // Service Worker가 처리하지 않고 그냥 통과
   }
 
   // Supabase Storage 이미지 처리
@@ -135,10 +126,6 @@ async function handleStaticRequest(request) {
     
     return networkResponse;
   } catch (error) {
-    // 404 에러는 조용히 처리
-    if (error.message && error.message.includes('404')) {
-      return new Response('', { status: 404 });
-    }
     console.error('[SW] Static request failed:', error);
     
     // 오프라인 페이지 반환
