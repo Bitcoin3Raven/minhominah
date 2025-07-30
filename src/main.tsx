@@ -8,32 +8,35 @@ if (import.meta.env.DEV) {
   import('./lib/supabase-test');
 }
 
-// Service Worker 등록
+// Service Worker 등록 (최소한의 기능만 활성화)
 if ('serviceWorker' in navigator && import.meta.env.PROD) {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register('/sw.js')
-      .then((registration) => {
-        console.log('Service Worker registered:', registration);
-        
-        // 업데이트 체크
-        registration.addEventListener('updatefound', () => {
-          const newWorker = registration.installing;
-          if (newWorker) {
-            newWorker.addEventListener('statechange', () => {
-              if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-                // 새 버전이 설치되었음을 사용자에게 알림
-                if (confirm('새로운 버전이 있습니다. 새로고침하시겠습니까?')) {
-                  newWorker.postMessage({ type: 'SKIP_WAITING' });
-                  window.location.reload();
-                }
-              }
-            });
-          }
-        });
-      })
-      .catch((error) => {
-        console.error('Service Worker registration failed:', error);
+  window.addEventListener('load', async () => {
+    try {
+      // 기존 Service Worker 정리
+      const registrations = await navigator.serviceWorker.getRegistrations();
+      for (const registration of registrations) {
+        await registration.unregister();
+      }
+      
+      // 모든 캐시 삭제
+      const cacheNames = await caches.keys();
+      await Promise.all(cacheNames.map(name => caches.delete(name)));
+      
+      // 새로운 Service Worker 등록
+      const registration = await navigator.serviceWorker.register('/sw.js', {
+        updateViaCache: 'none'
       });
+      
+      console.log('Service Worker registered with minimal caching');
+      
+      // 주기적으로 업데이트 체크 (1시간마다)
+      setInterval(() => {
+        registration.update();
+      }, 60 * 60 * 1000);
+      
+    } catch (error) {
+      console.error('Service Worker registration failed:', error);
+    }
   });
 }
 

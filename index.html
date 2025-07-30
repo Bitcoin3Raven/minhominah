@@ -19,31 +19,21 @@
     <!-- Pretendard 폰트 -->
     <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
     
-    <!-- 확장 프로그램 에러 무시 (매우 가벼운 스크립트) -->
-    <script src="/ignore-extension-errors.js"></script>
   </head>
   <body>
     <div id="root"></div>
     <script>
-      // Service Worker 캐시 강제 업데이트
-      if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.getRegistrations().then(function(registrations) {
-          for(let registration of registrations) {
-            registration.update();
-          }
-        });
-        
-        // 캐시 버전 확인 및 오래된 캐시 삭제
-        caches.keys().then(function(names) {
-          const currentCacheVersion = 'v3-2025-07-30';
-          for (let name of names) {
-            if (name.includes('minhominah-') && !name.includes(currentCacheVersion)) {
-              console.log('Deleting old cache:', name);
-              caches.delete(name);
-            }
-          }
-        });
-      }
+      // 404 에러 처리를 위한 간단한 에러 핸들러
+      window.addEventListener('error', function(e) {
+        // 확장 프로그램 관련 에러 무시
+        if (e.filename && (
+            e.filename.includes('chrome-extension://') ||
+            e.filename.match(/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/i)
+        )) {
+          e.preventDefault();
+          return true;
+        }
+      }, true);
     </script>
     <script type="module" src="/src/main.tsx"></script>
   </body>
