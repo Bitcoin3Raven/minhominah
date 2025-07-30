@@ -246,11 +246,12 @@ const HomePage = () => {
               transition={{ duration: 0.5, delay: 0.4 }}
               className="card overflow-hidden hover:transform hover:scale-105 transition-transform duration-300 bg-card dark:bg-gray-800 shadow-custom-md"
             >
-              <div className="h-48 bg-gradient-to-br from-blue-400 to-blue-600 dark:from-blue-600 dark:to-blue-800 flex items-center justify-center">
+              <div className="h-48 bg-gradient-to-br from-blue-400 to-blue-600 dark:from-blue-600 dark:to-blue-800 relative overflow-hidden">
                 <img 
-                  src="/assets/images/character-minho.svg" 
+                  src="/assets/images/character-minho.png" 
                   alt="민호 캐릭터"
-                  className="h-44 w-auto"
+                  className="absolute inset-0 w-full h-full object-cover"
+                  style={{ objectPosition: 'center' }}
                 />
               </div>
               <div className="p-6">
@@ -273,11 +274,12 @@ const HomePage = () => {
               transition={{ duration: 0.5, delay: 0.5 }}
               className="card overflow-hidden hover:transform hover:scale-105 transition-transform duration-300 bg-card dark:bg-gray-800 shadow-custom-md"
             >
-              <div className="h-48 bg-gradient-to-br from-pink-400 to-pink-600 dark:from-pink-600 dark:to-pink-800 flex items-center justify-center">
+              <div className="h-48 bg-gradient-to-br from-pink-400 to-pink-600 dark:from-pink-600 dark:to-pink-800 relative overflow-hidden">
                 <img 
-                  src="/assets/images/character-minah.svg" 
+                  src="/assets/images/character-minah.png" 
                   alt="민아 캐릭터"
-                  className="h-44 w-auto"
+                  className="absolute inset-0 w-full h-full object-cover"
+                  style={{ objectPosition: 'center' }}
                 />
               </div>
               <div className="p-6">
