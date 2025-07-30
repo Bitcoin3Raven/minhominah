@@ -248,10 +248,10 @@ const HomePage = () => {
             >
               <div className="h-48 bg-gradient-to-br from-blue-400 to-blue-600 dark:from-blue-600 dark:to-blue-800 relative overflow-hidden">
                 <img 
-                  src="/assets/images/character-minho.png" 
+                  src="/assets/images/character-minho-horizontal.png" 
                   alt="민호 캐릭터"
                   className="absolute inset-0 w-full h-full object-cover"
-                  style={{ objectPosition: 'center' }}
+                  style={{ objectPosition: 'center', objectFit: 'cover' }}
                 />
               </div>
               <div className="p-6">
@@ -276,10 +276,10 @@ const HomePage = () => {
             >
               <div className="h-48 bg-gradient-to-br from-pink-400 to-pink-600 dark:from-pink-600 dark:to-pink-800 relative overflow-hidden">
                 <img 
-                  src="/assets/images/character-minah.png" 
+                  src="/assets/images/character-minah-horizontal.png" 
                   alt="민아 캐릭터"
                   className="absolute inset-0 w-full h-full object-cover"
-                  style={{ objectPosition: 'center' }}
+                  style={{ objectPosition: 'center', objectFit: 'cover' }}
                 />
               </div>
               <div className="p-6">
