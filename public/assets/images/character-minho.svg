@@ -1,0 +1,79 @@
+<svg width="240" height="240" viewBox="0 0 240 240" xmlns="http://www.w3.org/2000/svg">
+  <!-- 배경 원 -->
+  <circle cx="120" cy="120" r="110" fill="#E6F3FF" stroke="#B3D9FF" stroke-width="2"/>
+  
+  <!-- 민호 캐릭터 -->
+  <g transform="translate(120, 120)">
+    <!-- 그림자 -->
+    <ellipse cx="0" cy="60" rx="40" ry="8" fill="#000" opacity="0.1"/>
+    
+    <!-- 몸통 -->
+    <ellipse cx="0" cy="25" rx="35" ry="45" fill="#87CEEB" stroke="#6495ED" stroke-width="3"/>
+    
+    <!-- 티셔츠 디테일 -->
+    <path d="M -20 15 Q 0 20, 20 15" fill="none" stroke="#6495ED" stroke-width="2"/>
+    
+    <!-- 팔 -->
+    <ellipse cx="-30" cy="15" rx="12" ry="30" fill="#FFF0E6" stroke="#DEB887" stroke-width="2.5" transform="rotate(-20 -30 15)"/>
+    <ellipse cx="30" cy="15" rx="12" ry="30" fill="#FFF0E6" stroke="#DEB887" stroke-width="2.5" transform="rotate(20 30 15)"/>
+    
+    <!-- 머리 -->
+    <circle cx="0" cy="-25" r="40" fill="#FFF0E6" stroke="#DEB887" stroke-width="3"/>
+    
+    <!-- 머리카락 -->
+    <path d="M -35 -50 Q -30 -60, -20 -58 Q -10 -62, 0 -60 Q 10 -62, 20 -58 Q 30 -60, 35 -50 L 35 -35 Q 30 -45, 25 -40 Q 20 -48, 10 -45 Q 0 -50, -10 -45 Q -20 -48, -25 -40 Q -30 -45, -35 -35 Z" 
+          fill="#8B6F47" stroke="#6B5637" stroke-width="2"/>
+    
+    <!-- 눈 -->
+    <circle cx="-12" cy="-25" r="3" fill="#5D4037"/>
+    <circle cx="12" cy="-25" r="3" fill="#5D4037"/>
+    
+    <!-- 눈썹 -->
+    <path d="M -18 -35 Q -12 -37, -6 -35" fill="none" stroke="#8B6F47" stroke-width="2" stroke-linecap="round"/>
+    <path d="M 6 -35 Q 12 -37, 18 -35" fill="none" stroke="#8B6F47" stroke-width="2" stroke-linecap="round"/>
+    
+    <!-- 코 -->
+    <path d="M 0 -20 L 0 -15" stroke="#DEB887" stroke-width="2" stroke-linecap="round"/>
+    
+    <!-- 입 -->
+    <path d="M -8 -10 Q 0 -5, 8 -10" fill="none" stroke="#5D4037" stroke-width="2.5" stroke-linecap="round"/>
+    
+    <!-- 볼 -->
+    <circle cx="-25" cy="-15" r="8" fill="#87CEEB" opacity="0.4"/>
+    <circle cx="25" cy="-15" r="8" fill="#87CEEB" opacity="0.4"/>
+    
+    <!-- 손 -->
+    <circle cx="-35" cy="35" r="10" fill="#FFF0E6" stroke="#DEB887" stroke-width="2"/>
+    <circle cx="35" cy="35" r="10" fill="#FFF0E6" stroke="#DEB887" stroke-width="2"/>
+  </g>
+  
+  <!-- 장식 요소들 -->
+  <!-- 별 -->
+  <g transform="translate(40, 40)">
+    <path d="M 0 -8 L 2 -2 L 8 -1 L 3 3 L 5 9 L 0 5 L -5 9 L -3 3 L -8 -1 L -2 -2 Z" 
+          fill="#FFD700" stroke="#FFA500" stroke-width="1"/>
+  </g>
+  
+  <!-- 구름 -->
+  <g transform="translate(180, 50)" opacity="0.7">
+    <ellipse cx="0" cy="0" rx="15" ry="10" fill="#FFF"/>
+    <ellipse cx="-10" cy="0" rx="12" ry="8" fill="#FFF"/>
+    <ellipse cx="10" cy="0" rx="12" ry="8" fill="#FFF"/>
+  </g>
+  
+  <!-- 하트 -->
+  <g transform="translate(50, 180)">
+    <path d="M 0 -5 C 0 -10, 5 -12, 8 -8 C 11 -12, 16 -10, 16 -5 C 16 0, 8 8, 8 8 C 8 8, 0 0, 0 -5 Z" 
+          fill="#87CEEB" opacity="0.6"/>
+  </g>
+  
+  <!-- 반짝이 -->
+  <g transform="translate(190, 170)">
+    <path d="M 0 -5 L 3 0 L 0 5 L -3 0 Z" fill="#FFD700"/>
+    <path d="M -5 0 L 0 -3 L 5 0 L 0 3 Z" fill="#FFD700"/>
+  </g>
+  
+  <!-- 이름 태그 -->
+  <rect x="80" y="200" width="80" height="25" fill="#FFF" stroke="#87CEEB" stroke-width="2" rx="12"/>
+  <text x="120" y="217" text-anchor="middle" font-family="Arial, sans-serif" font-size="16" font-weight="bold" fill="#87CEEB">민호</text>
+</svg>

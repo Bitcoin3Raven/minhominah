@@ -1,0 +1,111 @@
+<svg width="240" height="240" viewBox="0 0 240 240" xmlns="http://www.w3.org/2000/svg">
+  <!-- 배경 원 -->
+  <circle cx="120" cy="120" r="110" fill="#FFE6F0" stroke="#FFB3D9" stroke-width="2"/>
+  
+  <!-- 민아 캐릭터 -->
+  <g transform="translate(120, 120)">
+    <!-- 그림자 -->
+    <ellipse cx="0" cy="60" rx="40" ry="8" fill="#000" opacity="0.1"/>
+    
+    <!-- 몸통 (원피스) -->
+    <path d="M -30 10 Q -35 0, -35 -10 L -35 -5 Q -35 -15, -25 -18 Q -15 -20, 0 -20 Q 15 -20, 25 -18 Q 35 -15, 35 -5 L 35 -10 Q 35 0, 30 10 L 35 45 Q 30 55, 20 58 Q 10 60, 0 60 Q -10 60, -20 58 Q -30 55, -35 45 Z" 
+          fill="#FFB6C1" stroke="#FF69B4" stroke-width="3"/>
+    
+    <!-- 원피스 장식 -->
+    <ellipse cx="0" cy="20" rx="25" ry="3" fill="#FF69B4" opacity="0.3"/>
+    <circle cx="-10" cy="5" r="3" fill="#FFF" opacity="0.7"/>
+    <circle cx="10" cy="5" r="3" fill="#FFF" opacity="0.7"/>
+    <circle cx="0" cy="15" r="3" fill="#FFF" opacity="0.7"/>
+    
+    <!-- 팔 -->
+    <ellipse cx="-28" cy="10" rx="10" ry="28" fill="#FFF0E6" stroke="#DEB887" stroke-width="2.5" transform="rotate(-15 -28 10)"/>
+    <ellipse cx="28" cy="10" rx="10" ry="28" fill="#FFF0E6" stroke="#DEB887" stroke-width="2.5" transform="rotate(15 28 10)"/>
+    
+    <!-- 머리 -->
+    <circle cx="0" cy="-25" r="40" fill="#FFF0E6" stroke="#DEB887" stroke-width="3"/>
+    
+    <!-- 머리카락 -->
+    <path d="M -35 -50 Q -30 -62, -15 -58 Q 0 -65, 15 -58 Q 30 -62, 35 -50 L 38 -20 Q 35 -30, 32 -25 L 35 -15 Q 32 -20, 28 -18 L 30 -10 Q 25 -15, 20 -12 Q 10 -18, 0 -18 Q -10 -18, -20 -12 Q -25 -15, -30 -10 L -28 -18 Q -32 -20, -35 -15 L -32 -25 Q -35 -30, -38 -20 Z" 
+          fill="#8B6F47" stroke="#6B5637" stroke-width="2"/>
+    
+    <!-- 리본 -->
+    <g transform="translate(25, -50)">
+      <ellipse cx="-5" cy="0" rx="8" ry="6" fill="#FF69B4" stroke="#FF1493" stroke-width="1.5"/>
+      <ellipse cx="5" cy="0" rx="8" ry="6" fill="#FF69B4" stroke="#FF1493" stroke-width="1.5"/>
+      <circle cx="0" cy="0" r="4" fill="#FF1493"/>
+    </g>
+    
+    <!-- 눈 -->
+    <ellipse cx="-12" cy="-25" rx="3" ry="4" fill="#5D4037"/>
+    <ellipse cx="12" cy="-25" rx="3" ry="4" fill="#5D4037"/>
+    
+    <!-- 속눈썹 -->
+    <path d="M -15 -29 L -14 -31" stroke="#5D4037" stroke-width="1.5" stroke-linecap="round"/>
+    <path d="M -12 -30 L -12 -32" stroke="#5D4037" stroke-width="1.5" stroke-linecap="round"/>
+    <path d="M -9 -29 L -10 -31" stroke="#5D4037" stroke-width="1.5" stroke-linecap="round"/>
+    
+    <path d="M 15 -29 L 14 -31" stroke="#5D4037" stroke-width="1.5" stroke-linecap="round"/>
+    <path d="M 12 -30 L 12 -32" stroke="#5D4037" stroke-width="1.5" stroke-linecap="round"/>
+    <path d="M 9 -29 L 10 -31" stroke="#5D4037" stroke-width="1.5" stroke-linecap="round"/>
+    
+    <!-- 코 -->
+    <path d="M 0 -20 L 0 -17" stroke="#DEB887" stroke-width="2" stroke-linecap="round"/>
+    
+    <!-- 입 -->
+    <path d="M -6 -10 Q 0 -6, 6 -10" fill="none" stroke="#FF69B4" stroke-width="2.5" stroke-linecap="round"/>
+    
+    <!-- 볼 -->
+    <circle cx="-25" cy="-15" r="9" fill="#FFB6C1" opacity="0.5"/>
+    <circle cx="25" cy="-15" r="9" fill="#FFB6C1" opacity="0.5"/>
+    
+    <!-- 손 -->
+    <circle cx="-32" cy="30" r="9" fill="#FFF0E6" stroke="#DEB887" stroke-width="2"/>
+    <circle cx="32" cy="30" r="9" fill="#FFF0E6" stroke="#DEB887" stroke-width="2"/>
+    
+    <!-- 다리 -->
+    <ellipse cx="-12" cy="55" rx="8" ry="15" fill="#FFF0E6" stroke="#DEB887" stroke-width="2.5"/>
+    <ellipse cx="12" cy="55" rx="8" ry="15" fill="#FFF0E6" stroke="#DEB887" stroke-width="2.5"/>
+    
+    <!-- 신발 -->
+    <ellipse cx="-12" cy="68" rx="10" ry="6" fill="#FF69B4" stroke="#FF1493" stroke-width="2"/>
+    <ellipse cx="12" cy="68" rx="10" ry="6" fill="#FF69B4" stroke="#FF1493" stroke-width="2"/>
+  </g>
+  
+  <!-- 장식 요소들 -->
+  <!-- 꽃 -->
+  <g transform="translate(45, 45)">
+    <circle cx="0" cy="0" r="5" fill="#FFD700"/>
+    <circle cx="-6" cy="-6" r="6" fill="#FFB6C1" opacity="0.8"/>
+    <circle cx="6" cy="-6" r="6" fill="#FFB6C1" opacity="0.8"/>
+    <circle cx="6" cy="6" r="6" fill="#FFB6C1" opacity="0.8"/>
+    <circle cx="-6" cy="6" r="6" fill="#FFB6C1" opacity="0.8"/>
+  </g>
+  
+  <!-- 나비 -->
+  <g transform="translate(180, 60)">
+    <ellipse cx="-5" cy="-3" rx="8" ry="12" fill="#FF69B4" opacity="0.7" transform="rotate(-20 -5 -3)"/>
+    <ellipse cx="5" cy="-3" rx="8" ry="12" fill="#FF69B4" opacity="0.7" transform="rotate(20 5 -3)"/>
+    <rect x="-2" y="-5" width="4" height="10" fill="#8B6F47" rx="2"/>
+  </g>
+  
+  <!-- 하트들 -->
+  <g transform="translate(50, 170)">
+    <path d="M 0 -5 C 0 -10, 5 -12, 8 -8 C 11 -12, 16 -10, 16 -5 C 16 0, 8 8, 8 8 C 8 8, 0 0, 0 -5 Z" 
+          fill="#FF69B4" opacity="0.6"/>
+  </g>
+  
+  <g transform="translate(190, 180)">
+    <path d="M 0 -3 C 0 -6, 3 -7, 5 -5 C 7 -7, 10 -6, 10 -3 C 10 0, 5 5, 5 5 C 5 5, 0 0, 0 -3 Z" 
+          fill="#FFD700" opacity="0.5"/>
+  </g>
+  
+  <!-- 반짝이 -->
+  <g transform="translate(35, 180)">
+    <path d="M 0 -5 L 3 0 L 0 5 L -3 0 Z" fill="#FFD700"/>
+    <path d="M -5 0 L 0 -3 L 5 0 L 0 3 Z" fill="#FFD700"/>
+  </g>
+  
+  <!-- 이름 태그 -->
+  <rect x="80" y="200" width="80" height="25" fill="#FFF" stroke="#FF69B4" stroke-width="2" rx="12"/>
+  <text x="120" y="217" text-anchor="middle" font-family="Arial, sans-serif" font-size="16" font-weight="bold" fill="#FF69B4">민아</text>
+</svg>
