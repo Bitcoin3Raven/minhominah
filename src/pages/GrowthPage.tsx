@@ -62,39 +62,39 @@ const GrowthPage = () => {
   const queryClient = useQueryClient();
 
   // 인물 목록 가져오기 (prefetch 적용)
-  const { data: people = [], isLoading: isPeopleLoading } = useQuery({
+  const { data: people = [], isLoading: isPeopleLoading } = useQuery<Person[]>({
     queryKey: ['people'],
     queryFn: async () => {
       const { data, error } = await supabase
         .from('people')
         .select('*')
         .order('name');
-      
+
       if (error) throw error;
       return data as Person[];
     },
     staleTime: 5 * 60 * 1000, // 5분간 캐시
-    cacheTime: 10 * 60 * 1000, // 10분간 캐시 보관
+    gcTime: 10 * 60 * 1000, // 10분간 캐시 보관 (cacheTime -> gcTime in v5)
   });
 
   // 성장 기록 가져오기 (빠른 로딩을 위해 캐시 활용)
-  const { data: growthRecords = [], isLoading: isRecordsLoading } = useQuery({
+  const { data: growthRecords = [], isLoading: isRecordsLoading } = useQuery<GrowthRecord[]>({
     queryKey: ['growth-records', selectedPerson],
     queryFn: async () => {
       if (!selectedPerson) return [];
-      
+
       const { data, error } = await supabase
         .from('growth_records')
         .select('*')
         .eq('person_id', selectedPerson)
         .order('record_date', { ascending: true });
-      
+
       if (error) throw error;
       return data as GrowthRecord[];
     },
     enabled: !!selectedPerson,
     staleTime: 2 * 60 * 1000, // 2분간 캐시
-    cacheTime: 5 * 60 * 1000, // 5분간 캐시 보관
+    gcTime: 5 * 60 * 1000, // 5분간 캐시 보관 (cacheTime -> gcTime in v5)
   });
 
   // 첫 번째 인물 자동 선택
