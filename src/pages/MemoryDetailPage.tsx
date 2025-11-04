@@ -17,6 +17,8 @@ interface Memory {
   created_at: string;
   user_id: string;
   created_by: string;
+  is_public?: boolean; // 공개 여부 추가
+  public_share_id?: string; // 공유 ID 추가
   media_files: MediaFile[];
   memory_people: MemoryPerson[];
   memory_tags: MemoryTag[];
@@ -65,7 +67,9 @@ const MemoryDetailPage = () => {
           *,
           media_files(*),
           memory_people(people(*)),
-          memory_tags(tags(*))
+          memory_tags(tags(*)),
+          is_public,
+          public_share_id
         `)
         .eq('id', id)
         .single();
@@ -77,9 +81,14 @@ const MemoryDetailPage = () => {
         }
         throw error;
       }
-      
+
       if (!data) {
         throw new Error('Memory not found');
+      }
+
+      // 로그인하지 않은 사용자가 비공개 메모리에 접근한 경우
+      if (!user && !data.is_public) {
+        throw new Error('This memory is private. Please login to view.');
       }
       
       return data as Memory;

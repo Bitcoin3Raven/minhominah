@@ -19,6 +19,8 @@ interface Memory {
   created_at: string;
   user_id: string;
   created_by: string; // 추가
+  is_public?: boolean; // 공개 여부 추가
+  public_share_id?: string; // 공유 ID 추가
   media_files: MediaFile[];
   memory_people: MemoryPerson[];
   memory_tags: MemoryTag[];
@@ -73,6 +75,9 @@ const MemoriesPage = () => {
   const { user } = useAuth();
   const { t, language } = useLanguage();
   const queryClient = useQueryClient();
+
+  // 공개/비공개 필터 상태
+  const [showOnlyPublic, setShowOnlyPublic] = useState<boolean>(!user); // 로그인 안했으면 공개만 표시
   
   const [selectedPerson, setSelectedPerson] = useState<string>(personParam || 'all');
   const [selectedYear, setSelectedYear] = useState<string>('all');
@@ -115,6 +120,8 @@ const MemoriesPage = () => {
       if (error) throw error;
       return data;
     },
+    // 로그인하지 않은 경우에도 실행
+    enabled: true,
   });
 
   const { data: tags } = useQuery({
@@ -135,7 +142,7 @@ const MemoriesPage = () => {
     isLoading,
     isError,
   } = useInfiniteQuery({
-    queryKey: ['memories-infinite', selectedPerson, selectedYear, selectedTags, debouncedSearchQuery],
+    queryKey: ['memories-infinite', selectedPerson, selectedYear, selectedTags, debouncedSearchQuery, showOnlyPublic, user?.id],
     queryFn: async ({ pageParam = 0 }) => {
       const from = pageParam * PAGE_SIZE;
       const to = from + PAGE_SIZE - 1;
@@ -146,7 +153,9 @@ const MemoriesPage = () => {
           *,
           media_files(*),
           memory_people(people(*)),
-          memory_tags(tags(*))
+          memory_tags(tags(*)),
+          is_public,
+          public_share_id
         `, { count: 'exact' })
         .order('memory_date', { ascending: false })
         .range(from, to);
@@ -181,9 +190,19 @@ const MemoriesPage = () => {
 
   // 필터링된 메모리
   const filteredMemories = allMemories?.filter(memory => {
+    // 공개/비공개 필터 (로그인하지 않았으면 공개만 표시)
+    if (!user && !memory.is_public) {
+      return false;
+    }
+
+    // 로그인한 사용자가 공개만 보기를 선택한 경우
+    if (user && showOnlyPublic && !memory.is_public) {
+      return false;
+    }
+
     // 인물 필터
     if (selectedPerson !== 'all') {
-      const hasPerson = memory.memory_people?.some(mp => 
+      const hasPerson = memory.memory_people?.some(mp =>
         mp.people.name === selectedPerson
       );
       if (!hasPerson) return false;

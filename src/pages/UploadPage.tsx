@@ -19,6 +19,7 @@ interface UploadFormData {
   people: string[];
   tags: string[];
   albums: string[];
+  is_public?: boolean; // 공개 여부 추가
 }
 
 interface FilePreview {
@@ -147,6 +148,7 @@ const UploadPage = () => {
         people: peopleIds,
         tags: tagIds,
         albums: albumIds,
+        is_public: editMemory.is_public || false, // 공개 설정 추가
       });
       
       // 기존 미디어 파일 설정
@@ -270,6 +272,7 @@ const UploadPage = () => {
             title: data.title,
             description: data.description,
             memory_date: data.memory_date,
+            is_public: data.is_public || false, // 공개 설정 추가
             updated_at: new Date().toISOString(),
           })
           .eq('id', editId)
@@ -344,6 +347,7 @@ const UploadPage = () => {
             description: data.description,
             memory_date: data.memory_date,
             created_by: user.id,
+            is_public: data.is_public || false, // 공개 설정 추가
           })
           .select()
           .single();
@@ -719,7 +723,7 @@ const UploadPage = () => {
                 className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
               />
               {errors.memory_date && (
-                <motion.p 
+                <motion.p
                   initial={{ opacity: 0, y: -10 }}
                   animate={{ opacity: 1, y: 0 }}
                   className="text-red-500 text-sm mt-1"
@@ -728,6 +732,29 @@ const UploadPage = () => {
                 </motion.p>
               )}
             </div>
+
+            {/* 공개 설정 (parent 역할만 표시) */}
+            {user && (
+              <div className="flex items-center space-x-3 p-4 bg-purple-50 dark:bg-purple-900/20 rounded-lg">
+                <input
+                  type="checkbox"
+                  id="is_public"
+                  {...register('is_public')}
+                  className="w-5 h-5 text-purple-600 rounded focus:ring-purple-500"
+                />
+                <label
+                  htmlFor="is_public"
+                  className="flex-1 cursor-pointer"
+                >
+                  <div className="font-medium text-gray-900 dark:text-white">
+                    🌍 공개 추억으로 설정
+                  </div>
+                  <div className="text-sm text-gray-600 dark:text-gray-400">
+                    이 추억을 로그인하지 않은 사람도 볼 수 있게 합니다
+                  </div>
+                </label>
+              </div>
+            )}
 
             {/* 인물 선택 */}
             <div>

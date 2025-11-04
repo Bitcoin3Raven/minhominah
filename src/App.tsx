@@ -4,6 +4,7 @@ import { QueryClient, QueryClientProvider, useQueryClient } from '@tanstack/reac
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import Layout from './components/Layout';
 import PrivateRoute from './components/PrivateRoute';
+import OptionalAuthRoute from './components/OptionalAuthRoute';
 import { AuthProvider } from './contexts/AuthContext';
 import { LanguageProvider } from './contexts/LanguageContext';
 import { DarkModeProvider } from './contexts/DarkModeContext';
@@ -61,14 +62,14 @@ function App() {
                   <Route path="/login" element={<LoginPage />} />
                   <Route path="/accept-invite" element={<AcceptInvitePage />} />
                   <Route path="/memories" element={
-                    <PrivateRoute>
+                    <OptionalAuthRoute requireAuth={false}>
                       <MemoriesPage />
-                    </PrivateRoute>
+                    </OptionalAuthRoute>
                   } />
                   <Route path="/memories/:id" element={
-                    <PrivateRoute>
+                    <OptionalAuthRoute requireAuth={false}>
                       <MemoryDetailPage />
-                    </PrivateRoute>
+                    </OptionalAuthRoute>
                   } />
                   <Route path="/upload" element={
                     <PrivateRoute>
@@ -76,14 +77,14 @@ function App() {
                     </PrivateRoute>
                   } />
                   <Route path="/albums" element={
-                    <PrivateRoute>
+                    <OptionalAuthRoute requireAuth={false}>
                       <AlbumsPage />
-                    </PrivateRoute>
+                    </OptionalAuthRoute>
                   } />
                   <Route path="/albums/:id" element={
-                    <PrivateRoute>
+                    <OptionalAuthRoute requireAuth={false}>
                       <AlbumDetailPage />
-                    </PrivateRoute>
+                    </OptionalAuthRoute>
                   } />
                   <Route path="/statistics" element={
                     <PrivateRoute>
