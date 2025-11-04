@@ -237,8 +237,17 @@ const UploadPage = () => {
     setExistingMedia(prev => prev.filter(media => media.id !== mediaId));
   };
 
+  // 중복 제출 방지를 위한 ref
+  const isSubmittingRef = useRef(false);
+
   // 폼 제출
   const onSubmit = async (data: UploadFormData) => {
+    // 중복 제출 방지
+    if (isSubmittingRef.current) {
+      console.log('Already submitting, ignoring duplicate submission');
+      return;
+    }
+
     if (!user) {
       alert(t('upload_login_required'));
       navigate('/login');
@@ -252,12 +261,14 @@ const UploadPage = () => {
     }
 
     // 편집 모드에서 모든 미디어를 삭제하는 경우 체크
-    if (isEditMode && filePreviews.length === 0 && 
+    if (isEditMode && filePreviews.length === 0 &&
         existingMedia.length === deletedMediaIds.length) {
       alert(t('upload_min_one_media'));
       return;
     }
 
+    // 중복 제출 플래그 설정
+    isSubmittingRef.current = true;
     setUploading(true);
     setUploadProgress(0);
 
@@ -340,6 +351,23 @@ const UploadPage = () => {
 
       } else {
         // 새로 생성
+        // 먼저 같은 제목과 날짜의 메모리가 있는지 체크 (10초 이내)
+        const tenSecondsAgo = new Date(Date.now() - 10000).toISOString();
+        const { data: existingMemories } = await supabase
+          .from('memories')
+          .select('id, created_at')
+          .eq('title', data.title)
+          .eq('memory_date', data.memory_date)
+          .eq('created_by', user.id)
+          .gte('created_at', tenSecondsAgo);
+
+        if (existingMemories && existingMemories.length > 0) {
+          console.log('Duplicate memory detected within 10 seconds, skipping creation');
+          alert('같은 추억이 이미 등록되었습니다. 추억 갤러리로 이동합니다.');
+          navigate('/memories');
+          return;
+        }
+
         const { data: memory, error: memoryError } = await supabase
           .from('memories')
           .insert({
@@ -483,6 +511,8 @@ const UploadPage = () => {
       alert(isEditMode ? `${t('upload_edit_error')}: ${errorMessage}` : `${t('upload_error')}: ${errorMessage}`);
     } finally {
       setUploading(false);
+      // 중복 제출 플래그 리셋
+      isSubmittingRef.current = false;
     }
   };
 
