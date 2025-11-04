@@ -224,13 +224,23 @@ const MemoriesPage = () => {
     // 나이별 필터
     if (selectedAge !== 'all') {
       const memoryDate = new Date(memory.memory_date);
-      const hasPerson = memory.memory_people?.some(mp => {
-        const birthDate = BIRTH_DATES[mp.people.name as keyof typeof BIRTH_DATES];
-        if (!birthDate) return false;
-        const ageAtMemory = calculateAge(birthDate, memoryDate);
-        return ageAtMemory === selectedAge;
-      });
-      if (!hasPerson) return false;
+      let hasMatchingAge = false;
+
+      // 메모리에 포함된 사람들 확인
+      if (memory.memory_people && memory.memory_people.length > 0) {
+        hasMatchingAge = memory.memory_people.some(mp => {
+          const birthDate = BIRTH_DATES[mp.people.name as keyof typeof BIRTH_DATES];
+          // 생년월일이 정의된 사람(민호, 민아)만 나이 계산
+          if (birthDate) {
+            const ageAtMemory = calculateAge(birthDate, memoryDate);
+            return ageAtMemory === selectedAge;
+          }
+          // 생년월일이 없는 사람은 필터링하지 않음
+          return false;
+        });
+      }
+
+      if (!hasMatchingAge) return false;
     }
 
     // 검색어 필터
