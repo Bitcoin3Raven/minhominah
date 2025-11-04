@@ -85,17 +85,17 @@ const Layout = ({ children }: LayoutProps) => {
   // 메뉴 구조 정의
   const mainMenuItems = [
     { path: '/upload', label: t('nav_add_memory'), icon: <FiPlusCircle className="w-4 h-4 text-green-500" />, authRequired: true },
-    { path: '/memories', label: t('nav_memories'), icon: <FiImage className="w-4 h-4 text-blue-500" /> },
-    { path: '/growth', label: t('nav_growth'), icon: <FiTrendingUp className="w-4 h-4 text-pink-500" /> },
-    { path: '/statistics', label: t('nav_statistics'), icon: <FiBarChart2 className="w-4 h-4 text-purple-500" /> },
-    { path: '/albums', label: t('nav_albums'), icon: <FiFolder className="w-4 h-4 text-orange-500" /> },
+    { path: '/memories', label: t('nav_memories'), icon: <FiImage className="w-4 h-4 text-blue-500" />, authRequired: false },
+    { path: '/growth', label: t('nav_growth'), icon: <FiTrendingUp className="w-4 h-4 text-pink-500" />, authRequired: false },
+    { path: '/statistics', label: t('nav_statistics'), icon: <FiBarChart2 className="w-4 h-4 text-purple-500" />, authRequired: false },
+    { path: '/albums', label: t('nav_albums'), icon: <FiFolder className="w-4 h-4 text-orange-500" />, authRequired: false },
     { path: '/photobook-creator', label: t('nav_photobook'), icon: <FiBook className="w-4 h-4 text-indigo-500" />, authRequired: true },
   ];
   
   const familyMenuItems = [
-    { path: '/activity-log', label: t('nav_activity_log'), icon: <FiActivity className="w-4 h-4 text-blue-500" /> },
-    { path: '/trash', label: t('nav_trash'), icon: <FiTrash2 className="w-4 h-4 text-green-500" /> },
-    { path: '/backup', label: t('nav_backup'), icon: <FiDatabase className="w-4 h-4 text-indigo-500" /> },
+    { path: '/activity-log', label: t('nav_activity_log'), icon: <FiActivity className="w-4 h-4 text-blue-500" />, authRequired: true },
+    { path: '/trash', label: t('nav_trash'), icon: <FiTrash2 className="w-4 h-4 text-green-500" />, authRequired: true },
+    { path: '/backup', label: t('nav_backup'), icon: <FiDatabase className="w-4 h-4 text-indigo-500" />, authRequired: true },
     { path: '/invite', label: t('nav_invite'), icon: <FiUserPlus className="w-4 h-4 text-gray-500" />, authRequired: true, roleRequired: 'parent' },
     { path: '/admin', label: t('nav_admin'), icon: <FiSettings className="w-4 h-4 text-gray-500" />, authRequired: true, roleRequired: 'parent' },
   ];
