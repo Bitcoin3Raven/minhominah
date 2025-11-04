@@ -363,8 +363,19 @@ const UploadPage = () => {
         for (let i = 0; i < totalFiles; i++) {
           const filePreview = filePreviews[i];
           const file = filePreview.file;
-          const fileName = `memories/${memoryId}/${Date.now()}-${file.name}`;
-          
+
+          // 파일명 안전하게 처리 (한글, 특수문자 제거)
+          const safeFileName = file.name
+            .replace(/[^\w\s.-]/gi, '') // 영문, 숫자, 공백, 점, 하이픈만 허용
+            .replace(/\s+/g, '-') // 공백을 하이픈으로 변경
+            .toLowerCase() // 소문자로 변환
+            || `file-${i}`; // 만약 파일명이 모두 제거되면 기본값 사용
+
+          // 파일 확장자 추출
+          const fileExt = file.name.split('.').pop() || 'jpg';
+          const timestamp = Date.now() + i; // 각 파일마다 고유한 timestamp
+          const fileName = `memories/${memoryId}/${timestamp}-${safeFileName.split('.')[0]}.${fileExt}`;
+
           // 파일 업로드
           const { error: uploadError } = await supabase.storage
             .from('media')
