@@ -8,7 +8,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import AddPersonModal from '../components/AddPersonModal';
 import AddTagModal from '../components/AddTagModal';
-import { compressImage, formatFileSize, isImageFile, isVideoFile } from '../utils/imageUtils';
+import { compressImage, formatFileSize, isImageFile, isVideoFile, generateSafeFileName } from '../utils/imageUtils';
 import { useLegacyStyles } from '../hooks/useLegacyStyles';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useChunkedUpload } from '../hooks/useChunkedUpload';
@@ -182,16 +182,9 @@ const UploadPage = () => {
     return file.size > 6 * 1024 * 1024; // 6MB
   }, []);
 
-  // 청크 업로드용 파일명 생성
+  // generateSafeFileName 유틸리티 함수를 래핑
   const generateFileName = useCallback((file: File, memoryId: string): string => {
-    const safeFileName = file.name
-      .replace(/[^\w\s.-]/gi, '')
-      .replace(/\s+/g, '-')
-      .toLowerCase() || `file-${Date.now()}`;
-
-    const fileExt = file.name.split('.').pop() || 'bin';
-    const timestamp = Date.now();
-    return `memories/${memoryId}/${timestamp}-${safeFileName.split('.')[0]}.${fileExt}`;
+    return generateSafeFileName(file, memoryId);
   }, []);
 
   // 파일 처리

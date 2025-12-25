@@ -177,3 +177,41 @@ export const isImageFile = (file: File): boolean => {
 export const isVideoFile = (file: File): boolean => {
   return file.type.startsWith('video/');
 };
+
+/**
+ * 파일명을 안전하게 처리 (한글 지원)
+ */
+export const sanitizeFileName = (fileName: string): string => {
+  // 원본 파일명에서 확장자 분리
+  const lastDotIndex = fileName.lastIndexOf('.');
+  const nameWithoutExt = lastDotIndex > 0 ? fileName.substring(0, lastDotIndex) : fileName;
+  const fileExt = lastDotIndex > 0 ? fileName.substring(lastDotIndex + 1).toLowerCase() : 'bin';
+
+  // 한글, 영문, 숫자, 하이픈, 언더스코어, 괄호만 허용하고 안전하지 않은 문자 제거
+  const safeFileName = nameWithoutExt
+    .replace(/[<>:"/\\|?*]/g, '') // Windows/Linux 금지 문자 제거
+    .replace(/[\x00-\x1f\x80-\x9f]/g, '') // 제어 문자 제거
+    .replace(/^\.+/, '') // 시작 부분의 점 제거
+    .replace(/\.+$/, '') // 끝 부분의 점 제거
+    .replace(/\s+/g, '-') // 연속된 공백을 하이픈으로 변경
+    .trim() || `file-${Date.now()}`;
+
+  return `${safeFileName}.${fileExt}`;
+};
+
+/**
+ * 업로드용 파일명 생성 (한글 지원, URL 인코딩)
+ */
+export const generateSafeFileName = (file: File, memoryId: string): string => {
+  const sanitizedName = sanitizeFileName(file.name);
+  const timestamp = Date.now();
+
+  // 파일명과 확장자 분리
+  const lastDotIndex = sanitizedName.lastIndexOf('.');
+  const nameWithoutExt = lastDotIndex > 0 ? sanitizedName.substring(0, lastDotIndex) : sanitizedName;
+  const fileExt = lastDotIndex > 0 ? sanitizedName.substring(lastDotIndex + 1) : 'bin';
+
+  // URL 인코딩하여 한글 파일명 안전하게 처리
+  const encodedFileName = encodeURIComponent(nameWithoutExt);
+  return `memories/${memoryId}/${timestamp}-${encodedFileName}.${fileExt}`;
+};
