@@ -113,13 +113,39 @@ export const useChunkedUpload = () => {
         throw new Error('인증 토큰을 가져올 수 없습니다.');
       }
 
-      const projectId = import.meta.env.VITE_SUPABASE_URL?.split('://')[1]?.split('.')[0];
-      if (!projectId) {
-        throw new Error('Supabase 프로젝트 ID를 찾을 수 없습니다.');
+      // Supabase URL에서 프로젝트 ID 안전하게 추출 (fallback 포함)
+      const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || 'https://illwscrdeyncckltjrmr.supabase.co';
+      console.log('사용 중인 Supabase URL:', supabaseUrl); // 디버깅용
+
+      let projectId: string;
+      try {
+        const urlParts = supabaseUrl.split('://');
+        if (urlParts.length !== 2) {
+          throw new Error(`잘못된 URL 형식: ${supabaseUrl}`);
+        }
+
+        const domainParts = urlParts[1].split('.');
+        if (domainParts.length < 2) {
+          throw new Error(`잘못된 도메인 형식: ${urlParts[1]}`);
+        }
+
+        projectId = domainParts[0];
+        if (!projectId || projectId.length === 0) {
+          throw new Error('프로젝트 ID가 비어있습니다');
+        }
+
+        console.log('추출된 프로젝트 ID:', projectId); // 디버깅용
+
+      } catch (urlParseError) {
+        console.error('URL 파싱 중 오류:', urlParseError);
+
+        // fallback: 직접 프로젝트 ID 사용
+        projectId = 'illwscrdeyncckltjrmr';
+        console.log('fallback 프로젝트 ID 사용:', projectId);
       }
 
       const upload = new tus.Upload(file, {
-        endpoint: `${import.meta.env.VITE_SUPABASE_URL}/storage/v1/upload/resumable`,
+        endpoint: `${supabaseUrl}/storage/v1/upload/resumable`,
         retryDelays: RETRY_DELAYS,
         chunkSize: CHUNK_SIZE,
         headers: {
@@ -160,7 +186,7 @@ export const useChunkedUpload = () => {
         },
         onSuccess: () => {
           console.log('Upload completed successfully');
-          const fileUrl = `${import.meta.env.VITE_SUPABASE_URL}/storage/v1/object/public/${bucketName}/${fileName}`;
+          const fileUrl = `${supabaseUrl}/storage/v1/object/public/${bucketName}/${fileName}`;
 
           setUploadState(prev => ({
             ...prev,
