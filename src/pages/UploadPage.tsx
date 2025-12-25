@@ -8,9 +8,11 @@ import { useAuth } from '../contexts/AuthContext';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import AddPersonModal from '../components/AddPersonModal';
 import AddTagModal from '../components/AddTagModal';
-import { compressImage, formatFileSize, isImageFile } from '../utils/imageUtils';
+import { compressImage, formatFileSize, isImageFile, isVideoFile } from '../utils/imageUtils';
 import { useLegacyStyles } from '../hooks/useLegacyStyles';
 import { useLanguage } from '../contexts/LanguageContext';
+import { useChunkedUpload } from '../hooks/useChunkedUpload';
+import { ChunkedUploadProgress } from '../components/ChunkedUploadProgress';
 
 interface UploadFormData {
   title: string;
@@ -26,6 +28,8 @@ interface FilePreview {
   file: File;
   url: string;
   type: 'image' | 'video';
+  uploadState?: 'pending' | 'uploading' | 'completed' | 'error';
+  uploadedPath?: string;
 }
 
 interface ExistingMedia {
@@ -53,6 +57,17 @@ const UploadPage = () => {
   const [isDragging, setIsDragging] = useState(false);
   const [showAddPersonModal, setShowAddPersonModal] = useState(false);
   const [showAddTagModal, setShowAddTagModal] = useState(false);
+  const [activeChunkedUpload, setActiveChunkedUpload] = useState<{ file: File; fileName: string; previewIndex: number } | null>(null);
+
+  // 청크 업로드 훅
+  const {
+    uploadState: chunkedUploadState,
+    uploadFile: uploadChunkedFile,
+    pauseUpload,
+    resumeUpload,
+    cancelUpload,
+    resetState: resetChunkedUploadState
+  } = useChunkedUpload();
 
   const {
     register,
@@ -162,19 +177,36 @@ const UploadPage = () => {
     }
   }, [editMemory, people, tags, albums, reset]);
 
+  // 대용량 파일 여부 확인 (6MB 기준)
+  const isLargeFile = useCallback((file: File): boolean => {
+    return file.size > 6 * 1024 * 1024; // 6MB
+  }, []);
+
+  // 청크 업로드용 파일명 생성
+  const generateFileName = useCallback((file: File, memoryId: string): string => {
+    const safeFileName = file.name
+      .replace(/[^\w\s.-]/gi, '')
+      .replace(/\s+/g, '-')
+      .toLowerCase() || `file-${Date.now()}`;
+
+    const fileExt = file.name.split('.').pop() || 'bin';
+    const timestamp = Date.now();
+    return `memories/${memoryId}/${timestamp}-${safeFileName.split('.')[0]}.${fileExt}`;
+  }, []);
+
   // 파일 처리
   const handleFiles = useCallback(async (files: FileList | null) => {
     if (!files) return;
 
     const newPreviews: FilePreview[] = [];
-    
+
     for (const file of Array.from(files)) {
       if (file.type.startsWith('image/') || file.type.startsWith('video/')) {
         try {
           let processedFile = file;
           let url = '';
 
-          // 이미지인 경우 압축
+          // 이미지인 경우만 압축 (동영상은 압축하지 않음)
           if (isImageFile(file) && file.size > 1024 * 1024) { // 1MB 이상인 경우만 압축
             const compressed = await compressImage(file, {
               maxWidth: 2048,
@@ -183,7 +215,7 @@ const UploadPage = () => {
             });
             processedFile = compressed.file;
             url = compressed.dataUrl;
-            
+
             console.log(`압축 완료: ${formatFileSize(file.size)} → ${formatFileSize(processedFile.size)}`);
           } else {
             url = URL.createObjectURL(file);
@@ -193,6 +225,7 @@ const UploadPage = () => {
             file: processedFile,
             url,
             type: file.type.startsWith('image/') ? 'image' : 'video',
+            uploadState: 'pending',
           });
         } catch (error) {
           console.error('파일 처리 중 오류:', error);
@@ -387,51 +420,120 @@ const UploadPage = () => {
       // 2. 새 파일 업로드 (있는 경우)
       if (filePreviews.length > 0) {
         const totalFiles = filePreviews.length;
+        let uploadedFiles: { fileName: string; fileType: 'image' | 'video'; fileSize: number }[] = [];
 
         for (let i = 0; i < totalFiles; i++) {
           const filePreview = filePreviews[i];
           const file = filePreview.file;
 
-          // 파일명 안전하게 처리 (한글, 특수문자 제거)
-          const safeFileName = file.name
-            .replace(/[^\w\s.-]/gi, '') // 영문, 숫자, 공백, 점, 하이픈만 허용
-            .replace(/\s+/g, '-') // 공백을 하이픈으로 변경
-            .toLowerCase() // 소문자로 변환
-            || `file-${i}`; // 만약 파일명이 모두 제거되면 기본값 사용
+          // 파일명 생성
+          const fileName = generateFileName(file, memoryId);
 
-          // 파일 확장자 추출
-          const fileExt = file.name.split('.').pop() || 'jpg';
-          const timestamp = Date.now() + i; // 각 파일마다 고유한 timestamp
-          const fileName = `memories/${memoryId}/${timestamp}-${safeFileName.split('.')[0]}.${fileExt}`;
+          // 대용량 파일인지 확인
+          if (isLargeFile(file) || isVideoFile(file)) {
+            // 청크 업로드 사용
+            console.log(`대용량 파일 감지: ${file.name} (${formatFileSize(file.size)}), 청크 업로드 사용`);
 
-          // 파일 업로드
-          const { error: uploadError } = await supabase.storage
-            .from('media')
-            .upload(fileName, file);
+            // 파일 상태 업데이트
+            setFilePreviews(prev => prev.map((preview, idx) =>
+              idx === i ? { ...preview, uploadState: 'uploading' } : preview
+            ));
 
-          if (uploadError) throw uploadError;
+            // 청크 업로드 실행
+            setActiveChunkedUpload({ file, fileName, previewIndex: i });
 
+            await new Promise<void>((resolve, reject) => {
+              uploadChunkedFile(file, fileName, {
+                bucketName: 'media',
+                onProgress: (bytesUploaded, bytesTotal) => {
+                  const progress = (bytesUploaded / bytesTotal) * 100;
+                  setUploadProgress(((i) / totalFiles) * 50 + 50 + (progress / totalFiles * 50 / 100));
+                },
+                onSuccess: (url) => {
+                  console.log(`청크 업로드 완료: ${fileName}`);
+                  uploadedFiles.push({
+                    fileName,
+                    fileType: filePreview.type,
+                    fileSize: file.size
+                  });
+
+                  // 파일 상태 업데이트
+                  setFilePreviews(prev => prev.map((preview, idx) =>
+                    idx === i ? { ...preview, uploadState: 'completed', uploadedPath: fileName } : preview
+                  ));
+
+                  resolve();
+                },
+                onError: (error) => {
+                  console.error(`청크 업로드 실패: ${fileName}`, error);
+
+                  // 파일 상태 업데이트
+                  setFilePreviews(prev => prev.map((preview, idx) =>
+                    idx === i ? { ...preview, uploadState: 'error' } : preview
+                  ));
+
+                  reject(error);
+                }
+              });
+            });
+
+            setActiveChunkedUpload(null);
+
+          } else {
+            // 표준 업로드 사용 (소용량 파일)
+            console.log(`소용량 파일: ${file.name} (${formatFileSize(file.size)}), 표준 업로드 사용`);
+
+            // 파일 상태 업데이트
+            setFilePreviews(prev => prev.map((preview, idx) =>
+              idx === i ? { ...preview, uploadState: 'uploading' } : preview
+            ));
+
+            const { error: uploadError } = await supabase.storage
+              .from('media')
+              .upload(fileName, file);
+
+            if (uploadError) {
+              // 파일 상태 업데이트
+              setFilePreviews(prev => prev.map((preview, idx) =>
+                idx === i ? { ...preview, uploadState: 'error' } : preview
+              ));
+              throw uploadError;
+            }
+
+            uploadedFiles.push({
+              fileName,
+              fileType: filePreview.type,
+              fileSize: file.size
+            });
+
+            // 파일 상태 업데이트
+            setFilePreviews(prev => prev.map((preview, idx) =>
+              idx === i ? { ...preview, uploadState: 'completed', uploadedPath: fileName } : preview
+            ));
+
+            setUploadProgress(((i + 1) / totalFiles) * 50 + 50);
+          }
+        }
+
+        // 3. 미디어 파일 정보 저장 (모든 파일 업로드 완료 후)
+        for (const uploadedFile of uploadedFiles) {
           // 썸네일 생성 (이미지만)
           let thumbnailPath = null;
-          if (filePreview.type === 'image') {
-            // 실제 썸네일 생성 전까지는 원본 이미지를 썸네일로 사용
-            thumbnailPath = fileName;
+          if (uploadedFile.fileType === 'image') {
+            thumbnailPath = uploadedFile.fileName;
           }
 
-          // 3. 미디어 파일 정보 저장
           const { error: mediaError } = await supabase
             .from('media_files')
             .insert({
               memory_id: memoryId,
-              file_path: fileName,
+              file_path: uploadedFile.fileName,
               thumbnail_path: thumbnailPath,
-              file_type: filePreview.type,
-              file_size: file.size,
+              file_type: uploadedFile.fileType,
+              file_size: uploadedFile.fileSize,
             });
 
           if (mediaError) throw mediaError;
-
-          setUploadProgress(((i + 1) / totalFiles) * 50 + 50);
         }
       }
 
@@ -697,23 +799,87 @@ const UploadPage = () => {
                             <FiVideo className="w-12 h-12 text-purple-500" />
                           </div>
                         )}
-                        {/* 파일 크기 표시 */}
+
+                        {/* 업로드 상태 오버레이 */}
+                        {preview.uploadState === 'uploading' && (
+                          <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
+                            <div className="text-center text-white">
+                              <div className="animate-spin w-6 h-6 border-2 border-white border-t-transparent rounded-full mx-auto mb-2"></div>
+                              <p className="text-xs">업로드 중...</p>
+                            </div>
+                          </div>
+                        )}
+
+                        {preview.uploadState === 'completed' && (
+                          <div className="absolute top-2 left-2 p-1 bg-green-500 text-white rounded-full">
+                            <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                              <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                            </svg>
+                          </div>
+                        )}
+
+                        {preview.uploadState === 'error' && (
+                          <div className="absolute inset-0 bg-red-500/20 flex items-center justify-center">
+                            <div className="text-center text-red-600 dark:text-red-400">
+                              <FiX className="w-6 h-6 mx-auto mb-1" />
+                              <p className="text-xs">업로드 실패</p>
+                            </div>
+                          </div>
+                        )}
+
+                        {/* 파일 정보 */}
                         <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-2">
                           <p className="text-xs text-white font-medium">
                             {formatFileSize(preview.file.size)}
                           </p>
+                          {(isLargeFile(preview.file) || isVideoFile(preview.file)) && (
+                            <p className="text-xs text-yellow-300">
+                              대용량 파일 - 청크 업로드
+                            </p>
+                          )}
                         </div>
-                        <button
-                          type="button"
-                          onClick={() => removeFile(index)}
-                          className="absolute top-2 right-2 p-1.5 bg-red-500 text-white rounded-full hover:bg-red-600 transition-all transform hover:scale-110 shadow-lg"
-                        >
-                          <FiX className="w-4 h-4" />
-                        </button>
+
+                        {preview.uploadState !== 'uploading' && (
+                          <button
+                            type="button"
+                            onClick={() => removeFile(index)}
+                            className="absolute top-2 right-2 p-1.5 bg-red-500 text-white rounded-full hover:bg-red-600 transition-all transform hover:scale-110 shadow-lg"
+                          >
+                            <FiX className="w-4 h-4" />
+                          </button>
+                        )}
                       </motion.div>
                     ))}
                   </AnimatePresence>
                 </div>
+              )}
+
+              {/* 활성 청크 업로드 진행상태 */}
+              {activeChunkedUpload && (
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="mt-6"
+                >
+                  <ChunkedUploadProgress
+                    fileName={activeChunkedUpload.file.name}
+                    fileSize={activeChunkedUpload.file.size}
+                    progress={chunkedUploadState.progress}
+                    bytesUploaded={chunkedUploadState.bytesUploaded}
+                    bytesTotal={chunkedUploadState.bytesTotal}
+                    uploadSpeed={chunkedUploadState.uploadSpeed}
+                    estimatedTime={chunkedUploadState.estimatedTime}
+                    isUploading={chunkedUploadState.isUploading}
+                    isPaused={chunkedUploadState.isPaused}
+                    error={chunkedUploadState.error}
+                    onPause={pauseUpload}
+                    onResume={resumeUpload}
+                    onCancel={() => {
+                      cancelUpload();
+                      setActiveChunkedUpload(null);
+                    }}
+                  />
+                </motion.div>
               )}
             </div>
 
